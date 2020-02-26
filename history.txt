@@ -1,0 +1,9 @@
+V1.0.0
+
+    A collection of mp3 music files are scanned.
+
+    basic program completed.
+    The program will scan a given directory and report duplicate MP3 files.
+
+
+
