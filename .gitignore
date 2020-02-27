@@ -129,4 +129,8 @@ $RECYCLE.BIN/
 # logging files
 *.log.*
 
+# local files
+*.pickle
+dup.txt
+
 # End of https://www.gitignore.io/api/python,windows

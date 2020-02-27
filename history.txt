@@ -1,9 +1,12 @@
-V1.0.0
+V1.0.1
 
-    A collection of mp3 music files are scanned.
+    Added methods to save and load the songLibrary - pickles a directory.
+    Added an argument to print the number of songs.
+    Added an argument to save output to a file supplied.
+    Added an argument to not load database on start. i.e. create new one.
+
+
+V1.0.0
 
     basic program completed.
     The program will scan a given directory and report duplicate MP3 files.
-
-
-

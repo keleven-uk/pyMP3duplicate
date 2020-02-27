@@ -3,7 +3,7 @@
 #                                                                                                             #
 #  The program will scan a given directory and report duplicate MP3 files.                                    #
 #                                                                                                             #
-#        usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-l] [-v]                                               #
+#        usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-x] [-n] [-l] [-v]                        #
 #                                                                                                             #
 #       Kevin Scott     2020                                                                                  #
 #                                                                                                             #
@@ -28,6 +28,7 @@
 
 import os
 import time
+import pickle
 import shutil
 import pathlib
 import textwrap
@@ -65,8 +66,37 @@ class Library():
         """
         return self.library[key][0], self.library[key][1]
 
+    def noOfItems(self):
+        """  Return the number of entries in the library
+        """
+        return len(self.library)
+
+    def save(self):
+        """  Save the library to disc - currently uses pickle.
+        """
+        with open("dup.pickle", "wb") as f:
+            pickle.dump(self.library, f)
+
+    def load(self):
+        """  Loads the library from disc - currently uses pickle.
+        """
+        if os.path.isfile("dup.pickle"):
+            with open("dup.pickle", "rb") as f:
+                self.library = pickle.load(f)
+
+####################################################################################### printDuplicate ########
+def logTextLine(textLine):
+    """  It the global argument duplcateFile is set, then with the line of text
+    to that file, else print to screen.
+    """
+    if duplicateFile:
+        with open(duplicateFile, "a") as f:     # Open in amend mode, important.
+            f.write(textLine + "\n")
+    else:
+        print(textLine)
+
 ####################################################################################### checkDuplicate ########
-def checkDuplicate(musicFile, tag, key):
+def checkDuplicate(musicDuration, songDuration):
     """  A duplicate song has been located that is already in the library.
          The new song already matches the song title and artist, the song
          duration of the two songs are then compared.  If the difference is between
@@ -74,20 +104,13 @@ def checkDuplicate(musicFile, tag, key):
 
          DIFF - a named constant.
     """
-
-    songFile, songDuration = songLibrary.getItem(key)
-
-    if abs(tag.duration - songDuration) < DIFF:
-        print("-"*80 + "Duplicate Found" + "-"*20)
-        print(f"{musicFile} {tag.duration:.2f}")
-        print(f"{songFile}  {songDuration:.2f}")
+    if abs(musicDuration - songDuration) < DIFF:
         return True
     else:
         return False
 
-
 ####################################################################################### scanMusic #############
-def scanMusic(sourceDir):
+def scanMusic(sourceDir, duplicateFile):
     """  Scan the sourceDir, which should contain mp3 files.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then to two are checked.
@@ -100,11 +123,14 @@ def scanMusic(sourceDir):
         try:
             count += 1
             tag = TinyTag.get(musicFile)
-
             key = f"{tag.artist}:{tag.title}"
 
             if songLibrary.hasKey(key):
-                if checkDuplicate(musicFile, tag, key):
+                songFile, songDuration = songLibrary.getItem(key)
+                if checkDuplicate(tag.duration, songDuration):
+                    logTextLine("-"*80 + "Duplicate Found" + "-"*20)
+                    logTextLine(f"{musicFile} {tag.duration:.2f}")
+                    logTextLine(f"{songFile}  {songDuration:.2f}")
                     duplicates += 1
             else:
                 songLibrary.addKey(key, musicFile, tag.duration)
@@ -118,15 +144,14 @@ def scanMusic(sourceDir):
             print(f"{count}, duplicates {duplicates}: {datetime.timedelta(seconds = elapsedTimeSecs)}")
 
     print()
-    print(f"{colorama.Fore.CYAN} {count} music files found with duplicates {duplicates}. {colorama.Fore.RESET}")
+    logTextLine(f"{count} music files found with duplicates {duplicates}.")
 
 ########################################################################################### printSortLicense ######
 def printShortLicense():
-    print(f"""
-{myNAME} V{myVERSION}   Copyright (C) 2020  Kevin Scott
-This program comes with ABSOLUTELY NO WARRANTY; for details type `pyBackup -l'.
-This is free software, and you are welcome to redistribute it under certain conditions.
-    """, flush=True)
+    logTextLine("")
+    logTextLine(f"{myNAME} V{myVERSION}   Copyright (C) 2020  Kevin Scott")
+    logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{myNAME} -l'.")
+    logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.")
 
 ########################################################################################### printLongLicense ######
 def printLongLicense():
@@ -169,16 +194,24 @@ def parseArgs():
     #  a optional argument would be --source or -s
 
     parser.add_argument("-s", "--sourceDir", type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
+    parser.add_argument("-f", "--dupFile",   type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file.")
+    parser.add_argument("-x", "--noLoad",    action="store_true" , help="Do not load database.")
+    parser.add_argument("-n", "--number",    action="store_true" , help="print the Number of Songs in the database.")
     parser.add_argument("-l", "--license",   action="store_true" , help="Print the Software License.")
     parser.add_argument("-v", "--version",   action="version"    , version=f"{myNAME} V{myVERSION}")
 
     args = parser.parse_args()
 
+    if args.number:
+        songLibrary.load()
+        print("Loaded")
+        l = songLibrary.noOfItems()
+        print(f"Song Library has {l} songs")
+        exit(0)
+
     if args.license:
         printLongLicense()
         exit(0)
-
-    printShortLicense()
 
     if not args.sourceDir or not args.sourceDir.exists():
         log.error("No Source Directory Supplied.")
@@ -192,7 +225,7 @@ def parseArgs():
         parser.print_help()
         exit(2)
 
-    return (args.sourceDir)
+    return (args.sourceDir, args.dupFile, args.noLoad)
 
 ############################################################################################### __main__ ######
 
@@ -206,14 +239,20 @@ if __name__ == "__main__":
     log.info("-------------------------------------------------------------")
     log.info(f"Start of {myNAME} V{myVERSION}")
 
-    sourceDir = parseArgs()
+    sourceDir, duplicateFile, noLoad = parseArgs()
+    printShortLicense()
 
-    scanMusic(sourceDir)
+    if not noLoad:
+        songLibrary.load()
 
-    print()
+    scanMusic(sourceDir, duplicateFile)
+
+    songLibrary.save()
+
+    logTextLine("")
     elapsedTimeSecs  = time.time()  - startTime
-    print(f"{colorama.Fore.CYAN}Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}   {colorama.Fore.RESET}")
-    print()
+    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}")
+    logTextLine("")
 
     log.info(f"End of {myNAME} V{myVERSION}")
 
