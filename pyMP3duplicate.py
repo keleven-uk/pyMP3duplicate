@@ -84,6 +84,35 @@ class Library():
             with open("dup.pickle", "rb") as f:
                 self.library = pickle.load(f)
 
+####################################################################################### buildDataBase #########
+def buildDataBase(sourceDir):
+    """  Build the database only, does no duplicate checking.
+         If an old database exists, it will be over written.
+    """
+    count      = 0
+    for musicFile in sourceDir.glob("**/*.mp3"):
+        try:
+            count += 1
+            tag = TinyTag.get(musicFile)
+            key = f"{tag.artist}:{tag.title}"
+
+            if songLibrary.hasKey(key):
+                songFile, songDuration = songLibrary.getItem(key)
+                if checkDuplicate(tag.duration, songDuration):
+                    log.debug(f"{key} already exists")
+            else:
+                songLibrary.addKey(key, musicFile, tag.duration)
+
+        except (Exception) as error:
+            log.error(f"ERROR : {musicFile} :: {error}", exc_info=True)
+            print(f"ERROR : {musicFile} :: {error}")
+
+        if (count % 10000) == 0:
+            elapsedTimeSecs  = time.time()  - startTime
+            print(f"{count}: {datetime.timedelta(seconds = elapsedTimeSecs)}")
+
+    print()
+    logTextLine(f"{count} music files found.")
 ####################################################################################### printDuplicate ########
 def logTextLine(textLine):
     """  It the global argument duplcateFile is set, then with the line of text
@@ -193,12 +222,14 @@ def parseArgs():
     #  Add a Positional Argument.
     #  a optional argument would be --source or -s
 
-    parser.add_argument("-s", "--sourceDir", type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
-    parser.add_argument("-f", "--dupFile",   type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file.")
-    parser.add_argument("-x", "--noLoad",    action="store_true" , help="Do not load database.")
-    parser.add_argument("-n", "--number",    action="store_true" , help="print the Number of Songs in the database.")
-    parser.add_argument("-l", "--license",   action="store_true" , help="Print the Software License.")
-    parser.add_argument("-v", "--version",   action="version"    , version=f"{myNAME} V{myVERSION}")
+    parser.add_argument("-s",  "--sourceDir", type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
+    parser.add_argument("-f",  "--dupFile",   type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file.")
+    parser.add_argument("-xL", "--noLoad",    action="store_true" , help="Do not load database.")
+    parser.add_argument("-xS", "--noSave",    action="store_true" , help="Do not save database.")
+    parser.add_argument("-b",  "--build",     action="store_true" , help="Build the database only.")
+    parser.add_argument("-n",  "--number",    action="store_true" , help="print the Number of Songs in the database.")
+    parser.add_argument("-l",  "--license",   action="store_true" , help="Print the Software License.")
+    parser.add_argument("-v",  "--version",   action="version"    , version=f"{myNAME} V{myVERSION}")
 
     args = parser.parse_args()
 
@@ -207,10 +238,12 @@ def parseArgs():
         print("Loaded")
         l = songLibrary.noOfItems()
         print(f"Song Library has {l} songs")
+        log.info(f"End of {myNAME} V{myVERSION} : Printed Number of Items {l}")
         exit(0)
 
     if args.license:
         printLongLicense()
+        log.info(f"End of {myNAME} V{myVERSION} : Printed Licence")
         exit(0)
 
     if not args.sourceDir or not args.sourceDir.exists():
@@ -225,7 +258,7 @@ def parseArgs():
         parser.print_help()
         exit(2)
 
-    return (args.sourceDir, args.dupFile, args.noLoad)
+    return (args.sourceDir, args.dupFile, args.noLoad, args.noSave, args.build)
 
 ############################################################################################### __main__ ######
 
@@ -239,15 +272,25 @@ if __name__ == "__main__":
     log.info("-------------------------------------------------------------")
     log.info(f"Start of {myNAME} V{myVERSION}")
 
-    sourceDir, duplicateFile, noLoad = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build = parseArgs()
     printShortLicense()
 
-    if not noLoad:
+    if build:
+        log.debug("Building database")
+        buildDataBase(sourceDir)
+
+    if noLoad or build:
+        log.debug("Not Loading database")
+    else:
         songLibrary.load()
 
-    scanMusic(sourceDir, duplicateFile)
+    if not build:
+        scanMusic(sourceDir, duplicateFile)
 
-    songLibrary.save()
+    if noSave:
+        log.debug("Not Saving database")
+    else:
+        songLibrary.save()
 
     logTextLine("")
     elapsedTimeSecs  = time.time()  - startTime

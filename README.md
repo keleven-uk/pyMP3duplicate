@@ -16,7 +16,7 @@
     If the -f flag is used, the duplicates are saved in a file supplied.
 
 
-usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-x] [-n] [-l] [-v]
+usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-xL] [-xS] [-b] [-n] [-l] [-v]
 
 A Python MP3 Duplicate finder.
 -----------------------
@@ -28,13 +28,15 @@ optional arguments:
                         directory of the music files [mp3].
   -f DUPFILE, --dupFile DUPFILE
                         [Optional] list duplicates to file.
-  -x, --noLoad          Do not load database.
+  -xL, --noLoad         Do not load database.
+  -xS, --noSave         Do not save database.
+  -b, --build           Build the database only.
   -n, --number          print the Number of Songs in the database.
   -l, --license         Print the Software License.
   -v, --version         show program's version number and exit
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.1
+ Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.2
+
 
 
 For changes see history.txt
-

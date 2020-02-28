@@ -1,3 +1,9 @@
+V1.0.2
+
+    Added an argument to not load the database.
+    Added an argument to not save the database.
+    Added an argument to build the database only.
+
 V1.0.1
 
     Added methods to save and load the songLibrary - pickles a directory.
