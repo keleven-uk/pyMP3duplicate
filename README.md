@@ -4,16 +4,22 @@
 
     The main mp3 directory should be scanned first, this will give a list of duplicates in that directory.
     A database is then created of these files keyed on artist, title and duration.
-    If any new mp3's need to be added to the main directory, they should be scanned first, these will then
-    be compared to the database and any duplicates will be flagged and can be deleted.
-    The remaining mp3 files can be safely added to the main directory.
+    If any new mp3's need to be added to the main directory, they should be scanned first, this will then
+    be compared to the database and any duplicates will be flagged and can be deleted [maybe with the -xS flag].
+    The remaining mp3 files can be safely added to the main directory, the database will need to be rebuilt.
+
+    NB : The tags in the new MP3's should be in the same format has the tags in the main directory.
+         i.e spaces trimmed and in title case - my preference.
+         Also, both mp3's should have valid time or lengths.  Correct with mp3val.
 
     The database is stored in a simple directory and stored via pickling.  The pickled database is
-    stored in the same directory ans the man script.
+    stored in the same directory as the main script.
 
     If a new database needs to be created, then either delete the pickle file or run with the -x flag.
 
     If the -f flag is used, the duplicates are saved in a file supplied.
+
+    The -xS & -xL can be useful for a test run, so the database is left UN-touched.
 
 
 usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-xL] [-xS] [-b] [-n] [-l] [-v]

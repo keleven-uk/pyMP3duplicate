@@ -1,3 +1,11 @@
+V1.0.3
+
+    Getting strange errors when trying to print song paths, they where of
+    type pathlib.path, now they are all cast to str.
+    Getting errors when one of the song lengths was not set, now set to zero
+    before doing comparisons.
+
+
 V1.0.2
 
     Added an argument to not load the database.

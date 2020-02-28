@@ -39,7 +39,7 @@ import myLogger
 from tinytag import TinyTag
 from _version import myVERSION, myNAME
 
-DIFF = 0.5        # difference in seconds used to determine duplicates.
+DIFF = 5        # difference in seconds used to determine duplicates.
 
 class Library():
     """  A simple class that wraps the library dictionary.
@@ -64,7 +64,7 @@ class Library():
     def getItem(self, key):
         """  Returns items at position key from the library.
         """
-        return self.library[key][0], self.library[key][1]
+        return self.library[key]
 
     def noOfItems(self):
         """  Return the number of entries in the library
@@ -89,23 +89,28 @@ def buildDataBase(sourceDir):
     """  Build the database only, does no duplicate checking.
          If an old database exists, it will be over written.
     """
-    count      = 0
+    count = 0
     for musicFile in sourceDir.glob("**/*.mp3"):
         try:
             count += 1
             tag = TinyTag.get(musicFile)
             key = f"{tag.artist}:{tag.title}"
+            musicDuration = round(tag.duration, 2)
+            if not musicDuration: musicDuration = 0     # In case thies is no valid duration time on the mp3 file.
 
             if songLibrary.hasKey(key):
                 songFile, songDuration = songLibrary.getItem(key)
-                if checkDuplicate(tag.duration, songDuration):
+
+                if not songDuration:  songDuration  = 0     # In case thies is no valid duration time on the mp3 file.
+
+                if abs(musicDuration - songDuration) < DIFF:
                     log.debug(f"{key} already exists")
-            else:
-                songLibrary.addKey(key, musicFile, tag.duration)
+            else:  # if abs(musicDuration - songDuration) < DIFF:
+                songLibrary.addKey(key, musicFile, musicDuration)
 
         except (Exception) as error:
             log.error(f"ERROR : {musicFile} :: {error}", exc_info=True)
-            print(f"ERROR : {musicFile} :: {error}")
+            print(f"ERROR : {musicFile}     :: {error}")
 
         if (count % 10000) == 0:
             elapsedTimeSecs  = time.time()  - startTime
@@ -117,6 +122,8 @@ def buildDataBase(sourceDir):
 def logTextLine(textLine):
     """  It the global argument duplcateFile is set, then with the line of text
     to that file, else print to screen.
+
+    textLine needs to a string, for f.write - NOT a path.
     """
     if duplicateFile:
         with open(duplicateFile, "a") as f:     # Open in amend mode, important.
@@ -124,27 +131,12 @@ def logTextLine(textLine):
     else:
         print(textLine)
 
-####################################################################################### checkDuplicate ########
-def checkDuplicate(musicDuration, songDuration):
-    """  A duplicate song has been located that is already in the library.
-         The new song already matches the song title and artist, the song
-         duration of the two songs are then compared.  If the difference is between
-         DIFf seconds then they could be the same.
-
-         DIFF - a named constant.
-    """
-    if abs(musicDuration - songDuration) < DIFF:
-        return True
-    else:
-        return False
-
 ####################################################################################### scanMusic #############
 def scanMusic(sourceDir, duplicateFile):
     """  Scan the sourceDir, which should contain mp3 files.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then to two are checked.
     """
-
     startTime  = time.time()
     count      = 0
     duplicates = 0
@@ -153,20 +145,24 @@ def scanMusic(sourceDir, duplicateFile):
             count += 1
             tag = TinyTag.get(musicFile)
             key = f"{tag.artist}:{tag.title}"
+            musicDuration = round(tag.duration, 2)
+            if not musicDuration: musicDuration = 0     # In case there is no valid duration time on the mp3 file.
 
             if songLibrary.hasKey(key):
                 songFile, songDuration = songLibrary.getItem(key)
-                if checkDuplicate(tag.duration, songDuration):
+                if not songDuration:  songDuration  = 0     # In case there is no valid duration time on the mp3 file.
+
+                if abs(musicDuration - songDuration) < DIFF:
                     logTextLine("-"*80 + "Duplicate Found" + "-"*20)
-                    logTextLine(f"{musicFile} {tag.duration:.2f}")
-                    logTextLine(f"{songFile}  {songDuration:.2f}")
+                    logTextLine(f"{str(musicFile)} {musicDuration:.2f}")
+                    logTextLine(f"{str(songFile)}  {songDuration:.2f}")
                     duplicates += 1
-            else:
-                songLibrary.addKey(key, musicFile, tag.duration)
+            else:  # if abs(musicDuration - songDuration) < DIFF:
+                songLibrary.addKey(key, musicFile, musicDuration)
 
         except (Exception) as error:
-            log.error(f"ERROR : {musicFile} :: {error}", exc_info=True)
-            print(f"ERROR : {musicFile} :: {error}")
+            log.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
+            print(f"ERROR : {str(musicFile)} :: {error}")
 
         if (count % 10000) == 0:
             elapsedTimeSecs  = time.time()  - startTime
@@ -219,9 +215,6 @@ def parseArgs():
         The program will scan a given directory and report duplicate MP3 files."""),
         epilog = f" Kevin Scott (C) 2020 :: {myNAME} V{myVERSION}")
 
-    #  Add a Positional Argument.
-    #  a optional argument would be --source or -s
-
     parser.add_argument("-s",  "--sourceDir", type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
     parser.add_argument("-f",  "--dupFile",   type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file.")
     parser.add_argument("-xL", "--noLoad",    action="store_true" , help="Do not load database.")
@@ -269,7 +262,7 @@ if __name__ == "__main__":
     songLibrary = Library()             # Create the song library
 
     log = myLogger.get_logger(myNAME)   # Create the logger.
-    log.info("-------------------------------------------------------------")
+    log.info("-"*50)
     log.info(f"Start of {myNAME} V{myVERSION}")
 
     sourceDir, duplicateFile, noLoad, noSave, build = parseArgs()
