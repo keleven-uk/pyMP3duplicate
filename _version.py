@@ -1,2 +1,2 @@
-myVERSION = "1.0.3"
+myVERSION = "1.0.4"
 myNAME    = "pyMP3duplicate"

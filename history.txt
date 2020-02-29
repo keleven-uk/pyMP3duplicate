@@ -1,3 +1,13 @@
+V1.04
+
+    Added an argument to det the time deferance, defaults to 0.5s.
+    Getting error when writing some paths to the duplicate file,
+    'charmap' codec can't encode character '\u03b8'.
+    Adding the encoding flag cured this,
+    open(duplicateFile, encoding='utf-8', mode="a")
+    Changed the name of the method addKey to addItem.
+    
+
 V1.0.3
 
     Getting strange errors when trying to print song paths, they where of
