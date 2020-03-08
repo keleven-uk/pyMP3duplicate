@@ -21,7 +21,7 @@
 
     The -d flag sets the time duration, in seconds, of the max differance between two songs.
     If -d flag is not supplied, the default 0.5s will be used.
-    
+
     The -xS & -xL can be useful for a test run, so the database is left UN-touched.
 
 
@@ -33,18 +33,28 @@ The program will scan a given directory and report duplicate MP3 files.
 
 optional arguments:
   -h, --help            show this help message and exit
+
   -s SOURCEDIR, --sourceDir SOURCEDIR
                         directory of the music files [mp3].
+
   -f DUPFILE, --dupFile DUPFILE
                         [Optional] list duplicates to file.
-  -d DIFFERANCE, --differance DIFFERANCE
-                        Time differance between songs, default = 0.5s.
+
+  -d DIFFERENCE, --differance DIFFERENCE
+                        Time difference between songs, default = 0.5s.
+
   -xL, --noLoad         Do not load database.
+
   -xS, --noSave         Do not save database.
+
   -b, --build           Build the database only.
+
   -n, --number          print the Number of Songs in the database.
+
   -l, --license         Print the Software License.
+
   -v, --version         show program's version number and exit
+
 
  Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.4
 

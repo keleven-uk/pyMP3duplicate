@@ -29,7 +29,6 @@
 import os
 import time
 import pickle
-import shutil
 import pathlib
 import textwrap
 import datetime
@@ -56,8 +55,7 @@ class Library():
              item1 is song duration.
              item2 is song path.
         """
-        l = [item1, item2]
-        self.library[key] = l
+        self.library[key] = [item1, item2]
 
     def getItem(self, key):
         """  Returns items at position key from the library.
@@ -101,11 +99,11 @@ def buildDataBase(sourceDir):
             if songLibrary.hasKey(key):
                 songFile, songDuration = songLibrary.getItem(key)
 
-                if not songDuration:  songDuration  = 0     # In case thies is no valid duration time on the mp3 file.
+                if not songDuration: songDuration = 0     # In case there is no valid duration time on the mp3 file.
 
                 if abs(musicDuration - songDuration) < differance:
                     log.debug(f"{key} already exists")
-            else:  # if abs(musicDuration - songDuration) < differance:
+            else:  # if abs(musicDuration - songDuration) < difference:
                 songLibrary.addItem(key, musicFile, musicDuration)
 
         except (Exception) as error:
@@ -113,7 +111,7 @@ def buildDataBase(sourceDir):
             print(f"ERROR : {musicFile}     :: {error}")
 
         if (count % 10000) == 0:
-            elapsedTimeSecs  = time.time()  - startTime
+            elapsedTimeSecs = time.time() - startTime
             print(f"{count}: {datetime.timedelta(seconds = elapsedTimeSecs)}")
 
     print()
@@ -140,39 +138,54 @@ def scanMusic(sourceDir, duplicateFile, differance):
     startTime  = time.time()
     count      = 0
     duplicates = 0
-    for musicFile in sourceDir.glob("**/*.mp3"):
-        try:
-            count += 1
-            tag = TinyTag.get(musicFile)
-            key = f"{tag.artist}:{tag.title}"
-            if not tag.duration:     # In case there is no valid duration time on the mp3 file.
-                musicDuration = 0
-            else:
-                musicDuration = round(tag.duration, 2)
+    nonMusic   = 0
 
-            if songLibrary.hasKey(key):
-                songFile, songDuration = songLibrary.getItem(key)
-                if not songDuration:  songDuration  = 0     # In case there is no valid duration time on the mp3 file.
+    # Using os.walk seems faster but only just slightly.
+    # But gives extra functionality, non music files can be flagged
+    #for musicFile in sourceDir.glob("**/*.mp3"):
+    for root, dirs, files in os.walk(sourceDir):
+        for file in files:
+            musicFile = os.path.join(root, file)
+            if not musicFile.endswith(".mp3"):      # a non music file found.
+                logTextLine("-"*80 + "Non Music File Found" + "-"*25)
+                logTextLine(f"{musicFile} is not a music file")
+                nonMusic += 1
+                continue        # continue with next file.
 
-                if abs(musicDuration - songDuration) < differance:
-                    logTextLine("-"*80 + "Duplicate Found" + "-"*3
-                                0)
-                    logTextLine(f"{str(musicFile)} {musicDuration:.2f}")
-                    logTextLine(f"{str(songFile)}  {songDuration:.2f}")
-                    duplicates += 1
-            else:  # if abs(musicDuration - songDuration) < differance:
-                songLibrary.addItem(key, musicFile, musicDuration)
+            try:
+                count += 1
+                tag = TinyTag.get(musicFile)
+                key = f"{tag.artist}:{tag.title}"
+                if not tag.duration:     # In case there is no valid duration time on the mp3 file.
+                    musicDuration = 0
+                else:
+                    musicDuration = round(tag.duration, 2)
 
-        except (Exception) as error:
-            log.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
-            print(f"ERROR : {str(musicFile)} :: {error}")
+                if songLibrary.hasKey(key):
+                    songFile, songDuration = songLibrary.getItem(key)
+                    if not songDuration: songDuration = 0     # In case there is no valid duration time on the mp3 file.
 
-        if (count % 10000) == 0:
-            elapsedTimeSecs  = time.time()  - startTime
-            print(f"{count}, duplicates {duplicates}: {datetime.timedelta(seconds = elapsedTimeSecs)}")
+                    if abs(musicDuration - songDuration) < differance:
+                        logTextLine("-"*80 + "Duplicate Found" + "-"*30)
+                        logTextLine(f"{str(musicFile)} {musicDuration:.2f}")
+                        logTextLine(f"{str(songFile)}  {songDuration:.2f}")
+                        duplicates += 1
+                else:  # if abs(musicDuration - songDuration) < difference:
+                    songLibrary.addItem(key, musicFile, musicDuration)
 
-    print()
-    logTextLine(f"{count} music files found with duplicates {duplicates}.")
+            except (Exception) as error:
+                log.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
+                print(f"ERROR : {str(musicFile)} :: {error}")
+
+            if (count % 10000) == 0:
+                elapsedTimeSecs = time.time() - startTime
+                print(f"{count}, duplicates {duplicates}: {datetime.timedelta(seconds = elapsedTimeSecs)}")
+
+    logTextLine("")
+    if nonMusic:
+        logTextLine(f"{count} music files found with {duplicates} duplicates, with {nonMusic} non music files.")
+    else:
+        logTextLine(f"{count} music files found with {duplicates} duplicates.")
 
 ########################################################################################### printSortLicense ######
 def printShortLicense():
@@ -220,7 +233,7 @@ def parseArgs():
 
     parser.add_argument("-s",  "--sourceDir",  type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
     parser.add_argument("-f",  "--dupFile",    type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file.")
-    parser.add_argument("-d",  "--differance", type=float, action="store", default=0.5, help="Time differance between songs, default = 0.5s.")
+    parser.add_argument("-d",  "--difference", type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
     parser.add_argument("-xL", "--noLoad",     action="store_true" , help="Do not load database.")
     parser.add_argument("-xS", "--noSave",     action="store_true" , help="Do not save database.")
     parser.add_argument("-b",  "--build",      action="store_true" , help="Build the database only.")
@@ -281,7 +294,7 @@ if __name__ == "__main__":
     else:
         songLibrary.load()
 
-    logTextLine(f"Scanning {sourceDir} with a time differance of {differance}")
+    logTextLine(f"Scanning {sourceDir} with a time difference of {difference}")
 
     if not build:
         scanMusic(sourceDir, duplicateFile, differance)

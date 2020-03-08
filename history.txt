@@ -1,19 +1,27 @@
+V1.05
+
+    Changed main loon in scanMusicd to os.walk from glob.
+      Using os.walk seems faster but only just slightly.
+      But gives extra functionality, non music files can be flagged
+      Some code clean up.
+
+
 V1.04
 
-    Added an argument to det the time deferance, defaults to 0.5s.
+    Added an argument to get the time difference, defaults to 0.5s.
     Getting error when writing some paths to the duplicate file,
-    'charmap' codec can't encode character '\u03b8'.
-    Adding the encoding flag cured this,
+      'charmap' codec can't encode character '\u03b8'.
+      Adding the encoding flag cured this,
     open(duplicateFile, encoding='utf-8', mode="a")
-    Changed the name of the method addKey to addItem.
-    
+      Changed the name of the method addKey to addItem.
+
 
 V1.0.3
 
     Getting strange errors when trying to print song paths, they where of
-    type pathlib.path, now they are all cast to str.
+      type pathlib.path, now they are all cast to str.
     Getting errors when one of the song lengths was not set, now set to zero
-    before doing comparisons.
+      before doing comparisons.
 
 
 V1.0.2
