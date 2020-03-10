@@ -1,6 +1,7 @@
 ###############################################################################################################
 #                                                                                                             #
-#  A Wrapper for logging - based on https://www.toptal.com/python/in-depth-python-logging                     #
+#  Two procedure to print out License information, one short and one long.                                    #
+#  One procedure to either print test to screen or a file.                                                    #
 #                                                                                                             #
 #       Kevin Scott     2020                                                                                  #
 #                                                                                                             #
@@ -20,36 +21,42 @@
 #                                                                                                             #
 ###############################################################################################################
 
-"""
-    usage:
-        logger = myLogger.get_logger(myConfig.NAME() + ".log")
-
-    to write to log - log.debug(text message) [also can use log, error, info, warning, critical & exception]
-
-    can add exc_info=True to include exception information, not needed with log.exception
-"""
-
-import logging
-from logging.handlers import TimedRotatingFileHandler
 
 
-FORMATTER = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s")
-                                                                 # Could add if needed - %(funcName)s:%(lineno)d
-def get_console_handler():
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(FORMATTER)
-    return console_handler
+####################################################################################### printDuplicate ########
+def logTextLine(textLine, textFile):
+    """  if the textFile is set, then write the line of text to that file, else print to screen.
 
-def get_file_handler(logger_name):
-    file_handler = TimedRotatingFileHandler(logger_name, when="midnight", backupCount=7)  # Only keep 7 previous logs.
-    file_handler.setFormatter(FORMATTER)
-    return file_handler
+    textLine needs to be a string, for f.write - NOT a path.
+    """
+    if textFile:
+        with open(textFile, encoding='utf-8', mode="a") as f:     # Open in amend mode, important.
+            f.write(textLine + "\n")
+    else:
+        print(textLine)
 
-def get_logger(logger_name):
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)              # better to have too much log than not enough
-    #logger.addHandler(get_console_handler())   # add to log to console
-    logger.addHandler(get_file_handler(logger_name))
-    # with this pattern, it's rarely necessary to propagate the error up to parent
-    logger.propagate = False
-    return logger
+########################################################################################### printSortLicense ######
+def printShortLicense(Name, Version, textFile):
+    logTextLine("", textFile)
+    logTextLine(f"{Name} V{Version}   Copyright (C) 2020  Kevin Scott", textFile)
+    logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{Name} -l'.", textFile)
+    logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.", textFile)
+
+########################################################################################### printLongLicense ######
+def printLongLicense(Name, Version):
+    print(f"""
+    {Name} V{Version}  Copyright (C) 2020  Kevin Scott
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either myVERSION 3 of the License, or
+    (at your option) any later myVERSION.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    """, end="")

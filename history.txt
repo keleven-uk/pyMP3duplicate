@@ -1,3 +1,11 @@
+V1.07
+
+    Added two new files.
+      myLibrary - a wrapper around dictionary access, used to store song stuff.
+      myLicense - holds the print stuff for short license and long license.
+    Alterations to pyMP3Duplicate.py by above.
+
+
 V1.06
 
     Added a toml config file and a wrapper class in myConfig.py.

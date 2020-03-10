@@ -9,7 +9,7 @@ title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = '1.0.6beta'
+myVERSION = '1.0.7'
 myNAME    = 'pyMP3duplicate'
 
 [LOOP]

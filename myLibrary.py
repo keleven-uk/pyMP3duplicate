@@ -1,9 +1,10 @@
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
-#  A class that acts has a wrapper around the config file - config.toml.                                      #
-#  The config file is first read, then the properties are made available.                                     #
-#  The config file is currently in toml format.
+#  A class that acts has a wrapper around a dictionary access.                                               #
+#  The items to store are song files,                                                                         #
+#    The key is made up of {song.artist}:{tag.title}                                                          #
+#    The data is a list [songFile, songDuration]
 #                                                                                                             #
 ###############################################################################################################
 ###############################################################################################################
@@ -22,32 +23,61 @@
 #                                                                                                             #
 ###############################################################################################################
 
-import toml
+import os
+import pickle
 
-class Config():
-    """  A class that acts has a wrapper around the config file - config.toml.                                    #
-         The config file is first read, then the properties are made available.
 
-         Use single quotes :-(
+class Library():
+    """  A simple class that wraps the library dictionary.
 
          usage:
-            myConfig = myConfig.Config()
+             songLibrary = myLibrary.Library()
+
+         to add an item              - songLibrary.addItem(key, musicFile, musicDuration)
+         to retrieve an item         - songFile, songDuration = songLibrary.getItem(key)
+         to test for key             - if songLibrary.hasKey(key):
+         to return number of items   - l = songLibrary.noOfItems()
+
+         to load items - songLibrary.load() : this loads using pickle (hard-coded as dup.pickle).
+         to save items - songLibrary.save() : this saves using pickle (hard-coded as dup.pickle).
+
+         TODO - possibly needs error checking.
     """
 
     def __init__(self):
-        self.config = toml.load("config.toml")      # Load the config file, in toml
+        self.library = {}
 
-    def NAME(self):
-        """  Returns application name.
+    def hasKey(self, key):
+        """  Returns true if the key exist in the library.
         """
-        return self.config['INFO']['myNAME']
+        return key in self.library
 
-    def VERSION(self):
-        """  Returns application Version.
+    def addItem(self, key, item1, item2):
+        """  Adds to the library at point key, added is a list of items.
+             item1 is song duration.
+             item2 is song path.
         """
-        return self.config['INFO']['myVERSION']
+        self.library[key] = [item1, item2]
 
-    def ITERATIONS(self):
-        """  Returns application Version.
+    def getItem(self, key):
+        """  Returns items at position key from the library.
         """
-        return self.config['LOOP']['Iterations']
+        return self.library[key]
+
+    def noOfItems(self):
+        """  Return the number of entries in the library
+        """
+        return len(self.library)
+
+    def save(self):
+        """  Save the library to disc - currently uses pickle.
+        """
+        with open("dup.pickle", "wb") as f:
+            pickle.dump(self.library, f)
+
+    def load(self):
+        """  Loads the library from disc - currently uses pickle.
+        """
+        if os.path.isfile("dup.pickle"):
+            with open("dup.pickle", "rb") as f:
+                self.library = pickle.load(f)

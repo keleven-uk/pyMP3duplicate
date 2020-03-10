@@ -56,7 +56,7 @@ optional arguments:
   -v, --version         show program's version number and exit
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.4
+ Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.7
 
 
 

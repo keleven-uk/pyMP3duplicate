@@ -28,71 +28,17 @@
 
 import os
 import time
-import pickle
 import pathlib
 import textwrap
 import datetime
 import argparse
 import colorama
+import myLibrary
 import myConfig
 import myLogger
+
 from tinytag import TinyTag
-
-
-class Library():
-    """  A simple class that wraps the library dictionary.
-    """
-
-    def __init__(self):
-        self.library = {}
-
-    def hasKey(self, key):
-        """  Returns true if the key exist in the library.
-        """
-        return key in self.library
-
-    def addItem(self, key, item1, item2):
-        """  Adds to the library at point key, added is a list of items.
-             item1 is song duration.
-             item2 is song path.
-        """
-        self.library[key] = [item1, item2]
-
-    def getItem(self, key):
-        """  Returns items at position key from the library.
-        """
-        return self.library[key]
-
-    def noOfItems(self):
-        """  Return the number of entries in the library
-        """
-        return len(self.library)
-
-    def save(self):
-        """  Save the library to disc - currently uses pickle.
-        """
-        with open("dup.pickle", "wb") as f:
-            pickle.dump(self.library, f)
-
-    def load(self):
-        """  Loads the library from disc - currently uses pickle.
-        """
-        if os.path.isfile("dup.pickle"):
-            with open("dup.pickle", "rb") as f:
-                self.library = pickle.load(f)
-
-####################################################################################### printDuplicate ########
-def logTextLine(textLine):
-    """  It the global argument duplcateFile is set, then with the line of text
-    to that file, else print to screen.
-
-    textLine needs to a string, for f.write - NOT a path.
-    """
-    if duplicateFile:
-        with open(duplicateFile, encoding='utf-8', mode="a") as f:     # Open in amend mode, important.
-            f.write(textLine + "\n")
-    else:
-        print(textLine)
+from myLicense import printLongLicense, printShortLicense, logTextLine
 
 ####################################################################################### scanMusic #############
 def scanMusic(mode, sourceDir, duplicateFile, difference):
@@ -101,7 +47,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference):
          If the song already exists in the library, then the two are checked.
 
          mode = "scan"  -- the sourceDir is scanned and duplicates are reported.
-         mode = "build" -- the sourceDir is scanned and the daybase is built only, duplicates are not checked.
+         mode = "build" -- the sourceDir is scanned and the database is built only, duplicates are not checked.
     """
     startTime  = time.time()
     count      = 0
@@ -116,8 +62,8 @@ def scanMusic(mode, sourceDir, duplicateFile, difference):
             musicFile = os.path.join(root, file)
             if not musicFile.endswith(".mp3"):      # a non music file found.
                 if mode == "scan":
-                    logTextLine("-"*80 + "Non Music File Found" + "-"*25)
-                    logTextLine(f"{musicFile} is not a music file")
+                    logTextLine("-"*80 + "Non Music File Found" + "-"*25, duplicateFile)
+                    logTextLine(f"{musicFile} is not a music file", duplicateFile)
                     nonMusic += 1
                 continue        # continue with next file.
 
@@ -138,52 +84,26 @@ def scanMusic(mode, sourceDir, duplicateFile, difference):
                     if not songDuration: songDuration = 0     # In case there is no valid duration time on the mp3 file.
 
                     if abs(musicDuration - songDuration) < difference:
-                        logTextLine("-"*80 + "Duplicate Found" + "-"*30)
-                        logTextLine(f"{str(musicFile)} {musicDuration:.2f}")
-                        logTextLine(f"{str(songFile)}  {songDuration:.2f}")
+                        logTextLine("-"*80 + "Duplicate Found" + "-"*30, duplicateFile)
+                        logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
+                        logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
                         duplicates += 1
                 else:  # if songLibrary.hasKey(key):
                     songLibrary.addItem(key, musicFile, musicDuration)
 
             except (Exception) as error:
-                log.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
+                logger.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
 
             if (count % myConfig.ITERATIONS()) == 0:
                 elapsedTimeSecs = time.time() - startTime
                 elapsedTime     = datetime.timedelta(seconds = elapsedTimeSecs)
-                print(f"{count}, duplicates {duplicates}: {elapsedTime} :: {count/elapsedTimeSecs:.1f} songe per sec.")
+                print(f"{count}, duplicates {duplicates}: {elapsedTime} :: {count/elapsedTimeSecs:.1f} songs per sec.")
 
-    logTextLine("")
+    logTextLine("", duplicateFile)
     if nonMusic:
-        logTextLine(f"{count} music files found with {duplicates} duplicates, with {nonMusic} non music files.")
+        logTextLine(f"{count} music files found with {duplicates} duplicates, with {nonMusic} non music files.", duplicateFile)
     else:
-        logTextLine(f"{count} music files found with {duplicates} duplicates.")
-
-########################################################################################### printSortLicense ######
-def printShortLicense():
-    logTextLine("")
-    logTextLine(f"{myConfig.NAME()} V{myConfig.VERSION()}   Copyright (C) 2020  Kevin Scott")
-    logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{myConfig.NAME()} -l'.")
-    logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.")
-
-########################################################################################### printLongLicense ######
-def printLongLicense():
-    print(f"""
-    {myConfig.NAME()} V{myConfig.VERSION()}   Copyright (C) 2020  Kevin Scott
-
-    This program is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either myVERSION 3 of the License, or
-    (at your option) any later myVERSION.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    """, end="")
+        logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
 
 ############################################################################################## parseArgs ######
 def parseArgs():
@@ -219,22 +139,22 @@ def parseArgs():
         songLibrary.load()
         l = songLibrary.noOfItems()
         print(f"Song Library has {l} songs")
-        log.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Song Library has {l} songs")
+        logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Song Library has {l} songs")
         exit(0)
 
     if args.license:
-        printLongLicense()
-        log.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Printed Licence")
+        printLongLicense(myConfig.NAME(), myConfig.VERSION())
+        logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Printed Licence")
         exit(0)
 
     if not args.sourceDir or not args.sourceDir.exists():
-        log.error("No Source Directory Supplied.")
+        logger.error("No Source Directory Supplied.")
         print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
         parser.print_help()
         exit(1)
 
     if not args.sourceDir or not args.sourceDir.exists():
-        log.error("Source Directory Does Not Exist.")
+        logger.error("Source Directory Does Not Exist.")
         print(f"{colorama.Fore.RED}Source Directory Does Not Exist. {colorama.Fore.RESET}")
         parser.print_help()
         exit(2)
@@ -247,39 +167,40 @@ if __name__ == "__main__":
 
     startTime   = time.time()
     myConfig    = myConfig.Config()
-    songLibrary = Library()                              # Create the song library
-    log         = myLogger.get_logger(myConfig.NAME() + ".log")   # Create the logger.
+    songLibrary = myLibrary.Library()                             # Create the song library
+    logger      = myLogger.get_logger(myConfig.NAME() + ".log")   # Create the logger.
 
-    log.info("-"*50)
-    log.info(f"Start of {myConfig.NAME()} {myConfig.VERSION()}")
+    logger.info("-"*50)
+    logger.info(f"Start of {myConfig.NAME()} {myConfig.VERSION()}")
 
     sourceDir, duplicateFile, noLoad, noSave, build, difference = parseArgs()
-    printShortLicense()
+    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile)
 
     if noLoad or build:
-        log.debug("Not Loading database")
+        logger.debug("Not Loading database")
     else:
         songLibrary.load()
 
+    logTextLine("", duplicateFile)
     if build:
-        logTextLine(f"Building Database from {sourceDir} with a time difference of {difference}")
-        log.debug(f"Building Database from {sourceDir} with a time difference of {difference}")
+        logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds", duplicateFile)
+        logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         scanMusic("build", sourceDir, duplicateFile, difference)
     else:
-        logTextLine(f"Scanning {sourceDir} with a time difference of {difference}")
-        log.debug(f"Scanning {sourceDir} with a time difference of {difference}")
+        logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds", duplicateFile)
+        logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         scanMusic("scan", sourceDir, duplicateFile, difference)
 
     if noSave:
-        log.debug("Not Saving database")
+        logger.debug("Not Saving database")
     else:
         songLibrary.save()
 
-    logTextLine("")
+    logTextLine("", duplicateFile)
     elapsedTimeSecs  = time.time()  - startTime
-    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}")
-    logTextLine("")
+    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
+    logTextLine("", duplicateFile)
 
-    log.info(f"End of {myConfig.NAME()} {myConfig.VERSION()}")
+    logger.info(f"End of {myConfig.NAME()} {myConfig.VERSION()}")
 
     exit(0)
