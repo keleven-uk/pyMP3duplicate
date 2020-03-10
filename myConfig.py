@@ -1,9 +1,12 @@
+#                                                                                                             #
 ###############################################################################################################
+#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
-#  A Wrapper for logging - based on https://www.toptal.com/python/in-depth-python-logging                     #
+#  A class that acts has a wrapper around the config file - config.toml.                                      #
+#  The config file is first read, then the properties are made available.                                     #
+#  The config file is currently in toml format.
 #                                                                                                             #
-#       Kevin Scott     2020                                                                                  #
-#                                                                                                             #
+###############################################################################################################
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
@@ -20,28 +23,29 @@
 #                                                                                                             #
 ###############################################################################################################
 
-import sys
-import logging
-from logging.handlers import TimedRotatingFileHandler
+import toml
 
+class Config():
+    """  A class that acts has a wrapper around the config file - config.toml.                                    #
+         The config file is first read, then the properties are made available.
 
-FORMATTER = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s")
-                                                                 # Could add if needed - %(funcName)s:%(lineno)d
-def get_console_handler():
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(FORMATTER)
-    return console_handler
+         Use single quotes :-(
+    """
 
-def get_file_handler(logger_name):
-    file_handler = TimedRotatingFileHandler(logger_name, when="midnight", backupCount=7)  # Only keep 7 previous logs.
-    file_handler.setFormatter(FORMATTER)
-    return file_handler
+    def __init__(self):
+        self.config = toml.load("config.toml")      # Load the config file, in toml
 
-def get_logger(logger_name):
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)              # better to have too much log than not enough
-    #logger.addHandler(get_console_handler())   # add tp log to console
-    logger.addHandler(get_file_handler(logger_name))
-    # with this pattern, it's rarely necessary to propagate the error up to parent
-    logger.propagate = False
-    return logger
+    def NAME(self):
+        """  Returns application name.
+        """
+        return self.config['INFO']['myNAME']
+
+    def VERSION(self):
+        """  Returns application Version.
+        """
+        return self.config['INFO']['myVERSION']
+
+    def ITERATIONS(self):
+        """  Returns application Version.
+        """
+        return self.config['LOOP']['Iterations']

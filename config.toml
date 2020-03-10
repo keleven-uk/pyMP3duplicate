@@ -1,0 +1,16 @@
+#   Config files for pyMP3duplicates.py
+#
+#   Use single quotes :-(
+#
+#   March 2020   Kevin Scott
+
+
+title = 'pyMP3duplicates config file'
+
+# version information
+[INFO]
+myVERSION = '1.0.6beta'
+myNAME    = 'pyMP3duplicate'
+
+[LOOP]
+Iterations = 10000  # Number of iteration of the main loop, to print out timing information.

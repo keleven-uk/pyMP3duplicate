@@ -1,9 +1,21 @@
+V1.06
+
+    Added a toml config file and a wrapper class in myConfig.py.
+      The config only holds contents of _version.py i.e.
+      application name and version at the moment.
+    _version.py removed.
+    Alterations to myLogger.py caused by above.
+    Alterations to pyMP3Duplicate.py by above.
+    Combined the two procedures buildDataBase and scanMusic.
+      Almost identical except for the test for duplicates.
+
+
 V1.05
 
-    Changed main loon in scanMusicd to os.walk from glob.
+    Changed main loop in scanMusic to os.walk from glob.
       Using os.walk seems faster but only just slightly.
       But gives extra functionality, non music files can be flagged
-      Some code clean up.
+    Some code clean up.
 
 
 V1.04
@@ -12,7 +24,7 @@ V1.04
     Getting error when writing some paths to the duplicate file,
       'charmap' codec can't encode character '\u03b8'.
       Adding the encoding flag cured this,
-    open(duplicateFile, encoding='utf-8', mode="a")
+    Open(duplicateFile, encoding='utf-8', mode="a")
       Changed the name of the method addKey to addItem.
 
 
