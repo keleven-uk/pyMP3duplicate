@@ -1,3 +1,13 @@
+V1.08
+
+    Added tqdm - a very cool progress bar for console windows.
+      Both countSongs and scannMusic loop now display a progress bar.
+      Changed back to glob from os.walk, works better with tqdm.
+    Added procedure countSongs to give total to above.
+    Removed printing to screen every n iterations of loop,
+      not now needed with progress bar.
+
+
 V1.07
 
     Added two new files.

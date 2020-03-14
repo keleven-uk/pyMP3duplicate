@@ -24,6 +24,8 @@
 
     The -xS & -xL can be useful for a test run, so the database is left UN-touched.
 
+    Added tqdm - a very cool progress bar for console windows.
+
 
 usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]
 
@@ -56,7 +58,7 @@ optional arguments:
   -v, --version         show program's version number and exit
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.7
+ Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.8
 
 
 

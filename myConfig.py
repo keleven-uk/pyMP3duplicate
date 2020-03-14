@@ -47,7 +47,7 @@ class Config():
         """
         return self.config['INFO']['myVERSION']
 
-    def ITERATIONS(self):
-        """  Returns application Version.
+    def NCOLS(self):
+        """  Returns Max number of columns for tqdm [width of progress bar].
         """
-        return self.config['LOOP']['Iterations']
+        return self.config['TQDM']['ncols']

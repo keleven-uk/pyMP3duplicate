@@ -9,8 +9,8 @@ title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = '1.0.7'
+myVERSION = '1.0.8'
 myNAME    = 'pyMP3duplicate'
 
-[LOOP]
-Iterations = 10000  # Number of iteration of the main loop, to print out timing information.
+[TQDM]
+ncols = 160     # Width of progress bar, should be equal or smaller then width of command window.

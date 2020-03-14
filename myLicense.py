@@ -41,6 +41,7 @@ def printShortLicense(Name, Version, textFile):
     logTextLine(f"{Name} V{Version}   Copyright (C) 2020  Kevin Scott", textFile)
     logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{Name} -l'.", textFile)
     logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.", textFile)
+    logTextLine("", textFile)
 
 ########################################################################################### printLongLicense ######
 def printLongLicense(Name, Version):
