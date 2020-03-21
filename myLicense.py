@@ -36,13 +36,18 @@ def logTextLine(textLine, textFile):
         print(textLine)
 
 ########################################################################################### printSortLicense ######
-def printShortLicense(Name, Version, textFile):
+def printShortLicense(Name, Version, textFile, screen=False):
     logTextLine("", textFile)
     logTextLine(f"{Name} V{Version}   Copyright (C) 2020  Kevin Scott", textFile)
     logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{Name} -l'.", textFile)
     logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.", textFile)
     logTextLine("", textFile)
-
+    if screen:
+        print("")
+        print(f"{Name} V{Version}   Copyright (C) 2020  Kevin Scott")
+        print(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{Name} -l'.")
+        print("This is free software, and you are welcome to redistribute it under certain conditions.")
+        print("")
 ########################################################################################### printLongLicense ######
 def printLongLicense(Name, Version):
     print(f"""

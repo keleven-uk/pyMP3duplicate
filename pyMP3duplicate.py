@@ -28,17 +28,46 @@
 
 import os
 import time
+import eyed3
 import pathlib
 import textwrap
 import datetime
 import argparse
 import colorama
-import myLibrary
 import myConfig
 import myLogger
+import myLibrary
 from tqdm import tqdm
 from tinytag import TinyTag
 from myLicense import printLongLicense, printShortLicense, logTextLine
+
+
+####################################################################################### scanTags ##############
+def scanTags(musicFile):
+    """
+        Scans the musicfile for the required tags.
+        Will used the method indicated in the user config.
+    """
+    if myConfig.TAGS() == "tinytag":
+        tags     = TinyTag.get(musicFile)
+        key      = f"{tags.artist}:{tags.title}"
+        duration = tags.duration
+    elif myConfig.TAGS() == "eyed3":
+        tags     = eyed3.load(musicFile)
+        key      = f"{tags.tag.artist}:{tags.tag.title}"
+        duration = tags.info.time_secs
+    else:
+        # Should not happen, tinytag should be returned by default.
+        logger.error("Unknown use option for Tags Module.")
+        print(f"{colorama.Fore.RED}Unknown use option for Tags Module.{colorama.Fore.RESET}")
+        exit(4)
+
+    if not duration:     # In case there is no valid duration time on the mp3 file.
+        musicDuration = 0
+    else:
+        musicDuration = round(duration, 2)
+
+    return key, musicDuration
 
 ####################################################################################### countSongs ############
 def countSongs(sourceDir):
@@ -82,25 +111,20 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         try:
             count += 1
-            tag = TinyTag.get(musicFile)
-            key = f"{tag.artist}:{tag.title}"
-            if not tag.duration:     # In case there is no valid duration time on the mp3 file.
-                musicDuration = 0
-            else:
-                musicDuration = round(tag.duration, 2)
+            key, musicDuration = scanTags(musicFile)
 
             if songLibrary.hasKey(key):
                 if mode == "build":  # Only building database - do not check for duplicates.
                     continue
 
                 songFile, songDuration = songLibrary.getItem(key)
-                if not songDuration: songDuration = 0     # In case there is no valid duration time on the mp3 file.
 
                 if abs(musicDuration - songDuration) < difference:
                     logTextLine("-"*80 + "Duplicate Found" + "-"*30, duplicateFile)
                     logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
                     logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
                     duplicates += 1
+
             else:  # if songLibrary.hasKey(key):
                 songLibrary.addItem(key, musicFile, musicDuration)
 
@@ -119,7 +143,7 @@ def parseArgs():
 
          Checks the arguments and will exit if not valid.
 
-         Exit code 0 - program has exited normally, after print licence or help.
+         Exit code 0 - program has exited normally, after print version, licence or help.
          Exit Code 1 - No source directory supplied.
          Exit code 2 - Source directory does not exist.
     """
@@ -139,13 +163,19 @@ def parseArgs():
     parser.add_argument("-b",  "--build",      action="store_true" , help="Build the database only.")
     parser.add_argument("-n",  "--number",     action="store_true" , help="print the Number of Songs in the database.")
     parser.add_argument("-l",  "--license",    action="store_true" , help="Print the Software License.")
-    parser.add_argument("-v",  "--version",    action="version"    , version=f"{myConfig.NAME()} V{myConfig.VERSION()}")
+    parser.add_argument("-v",  "--version",    action="store_true" , help="print the version of the application.")
 
     args = parser.parse_args()
+
+    if args.version:
+        printShortLicense(myConfig.NAME(), myConfig.VERSION(), "", False)
+        logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()}: version")
+        exit(0)
 
     if args.number:
         songLibrary.load()
         l = songLibrary.noOfItems()
+        printShortLicense(myConfig.NAME(), myConfig.VERSION(), "", False)
         print(f"Song Library has {l} songs")
         logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Song Library has {l} songs")
         exit(0)
@@ -180,13 +210,11 @@ if __name__ == "__main__":
 
     logger.info("-"*50)
     logger.info(f"Start of {myConfig.NAME()} {myConfig.VERSION()}")
+    logger.info(f"Extracting tags using {myConfig.TAGS()}")
 
     sourceDir, duplicateFile, noLoad, noSave, build, difference = parseArgs()
 
-    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile)
-
-    # if sending to files, still print short licence to screen.
-    if duplicateFile: printShortLicense(myConfig.NAME(), myConfig.VERSION(), "")
+    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, True)
 
     if noLoad or build:
         logger.debug("Not Loading database")
@@ -214,10 +242,9 @@ if __name__ == "__main__":
 
     logTextLine("", duplicateFile)
     elapsedTimeSecs  = time.time()  - startTime
-    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
+    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} :: using {myConfig.TAGS()}", duplicateFile)
     logTextLine("", duplicateFile)
 
-    if duplicateFile: printShortLicense(myConfig.NAME(), myConfig.VERSION(), "")
     logger.info(f"End of {myConfig.NAME()} {myConfig.VERSION()}")
 
     exit(0)

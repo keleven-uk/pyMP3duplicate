@@ -51,3 +51,15 @@ class Config():
         """  Returns Max number of columns for tqdm [width of progress bar].
         """
         return self.config['TQDM']['ncols']
+
+    def TAGS(self):
+        """  Returns the module used to scan the mp3 tags.
+             Only supports two modules tinttag or eyed3.
+             Will default to tinytag, if module returns other.
+        """
+        module = self.config['TAGS']['module']
+
+        if module == "tinytag" or module == "eyed3":
+            return self.config['TAGS']['module']
+        else:
+            return "tinytag"

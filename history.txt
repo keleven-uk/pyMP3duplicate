@@ -1,4 +1,18 @@
-V1.08
+V1.1.0
+
+    Added the ability to use different modules to read the mp3 tags.
+      Currently tinytag & eyed3 are supported.  [eyed3 could be used to write tags]
+      A configuration option was added to specify winch to use.
+      Alterations to pyMP3Duplicate.py by above [added procedure scanTags].
+
+
+V1.0.9
+
+    Amended the option -v, print the version.  This is now handled the same -l for license.
+    The short version of licence is also not printed with the version info.
+
+
+V1.0.8
 
     Added tqdm - a very cool progress bar for console windows.
       Both countSongs and scannMusic loop now display a progress bar.
@@ -8,7 +22,7 @@ V1.08
       not now needed with progress bar.
 
 
-V1.07
+V1.0.7
 
     Added two new files.
       myLibrary - a wrapper around dictionary access, used to store song stuff.
@@ -16,7 +30,7 @@ V1.07
     Alterations to pyMP3Duplicate.py by above.
 
 
-V1.06
+V1.0.6
 
     Added a toml config file and a wrapper class in myConfig.py.
       The config only holds contents of _version.py i.e.
@@ -28,7 +42,7 @@ V1.06
       Almost identical except for the test for duplicates.
 
 
-V1.05
+V1.0.5
 
     Changed main loop in scanMusic to os.walk from glob.
       Using os.walk seems faster but only just slightly.
@@ -36,7 +50,7 @@ V1.05
     Some code clean up.
 
 
-V1.04
+V1.0.4
 
     Added an argument to get the time difference, defaults to 0.5s.
     Getting error when writing some paths to the duplicate file,
