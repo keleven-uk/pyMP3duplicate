@@ -19,12 +19,22 @@
 
     If the -f flag is used, the duplicates are saved in a file supplied.
 
-    The -d flag sets the time duration, in seconds, of the max differance between two songs.
+    The -d flag sets the time duration, in seconds, of the max difference between two songs.
     If -d flag is not supplied, the default 0.5s will be used.
 
     The -xS & -xL can be useful for a test run, so the database is left UN-touched.
 
     Added tqdm - a very cool progress bar for console windows.
+
+    Added the ability to use different modules to read the mp3 tags.
+        Currently tinytag, eyed3 & mutagen are supported.
+
+        Tinytag is the fastest, but read only.
+        Eyed3 is the next fastest - looks about 3 times slower then Tinytag.
+        Mutagen is the slowest, needs to read the song twice - about five time slower then mutagen.
+
+    Added the ability to ignore certain duplicates files, these may be files with the same
+      artist, title and duration [or close] but are in fact not the same track.
 
 
 usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]
@@ -42,7 +52,7 @@ optional arguments:
   -f DUPFILE, --dupFile DUPFILE
                         [Optional] list duplicates to file.
 
-  -d DIFFERENCE, --differance DIFFERENCE
+  -d DIFFERENCE, --difference DIFFERENCE
                         Time difference between songs, default = 0.5s.
 
   -xL, --noLoad         Do not load database.
@@ -58,7 +68,7 @@ optional arguments:
   -v, --version         show program's version number and exit
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V1.0.9
+ Kevin Scott (C) 2020 :: pyMP3duplicate V1.1.1
 
 
 

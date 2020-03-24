@@ -52,12 +52,13 @@ class Library():
         """
         return key in self.library
 
-    def addItem(self, key, item1, item2):
+    def addItem(self, key, item1, item2, item3):
         """  Adds to the library at point key, added is a list of items.
              item1 is song duration.
              item2 is song path.
+             item3 is song ignore flag.
         """
-        self.library[key] = [item1, item2]
+        self.library[key] = [item1, item2, item3]
 
     def getItem(self, key):
         """  Returns items at position key from the library.

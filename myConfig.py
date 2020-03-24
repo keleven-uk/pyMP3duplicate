@@ -59,7 +59,13 @@ class Config():
         """
         module = self.config['TAGS']['module']
 
-        if module == "tinytag" or module == "eyed3":
+        if module == "mutagen" or module == "eyed3":
             return self.config['TAGS']['module']
         else:
             return "tinytag"
+
+    def IGNORE(self):
+        """  Returns the ignore marker.
+            if both duplicate have this in comment, then ignore
+        """
+        return self.config['TAGS']['ignore']

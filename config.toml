@@ -9,11 +9,12 @@ title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = '1.1.0'
+myVERSION = '1.1.1beta'
 myNAME    = 'pyMP3duplicate'
 
 [TQDM]
 ncols = 160     # Width of progress bar, should be equal or smaller then width of command window.
 
 [TAGS]
-module = "tinytag"    # Can be either tinytag or eyed3
+module = "mutagen"       # Can be either tinytag, mutagen or eyed3
+ignore = "**IGNORE**"    # if both duplicate have this in comment, then ignore

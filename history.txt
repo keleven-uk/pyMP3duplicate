@@ -1,3 +1,18 @@
+V1.1.1
+
+    Added the ability to read the mp3 tags using mutagen.
+    Added the ability to ignore certain duplicates files, these may be files with the same
+      artist, title and duration [or close] but are in fact not the same track.
+      This is achieved by manually inserting a new DUPLICATE tag into each song.
+      Mutagen allows this extra tags to be read and thus ignored.
+      The ignore tag can be set in user config file.
+      The ignore flag [if present or blank] is saved in the song library.
+
+      Tinytag is the fastest, but read only.
+      Eyed3 is the next fastest - looks about 3 times slower then Tinytag.
+      Mutagen is the slowest, needs to read the song twice - about five time slower then mutagen.
+
+
 V1.1.0
 
     Added the ability to use different modules to read the mp3 tags.

@@ -29,6 +29,7 @@
 import os
 import time
 import eyed3
+import chardet
 import pathlib
 import textwrap
 import datetime
@@ -38,24 +39,46 @@ import myConfig
 import myLogger
 import myLibrary
 from tqdm import tqdm
+from mutagen.id3 import ID3
+from mutagen.mp3 import MP3
 from tinytag import TinyTag
 from myLicense import printLongLicense, printShortLicense, logTextLine
 
-
+####################################################################################### checkToIgnore ##############
+def checkToIgnore(musicDuplicate, songDuplicate):
+    """  Each song may carry a ignore flag, return True if these are same.
+         Only checked it tag are read using mutagen.
+    """
+    if (musicDuplicate == myConfig.IGNORE()) and (songDuplicate == myConfig.IGNORE()):
+        return True
+    else:
+        return False
 ####################################################################################### scanTags ##############
 def scanTags(musicFile):
-    """
-        Scans the musicfile for the required tags.
-        Will used the method indicated in the user config.
+    """  Scans the musicfile for the required tags.
+         Will used the method indicated in the user config.
     """
     if myConfig.TAGS() == "tinytag":
-        tags     = TinyTag.get(musicFile)
-        key      = f"{tags.artist}:{tags.title}"
-        duration = tags.duration
+        tags      = TinyTag.get(musicFile)
+        key       = f"{tags.artist}:{tags.title}"
+        duration  = tags.duration
+        duplicate = ""
     elif myConfig.TAGS() == "eyed3":
-        tags     = eyed3.load(musicFile)
-        key      = f"{tags.tag.artist}:{tags.tag.title}"
-        duration = tags.info.time_secs
+        tags      = eyed3.load(musicFile)
+        key       = f"{tags.tag.artist}:{tags.tag.title}"
+        duration  = tags.info.time_secs
+        duplicate = ""
+    elif myConfig.TAGS() == "mutagen":
+        tags     = ID3(musicFile)
+        audio    = MP3(musicFile)
+        artist   = tags["TPE1"][0]
+        title    = tags["TIT2"][0]
+        key      = f"{artist}:{title}"
+        duration = audio.info.length
+        try:
+            duplicate = tags["TXXX:DUPLICATE"][0]
+        except (Exception) as error:
+            duplicate = ""
     else:
         # Should not happen, tinytag should be returned by default.
         logger.error("Unknown use option for Tags Module.")
@@ -67,7 +90,7 @@ def scanTags(musicFile):
     else:
         musicDuration = round(duration, 2)
 
-    return key, musicDuration
+    return key, musicDuration, duplicate
 
 ####################################################################################### countSongs ############
 def countSongs(sourceDir):
@@ -97,6 +120,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
     count      = 0
     duplicates = 0
     nonMusic   = 0
+    ignoreSong = myConfig.IGNORE()
 
     for musicFile in tqdm(sourceDir.glob("**/*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS(), position=1):
 
@@ -111,22 +135,24 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         try:
             count += 1
-            key, musicDuration = scanTags(musicFile)
+            key, musicDuration, musicDuplicate = scanTags(musicFile)
 
             if songLibrary.hasKey(key):
                 if mode == "build":  # Only building database - do not check for duplicates.
                     continue
 
-                songFile, songDuration = songLibrary.getItem(key)
+                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
                 if abs(musicDuration - songDuration) < difference:
+                    if myConfig.TAGS() == "mutagen":  # Using mutagen, we should check for ignore flag
+                        if checkToIgnore(musicDuplicate, songDuplicate): continue
                     logTextLine("-"*80 + "Duplicate Found" + "-"*30, duplicateFile)
                     logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
                     logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
                     duplicates += 1
 
             else:  # if songLibrary.hasKey(key):
-                songLibrary.addItem(key, musicFile, musicDuration)
+                songLibrary.addItem(key, musicFile, musicDuration, musicDuplicate)
 
         except (Exception) as error:
             logger.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
