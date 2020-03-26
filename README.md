@@ -37,6 +37,8 @@
       artist, title and duration [or close] but are in fact not the same track.
 
 
+To install dependences pip -r requirments.txt
+
 usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]
 
 A Python MP3 Duplicate finder.

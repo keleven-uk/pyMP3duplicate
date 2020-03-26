@@ -27,9 +27,9 @@
 
 
 import os
+import sys
 import time
 import eyed3
-import chardet
 import pathlib
 import textwrap
 import datetime
@@ -56,7 +56,7 @@ def checkToIgnore(musicDuplicate, songDuplicate):
 ####################################################################################### scanTags ##############
 def scanTags(musicFile):
     """  Scans the musicfile for the required tags.
-         Will used the method indicated in the user config.
+         Will use the method indicated in the user config.
     """
     if myConfig.TAGS() == "tinytag":
         tags      = TinyTag.get(musicFile)
@@ -120,9 +120,10 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
     count      = 0
     duplicates = 0
     nonMusic   = 0
+    ignored    = 0
     ignoreSong = myConfig.IGNORE()
 
-    for musicFile in tqdm(sourceDir.glob("**/*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS(), position=1):
+    for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS(), position=1):
 
         if musicFile.is_dir(): continue     # ignore directories.
 
@@ -145,7 +146,9 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
                 if abs(musicDuration - songDuration) < difference:
                     if myConfig.TAGS() == "mutagen":  # Using mutagen, we should check for ignore flag
-                        if checkToIgnore(musicDuplicate, songDuplicate): continue
+                        if checkToIgnore(musicDuplicate, songDuplicate):
+                            ignored += 1
+                            continue
                     logTextLine("-"*80 + "Duplicate Found" + "-"*30, duplicateFile)
                     logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
                     logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
@@ -158,8 +161,12 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
             logger.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
 
     logTextLine("", duplicateFile)
-    if nonMusic:
-        logTextLine(f"{count} music files found with {duplicates} duplicates, with {nonMusic} non music files.", duplicateFile)
+    if nonMusic and ignored:
+        logTextLine(f"{count} music files found with {duplicates} duplicates, \
+                    with {nonMusic} non music files and {ignored} songs.", duplicateFile)
+    elif nonMusic:
+        logTextLine(f"{count} music files found with {duplicates} duplicates, \
+                    with {nonMusic} non music files.", duplicateFile)
     else:
         logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
 

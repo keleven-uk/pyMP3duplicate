@@ -1,3 +1,8 @@
+V1.1.2
+
+    Added requirments.txt - to install dependences pip -r requirments.txt.
+    Added ignore song count, if using mutagen.
+
 V1.1.1
 
     Added the ability to read the mp3 tags using mutagen.
