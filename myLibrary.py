@@ -38,8 +38,8 @@ class Library():
          to test for key             - if songLibrary.hasKey(key):
          to return number of items   - l = songLibrary.noOfItems()
 
-         to load items - songLibrary.load() : this loads using pickle (hard-coded as dup.pickle).
-         to save items - songLibrary.save() : this saves using pickle (hard-coded as dup.pickle).
+         to load items - songLibrary.load(filename) : this loads using pickle (located at filename).
+         to save items - songLibrary.save(filename) : this saves using pickle (located at filename).
 
          TODO - possibly needs error checking.
     """
@@ -70,15 +70,15 @@ class Library():
         """
         return len(self.library)
 
-    def save(self):
+    def save(self, filename):
         """  Save the library to disc - currently uses pickle.
         """
-        with open("dup.pickle", "wb") as f:
+        with open(filename, "wb") as f:
             pickle.dump(self.library, f)
 
-    def load(self):
+    def load(self, filename):
         """  Loads the library from disc - currently uses pickle.
         """
-        if os.path.isfile("dup.pickle"):
-            with open("dup.pickle", "rb") as f:
+        if os.path.isfile(filename):
+            with open(filename, "rb") as f:
                 self.library = pickle.load(f)

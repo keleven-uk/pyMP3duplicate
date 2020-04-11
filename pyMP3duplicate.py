@@ -44,7 +44,7 @@ from mutagen.mp3 import MP3
 from tinytag import TinyTag
 from myLicense import printLongLicense, printShortLicense, logTextLine
 
-####################################################################################### checkToIgnore ##############
+####################################################################################### checkToIgnore #########
 def checkToIgnore(musicDuplicate, songDuplicate):
     """  Each song may carry a ignore flag, return True if these are same.
          Only checked it tag are read using mutagen.
@@ -53,6 +53,18 @@ def checkToIgnore(musicDuplicate, songDuplicate):
         return True
     else:
         return False
+
+####################################################################################### removeThe #############
+def removeThe(name):
+    """  Removes 'the' from the from of the artist and title if present.
+         Mainly a problem on artist, to be honest.
+    """
+    n = name.lower()
+    if n.startswith("the"):
+        return name[4:]
+    else:
+        return name
+
 ####################################################################################### scanTags ##############
 def scanTags(musicFile):
     """  Scans the musicfile for the required tags.
@@ -60,19 +72,23 @@ def scanTags(musicFile):
     """
     if myConfig.TAGS() == "tinytag":
         tags      = TinyTag.get(musicFile)
-        key       = f"{tags.artist}:{tags.title}"
+        artist    = removeThe(tags.artist)
+        title     = removeThe(tags.title)
+        key       = f"{artist}:{title}"
         duration  = tags.duration
         duplicate = ""
     elif myConfig.TAGS() == "eyed3":
         tags      = eyed3.load(musicFile)
-        key       = f"{tags.tag.artist}:{tags.tag.title}"
+        artist    = removeThe(tags.tag.artist)
+        title     = removeThe(tags.tag.title)
+        key       = f"{artist}:{title}"
         duration  = tags.info.time_secs
         duplicate = ""
     elif myConfig.TAGS() == "mutagen":
         tags     = ID3(musicFile)
         audio    = MP3(musicFile)
-        artist   = tags["TPE1"][0]
-        title    = tags["TIT2"][0]
+        artist   = removeThe(tags["TPE1"][0])
+        title    = removeThe(tags["TIT2"][0])
         key      = f"{artist}:{title}"
         duration = audio.info.length
         try:
@@ -127,7 +143,8 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         if musicFile.is_dir(): continue     # ignore directories.
 
-        if not str(musicFile).endswith(".mp3"):      # a non music file found.
+        if not str(musicFile).endswith(".mp3"):                 # A non music file found.
+            if str(musicFile).endswith(".pickle"): continue     # Ignore database if stored in target directory.
             if mode == "scan":
                 logTextLine("-"*80 + "Non Music File Found" + "-"*30, duplicateFile)
                 logTextLine(f"{str(musicFile)} is not a music file", duplicateFile)
@@ -188,15 +205,20 @@ def parseArgs():
         The program will scan a given directory and report duplicate MP3 files."""),
         epilog = f" Kevin Scott (C) 2020 :: {myConfig.NAME()} V{myConfig.VERSION()}")
 
-    parser.add_argument("-s",  "--sourceDir",  type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
-    parser.add_argument("-f",  "--dupFile",    type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file.")
-    parser.add_argument("-d",  "--difference", type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
-    parser.add_argument("-xL", "--noLoad",     action="store_true" , help="Do not load database.")
-    parser.add_argument("-xS", "--noSave",     action="store_true" , help="Do not save database.")
-    parser.add_argument("-b",  "--build",      action="store_true" , help="Build the database only.")
-    parser.add_argument("-n",  "--number",     action="store_true" , help="print the Number of Songs in the database.")
-    parser.add_argument("-l",  "--license",    action="store_true" , help="Print the Software License.")
-    parser.add_argument("-v",  "--version",    action="store_true" , help="print the version of the application.")
+    parser.add_argument("-s",  "--sourceDir",
+        type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
+    parser.add_argument("-f",  "--dupFile",
+        type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file, start afresh.")
+    parser.add_argument("-fA",  "--dupFileAmend",
+        type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file, Amend to previous.")
+    parser.add_argument("-d",  "--difference",
+        type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
+    parser.add_argument("-xL", "--noLoad",  action="store_true" , help="Do not load database.")
+    parser.add_argument("-xS", "--noSave",  action="store_true" , help="Do not save database.")
+    parser.add_argument("-b",  "--build",   action="store_true" , help="Build the database only.")
+    parser.add_argument("-n",  "--number",  action="store_true" , help="Print the Number of Songs in the database.")
+    parser.add_argument("-l",  "--license", action="store_true" , help="Print the Software License.")
+    parser.add_argument("-v",  "--version", action="store_true" , help="print the version of the application.")
 
     args = parser.parse_args()
 
@@ -230,7 +252,16 @@ def parseArgs():
         parser.print_help()
         exit(2)
 
-    return (args.sourceDir, args.dupFile, args.noLoad, args.noSave, args.build, args.difference)
+    if args.dupFile:                                            # Delete duplicate file if it exists.
+        try:
+            dfile = args.dupFile
+            os.remove(args.dupFile)
+        except (IOError, os.error) as error:
+            logger.error("Duplication File Does Not Exist.")    # Log error, but don't really care.
+    else:                                                       # Amend to previous duplicate file, if it exists.
+        dfile = args.dupFileAmend
+
+    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference)
 
 ############################################################################################### __main__ ######
 
@@ -249,10 +280,13 @@ if __name__ == "__main__":
 
     printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, True)
 
+    DBname = myConfig.DB_NAME()
+    logger.debug(f"Storing database at {DBname}")
+
     if noLoad or build:
         logger.debug("Not Loading database")
     else:
-        songLibrary.load()
+        songLibrary.load(DBname)
 
     songsCount = countSongs(sourceDir)
     elapsedTimeSecs  = time.time()  - startTime
@@ -271,7 +305,7 @@ if __name__ == "__main__":
     if noSave:
         logger.debug("Not Saving database")
     else:
-        songLibrary.save()
+        songLibrary.save(DBname)
 
     logTextLine("", duplicateFile)
     elapsedTimeSecs  = time.time()  - startTime

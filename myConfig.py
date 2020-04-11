@@ -22,11 +22,17 @@
 #                                                                                                             #
 ###############################################################################################################
 
+import os
 import toml
+import colorama
+
 
 class Config():
-    """  A class that acts has a wrapper around the config file - config.toml.                                    #
+    """  A class that acts has a wrapper around the config file - config.toml.
+         The config file is hard coded and lives in the save directory has the main script.
          The config file is first read, then the properties are made available.
+
+         If config.toml is not found, a default config file is generated.
 
          Use single quotes :-(
 
@@ -34,8 +40,17 @@ class Config():
             myConfig = myConfig.Config()
     """
 
+    FILE_NAME = "config.toml"
+
+
     def __init__(self):
-        self.config = toml.load("config.toml")      # Load the config file, in toml
+        try:
+            self.config = toml.load(self.FILE_NAME)      # Load the config file, in toml
+        except FileNotFoundError:
+            print(f"{colorama.Fore.RED}Config not found. {colorama.Fore.RESET}")
+            print(f"{colorama.Fore.YELLOW}Writing default config file. {colorama.Fore.RESET}")
+            self.writeDefaultConfig()
+            print(f"{colorama.Fore.GREEN}Running program with default config. {colorama.Fore.RESET}")
 
     def NAME(self):
         """  Returns application name.
@@ -54,13 +69,13 @@ class Config():
 
     def TAGS(self):
         """  Returns the module used to scan the mp3 tags.
-             Only supports two modules tinttag or eyed3.
+             Currently supports three modules tinytag, mutagen or eyed3.
              Will default to tinytag, if module returns other.
         """
         module = self.config['TAGS']['module']
 
         if module == "mutagen" or module == "eyed3":
-            return self.config['TAGS']['module']
+            return module
         else:
             return "tinytag"
 
@@ -69,3 +84,40 @@ class Config():
             if both duplicate have this in comment, then ignore
         """
         return self.config['TAGS']['ignore']
+
+    def DB_NAME(self):
+        """  Returns the location and filename of the database.
+             if location is empty will just filename, so save next to main script.
+        """
+        location = self.config['DATABASE']['location']
+
+        if not location:
+            return self.config['DATABASE']['filename']
+        else:
+            return f"{location}\{self.config['DATABASE']['filename']}"
+
+
+    def writeDefaultConfig(self):
+        """ Write a default config file.
+            This is hard coded  ** TO KEEP UPDATED **
+        """
+        config = dict()
+
+        config['INFO'] = {'myVERSION': '1.1.3g',
+                          'myNAME'   : 'pyMP3duplicate'}
+
+        config['TQDM'] = {'ncols': 160}
+
+        config['TAGS'] = {'module': 'tinytag',
+                          'ignore': '**IGNORE**'}
+
+        config['DATABASE'] = {'filename': 'dup.pickle',
+                              'location': ''}
+
+        st_toml = toml.dumps(config)
+
+        with open(self.FILE_NAME, "w") as configFile:
+            configFile.writelines(st_toml)
+
+
+        self.config = toml.load(self.FILE_NAME)      # Load the config file, in toml

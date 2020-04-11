@@ -9,12 +9,16 @@ title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = '1.1.2'
+myVERSION = '1.1.3'
 myNAME    = 'pyMP3duplicate'
 
 [TQDM]
 ncols = 160     # Width of progress bar, should be equal or smaller then width of command window.
 
 [TAGS]
-module = "eyed3"       # Can be either tinytag, mutagen or eyed3
-ignore = "**IGNORE**"    # if both duplicate have this in comment, then ignore
+module = 'tinytag'       # Can be either tinytag, mutagen or eyed3
+ignore = '**IGNORE**'    # if both duplicate have this in comment, then ignore
+
+[DATABASE]
+filename = 'dup.pickle'
+location = 'c:\\tmp\\check'
