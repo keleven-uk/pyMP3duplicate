@@ -27,7 +27,7 @@
     Added tqdm - a very cool progress bar for console windows.
 
     Added the ability to use different modules to read the mp3 tags.
-        Currently tinytag, eyed3 & mutagen are supported.
+        Currently tinytag, Eyed3 & Mutagen are supported.
 
         Tinytag is the fastest, but read only.
         Eyed3 is the next fastest - looks about 3 times slower then Tinytag.
@@ -35,6 +35,10 @@
 
     Added the ability to ignore certain duplicates files, these may be files with the same
       artist, title and duration [or close] but are in fact not the same track.
+
+    Added the ability to match the song artist / title using the Soundex algorithm, to add a sort of
+    fuzzy matching.  Also will ignore any leading 'the'.  Also, the matching is done with lower case strings.
+      i.e The Sweet will match Sweet and Led Zeppelin should match Led Zeplin.
 
 
 To install dependences pip -r requirments.txt
@@ -52,7 +56,10 @@ optional arguments:
                         directory of the music files [mp3].
 
   -f DUPFILE, --dupFile DUPFILE
-                        [Optional] list duplicates to file.
+                        [Optional] list duplicates to file, start afresh.
+
+  -fA DUPFILEAMEND, --dupFileAmend DUPFILEAMEND
+                        [Optional] list duplicates to file, Amend to previous.
 
   -d DIFFERENCE, --difference DIFFERENCE
                         Time difference between songs, default = 0.5s.
@@ -70,7 +77,7 @@ optional arguments:
   -v, --version         show program's version number and exit
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V1.1.3
+ Kevin Scott (C) 2020 :: pyMP3duplicate V1.1.4
 
 
 

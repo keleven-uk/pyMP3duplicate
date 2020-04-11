@@ -4,5 +4,7 @@ colorama
 tqdm
 mutagen
 tinytag
+libindic-soundex
 
 ###### Requirements with Version Specifiers ######
+libindic-utils>=1.0.3

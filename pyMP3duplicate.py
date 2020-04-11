@@ -42,6 +42,7 @@ from tqdm import tqdm
 from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
+from libindic.soundex import Soundex
 from myLicense import printLongLicense, printShortLicense, logTextLine
 
 ####################################################################################### checkToIgnore #########
@@ -53,6 +54,19 @@ def checkToIgnore(musicDuplicate, songDuplicate):
         return True
     else:
         return False
+
+####################################################################################### createKey #############
+def createKey(artist, title):
+    """ Creates the key from the artist and title.
+        key is either formed from string substitution or created from the soundex of the string.
+    """
+    artist = artist.lower()
+    title  = title.lower()
+
+    if myConfig.SOUNDEX():
+        return phonetic.soundex(f"{artist}:{title}")
+    else:
+        return f"{artist}:{title}"
 
 ####################################################################################### removeThe #############
 def removeThe(name):
@@ -74,14 +88,14 @@ def scanTags(musicFile):
         tags      = TinyTag.get(musicFile)
         artist    = removeThe(tags.artist)
         title     = removeThe(tags.title)
-        key       = f"{artist}:{title}"
+        key       = createKey(artist, title)
         duration  = tags.duration
         duplicate = ""
     elif myConfig.TAGS() == "eyed3":
         tags      = eyed3.load(musicFile)
         artist    = removeThe(tags.tag.artist)
         title     = removeThe(tags.tag.title)
-        key       = f"{artist}:{title}"
+        key       = createKey(artist, title)
         duration  = tags.info.time_secs
         duplicate = ""
     elif myConfig.TAGS() == "mutagen":
@@ -89,7 +103,7 @@ def scanTags(musicFile):
         audio    = MP3(musicFile)
         artist   = removeThe(tags["TPE1"][0])
         title    = removeThe(tags["TIT2"][0])
-        key      = f"{artist}:{title}"
+        key      = createKey(artist, title)
         duration = audio.info.length
         try:
             duplicate = tags["TXXX:DUPLICATE"][0]
@@ -106,7 +120,7 @@ def scanTags(musicFile):
     else:
         musicDuration = round(duration, 2)
 
-    return key, musicDuration, duplicate
+    return key, musicDuration, duplicate, artist, title
 
 ####################################################################################### countSongs ############
 def countSongs(sourceDir):
@@ -153,7 +167,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         try:
             count += 1
-            key, musicDuration, musicDuplicate = scanTags(musicFile)
+            key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
 
             if songLibrary.hasKey(key):
                 if mode == "build":  # Only building database - do not check for duplicates.
@@ -169,6 +183,10 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                     logTextLine("-"*80 + "Duplicate Found" + "-"*30, duplicateFile)
                     logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
                     logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
+                    key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+                    logTextLine(f"Key of musicFile {key} ::{artist} :: {title}", duplicateFile)
+                    key, musicDuration, musicDuplicate, artist, title = scanTags(songFile)
+                    logTextLine(f"Key of songFile {key} ::{artist} :: {title}", duplicateFile)
                     duplicates += 1
 
             else:  # if songLibrary.hasKey(key):
@@ -271,6 +289,7 @@ if __name__ == "__main__":
     myConfig    = myConfig.Config()
     songLibrary = myLibrary.Library()                             # Create the song library
     logger      = myLogger.get_logger(myConfig.NAME() + ".log")   # Create the logger.
+    phonetic    = Soundex()
 
     logger.info("-"*50)
     logger.info(f"Start of {myConfig.NAME()} {myConfig.VERSION()}")
@@ -282,6 +301,11 @@ if __name__ == "__main__":
 
     DBname = myConfig.DB_NAME()
     logger.debug(f"Storing database at {DBname}")
+
+    if myConfig.SOUNDEX():
+        logger.debug("Using Soundex for TAGS matching")
+    else:
+        logger.debug("Using Strings for TAGS matching")
 
     if noLoad or build:
         logger.debug("Not Loading database")

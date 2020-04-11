@@ -81,9 +81,15 @@ class Config():
 
     def IGNORE(self):
         """  Returns the ignore marker.
-            if both duplicate have this in comment, then ignore
+             if both duplicate have this in comment, then ignore
         """
         return self.config['TAGS']['ignore']
+
+    def SOUNDEX(self):
+        """  Returns the Soundex marker.
+             if true, uses Soundex for tags matching else use normal strings.
+        """
+        return self.config['TAGS']['soundex']
 
     def DB_NAME(self):
         """  Returns the location and filename of the database.
@@ -108,8 +114,9 @@ class Config():
 
         config['TQDM'] = {'ncols': 160}
 
-        config['TAGS'] = {'module': 'tinytag',
-                          'ignore': '**IGNORE**'}
+        config['TAGS'] = {'module' : 'tinytag',
+                          'ignore' : '**IGNORE**',
+                          'soundex': true}
 
         config['DATABASE'] = {'filename': 'dup.pickle',
                               'location': ''}
