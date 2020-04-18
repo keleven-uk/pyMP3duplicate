@@ -1,9 +1,16 @@
+V1.1.5
+
+    Added custom exception, held in myException.py, which is raised when the tag read has failed.
+    Added a check for fale positives when matching the tags using Soundex.
+      A count of sutch will be displayed at the end of the run.
+    Added to the removeThe function to return "" if name is blank.
+      i.e. the artist ot title tag is blank or failed to read.
 V1.1.4
 
     Added the ability to match the song artist / title using the Soundex algorithm, to add a sort of
     fuzzy matching.  Also, the matching is done with lower case strings.
       i.e Led Zeppelin should match Led Zeplin.
-      
+
 
 V1.1.3
 
@@ -17,7 +24,7 @@ V1.1.3
 V1.1.2
 
     Added requirments.txt - to install dependences pip -r requirments.txt.
-    Added ignore song count, if using mutagen.
+    Added ignore song count, if not using mutagen.
 
 
 V1.1.1
@@ -40,7 +47,7 @@ V1.1.0
     Added the ability to use different modules to read the mp3 tags.
       Currently tinytag & eyed3 are supported.  [eyed3 could be used to write tags]
       A configuration option was added to specify winch to use.
-      Alterations to pyMP3Duplicate.py by above [added procedure scanTags].
+      Alterations to pyMP3Duplicate.py by above [added method scanTags].
 
 
 V1.0.9
@@ -54,7 +61,7 @@ V1.0.8
     Added tqdm - a very cool progress bar for console windows.
       Both countSongs and scannMusic loop now display a progress bar.
       Changed back to glob from os.walk, works better with tqdm.
-    Added procedure countSongs to give total to above.
+    Added method countSongs to give total to above.
     Removed printing to screen every n iterations of loop,
       not now needed with progress bar.
 
@@ -75,7 +82,7 @@ V1.0.6
     _version.py removed.
     Alterations to myLogger.py caused by above.
     Alterations to pyMP3Duplicate.py by above.
-    Combined the two procedures buildDataBase and scanMusic.
+    Combined the two methods buildDataBase and scanMusic.
       Almost identical except for the test for duplicates.
 
 

@@ -9,18 +9,19 @@
     The remaining mp3 files can be safely added to the main directory, the database will need to be rebuilt.
 
     NB : The tags in the new MP3's should be in the same format has the tags in the main directory.
-         i.e spaces trimmed and in title case - my preference.
+         i.e spaces trimmed and in title case - my preference. [See note about Soundex later on.]
          Also, both mp3's should have valid time or lengths.  Correct with mp3val.
 
     The database is stored in a simple directory and stored via pickling.  The pickled database is
-    stored in the same directory as the main script.
+    stored in the same directory as the main script, if location not set in config file..
 
-    If a new database needs to be created, then either delete the pickle file or run with the -x flag.
+    If a new database needs to be created, then either delete the pickle file or run with the -xL flag.
 
-    If the -f flag is used, the duplicates are saved in a file supplied.
+    If the -f flag is used, the duplicates are saved to the file supplied.
+    If the -f flag not supplied, the duplicates are listed to the screen [standard output].
 
     The -d flag sets the time duration, in seconds, of the max difference between two songs.
-    If -d flag is not supplied, the default 0.5s will be used.
+    If the -d flag is not supplied, the default 0.5s will be used.
 
     The -xS & -xL can be useful for a test run, so the database is left UN-touched.
 
@@ -30,7 +31,7 @@
         Currently tinytag, Eyed3 & Mutagen are supported.
 
         Tinytag is the fastest, but read only.
-        Eyed3 is the next fastest - looks about 3 times slower then Tinytag.
+        Eyed3 is the next fastest - looks about 3 times slower then Tinytag [but gives errors to the screen].
         Mutagen is the slowest, needs to read the song twice - about five time slower then mutagen.
 
     Added the ability to ignore certain duplicates files, these may be files with the same
@@ -38,7 +39,7 @@
 
     Added the ability to match the song artist / title using the Soundex algorithm, to add a sort of
     fuzzy matching.  Also will ignore any leading 'the'.  Also, the matching is done with lower case strings.
-      i.e The Sweet will match Sweet and Led Zeppelin should match Led Zeplin.
+      i.e The Sweet will match Sweet and Led Zeppelin should match Led Zepelin.
 
 
 To install dependences pip -r requirments.txt
@@ -77,7 +78,7 @@ optional arguments:
   -v, --version         show program's version number and exit
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V1.1.4
+ Kevin Scott (C) 2020 :: pyMP3duplicate V1.1.5
 
 
 

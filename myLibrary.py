@@ -1,10 +1,12 @@
 ###############################################################################################################
-#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
+#    myLibrary.py   Copyright (C) <2020>  <Kevin Scott>                                                       #
 #                                                                                                             #
-#  A class that acts has a wrapper around a dictionary access.                                               #
-#  The items to store are song files,                                                                         #
-#    The key is made up of {song.artist}:{tag.title}                                                          #
-#    The data is a list [songFile, songDuration]
+#    A class that acts has a wrapper around a dictionary access.                                              #
+#    The items to store are song files,                                                                       #
+#      The key is iether made up of {song.artist}:{tag.title}                                                 #
+#        or soundex({song.artist}:{tag.title})                                                                #
+#        or any unique token generated from the song.                                                         #
+#      The data is a list [songFile, songDuration, ignore flag]                                               #
 #                                                                                                             #
 ###############################################################################################################
 ###############################################################################################################

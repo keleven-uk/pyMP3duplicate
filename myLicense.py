@@ -1,9 +1,8 @@
 ###############################################################################################################
+#    myLicense.py   Copyright (C) <2020>  <Kevin Scott>                                                       #
 #                                                                                                             #
-#  Two procedure to print out License information, one short and one long.                                    #
-#  One procedure to either print test to screen or a file.                                                    #
-#                                                                                                             #
-#       Kevin Scott     2020                                                                                  #
+#    Two methods to print out License information, one short and one long.                                    #
+#    One method to either print text to screen or a file.                                                     #
 #                                                                                                             #
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
@@ -27,7 +26,7 @@
 def logTextLine(textLine, textFile):
     """  if the textFile is set, then write the line of text to that file, else print to screen.
 
-    textLine needs to be a string, for f.write - NOT a path.
+         textLine needs to be a string, for f.write - NOT a path.
     """
     if textFile:
         with open(textFile, encoding='utf-8', mode="a") as f:     # Open in amend mode, important.

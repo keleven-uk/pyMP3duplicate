@@ -1,16 +1,14 @@
 ###############################################################################################################
-#  pyMP3duplicate                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020>  <Kevin Scott>                                                     #
 #                                                                                                             #
-#  The program will scan a given directory and report duplicate MP3 files.                                    #
+#    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 # usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]   #
 #                                                                                                             #
-#       Kevin Scott     2020                                                                                  #
-#                                                                                                             #
-#   For changes see history.txt                                                                               #
+#     For changes see history.txt                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2019 - 2020>  <Kevin Scott>                                                               #
+#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either myVERSION 3 of the       #
@@ -43,7 +41,30 @@ from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
 from libindic.soundex import Soundex
+from myExceptions import TagReadError
 from myLicense import printLongLicense, printShortLicense, logTextLine
+
+####################################################################################### checktags #############
+def checktags(musicFile, songFile):
+    """  Used to check if the Soundex algorithm has returned a false positive.
+         Returns true if the artist and title of the two songs are the same.
+    """
+
+    try:                                    # Tries to read tags from the music file.
+        tags = TinyTag.get(musicFile)
+    except (Exception) as error:           # Can't read tags - log as error.
+        logger.error(f"ERROR : Can't read tags : {musicFile}")
+    artist1 = removeThe(tags.artist)
+    title1  = removeThe(tags.title)
+
+    try:                                    # Tries to read tags from the music file.
+        tags = TinyTag.get(songFile)
+    except (Exception) as error:           # Can't read tags - log as error.
+        logger.error(f"ERROR : Can't read tags : {songFile}")
+    artist2 = removeThe(tags.artist)
+    title2  = removeThe(tags.title)
+
+    return (True if (artist1 == artist2) and (title1 == title2) else False)
 
 ####################################################################################### checkToIgnore #########
 def checkToIgnore(musicDuplicate, songDuplicate):
@@ -62,51 +83,59 @@ def createKey(artist, title):
     """
     artist = artist.lower()
     title  = title.lower()
-
-    if myConfig.SOUNDEX():
-        return phonetic.soundex(f"{artist}:{title}")
-    else:
-        return f"{artist}:{title}"
+    return (phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX() else f"{artist}:{title}")
 
 ####################################################################################### removeThe #############
 def removeThe(name):
-    """  Removes 'the' from the from of the artist and title if present.
-         Mainly a problem on artist, to be honest.
+    """  Removes 'the' from the from the beginning of artist and title if present.
+         Mainly a problem with artist, to be honest.
     """
-    n = name.lower()
-    if n.startswith("the"):
-        return name[4:]
+
+    if name:
+        n = name.lower()
+        return (name[4:] if n.startswith("the") else name)
     else:
-        return name
+        return ""
 
 ####################################################################################### scanTags ##############
 def scanTags(musicFile):
     """  Scans the musicfile for the required tags.
          Will use the method indicated in the user config.
+
+         If there is a problem reading the tags, raise an exception.
     """
     if myConfig.TAGS() == "tinytag":
-        tags      = TinyTag.get(musicFile)
+        try:                                    # Tries to read tags from the music file.
+            tags = TinyTag.get(musicFile)
+        except (Exception) as error:           # Can't read tags - flag as error.
+            raise TagReadError(f"Tinytag error reading tags {musicFile}")
         artist    = removeThe(tags.artist)
         title     = removeThe(tags.title)
-        key       = createKey(artist, title)
         duration  = tags.duration
         duplicate = ""
+
     elif myConfig.TAGS() == "eyed3":
-        tags      = eyed3.load(musicFile)
+        try:
+            tags = eyed3.load(musicFile)
+        except (Exception) as error:
+            logger.error(f"Eyed3 error reading tags {musicFile}")
+            raise TagReadError(f"Eyed3 error reading tags {musicFile}")
         artist    = removeThe(tags.tag.artist)
         title     = removeThe(tags.tag.title)
-        key       = createKey(artist, title)
         duration  = tags.info.time_secs
         duplicate = ""
+
     elif myConfig.TAGS() == "mutagen":
-        tags     = ID3(musicFile)
-        audio    = MP3(musicFile)
+        try:
+            tags  = ID3(musicFile)
+            audio = MP3(musicFile)
+        except (Exception) as error:
+            raise TagReadError(f"Mutagen error reading tags {musicFile}")
         artist   = removeThe(tags["TPE1"][0])
         title    = removeThe(tags["TIT2"][0])
-        key      = createKey(artist, title)
         duration = audio.info.length
-        try:
-            duplicate = tags["TXXX:DUPLICATE"][0]
+        try:                                        # Try to read duplicate tag.
+            duplicate = tags["TXXX:DUPLICATE"][0]   # Ignore if not there.
         except (Exception) as error:
             duplicate = ""
     else:
@@ -120,12 +149,13 @@ def scanTags(musicFile):
     else:
         musicDuration = round(duration, 2)
 
+    key = createKey(artist, title)
     return key, musicDuration, duplicate, artist, title
 
 ####################################################################################### countSongs ############
 def countSongs(sourceDir):
     """  Count the number of songs [.mp3 files] in the sourceDir.
-         This count is used in the progress bat in scanMusic()
+         This count is used in the progress bar in scanMusic()
          Takes just over a second at 130000 files approx.
     """
     print("Counting Songs")
@@ -151,6 +181,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
     duplicates = 0
     nonMusic   = 0
     ignored    = 0
+    falsePos   = 0
     ignoreSong = myConfig.IGNORE()
 
     for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS(), position=1):
@@ -160,14 +191,18 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
         if not str(musicFile).endswith(".mp3"):                 # A non music file found.
             if str(musicFile).endswith(".pickle"): continue     # Ignore database if stored in target directory.
             if mode == "scan":
-                logTextLine("-"*80 + "Non Music File Found" + "-"*30, duplicateFile)
-                logTextLine(f"{str(musicFile)} is not a music file", duplicateFile)
+                logTextLine("-"*80 + "Non Music File Found" + "-"*40, duplicateFile)
+                logTextLine(f"{str(musicFile)} is not a music file",  duplicateFile)
                 nonMusic += 1
             continue        # continue with next file.
 
         try:
             count += 1
-            key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+            try:
+                key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+            except (Exception) as error:
+                logger.error(error)
+                continue
 
             if songLibrary.hasKey(key):
                 if mode == "build":  # Only building database - do not check for duplicates.
@@ -180,16 +215,15 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                         if checkToIgnore(musicDuplicate, songDuplicate):
                             ignored += 1
                             continue
-                    logTextLine("-"*80 + "Duplicate Found" + "-"*30, duplicateFile)
+                    logTextLine("-"*80 + "Duplicate Found" + "-"*40, duplicateFile)
+                    if myConfig.SOUNDEX() and not checktags(musicFile, songFile):
+                        logTextLine("*"*80 + "Possible False Positive" + "*"*32, duplicateFile)
+                        falsePos += 1
                     logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
                     logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
-                    key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
-                    logTextLine(f"Key of musicFile {key} ::{artist} :: {title}", duplicateFile)
-                    key, musicDuration, musicDuplicate, artist, title = scanTags(songFile)
-                    logTextLine(f"Key of songFile {key} ::{artist} :: {title}", duplicateFile)
                     duplicates += 1
 
-            else:  # if songLibrary.hasKey(key):
+            else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
                 songLibrary.addItem(key, musicFile, musicDuration, musicDuplicate)
 
         except (Exception) as error:
@@ -204,6 +238,9 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                     with {nonMusic} non music files.", duplicateFile)
     else:
         logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
+
+    if falsePos:
+        logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
 ############################################################################################## parseArgs ######
 def parseArgs():
@@ -291,9 +328,8 @@ if __name__ == "__main__":
     logger      = myLogger.get_logger(myConfig.NAME() + ".log")   # Create the logger.
     phonetic    = Soundex()
 
-    logger.info("-"*50)
+    logger.info("-"*100)
     logger.info(f"Start of {myConfig.NAME()} {myConfig.VERSION()}")
-    logger.info(f"Extracting tags using {myConfig.TAGS()}")
 
     sourceDir, duplicateFile, noLoad, noSave, build, difference = parseArgs()
 
@@ -303,9 +339,11 @@ if __name__ == "__main__":
     logger.debug(f"Storing database at {DBname}")
 
     if myConfig.SOUNDEX():
-        logger.debug("Using Soundex for TAGS matching")
+        logger.debug(f"Using Soundex for {myConfig.TAGS()} matching")
+        mode = f"Using Soundex for {myConfig.TAGS()} matching"
     else:
-        logger.debug("Using Strings for TAGS matching")
+        logger.debug(f"Using Strings for {myConfig.TAGS()} matching")
+        mode = f"Using Strings for {myConfig.TAGS()} matching"
 
     if noLoad or build:
         logger.debug("Not Loading database")
@@ -316,12 +354,12 @@ if __name__ == "__main__":
     elapsedTimeSecs  = time.time()  - startTime
 
     if build:
-        logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds", duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
+        logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile)
+        logTextLine(f"... with a song count of {songsCount} in {datetime.timedelta(seconds = elapsedTimeSecs)}",   duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         scanMusic("build", sourceDir, duplicateFile, difference, songsCount)
     else:
-        logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds", duplicateFile)
+        logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
         logTextLine(f"... with a song count of {songsCount} in {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         scanMusic("scan", sourceDir, duplicateFile, difference, songsCount)
@@ -333,7 +371,7 @@ if __name__ == "__main__":
 
     logTextLine("", duplicateFile)
     elapsedTimeSecs  = time.time()  - startTime
-    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} :: using {myConfig.TAGS()}", duplicateFile)
+    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
     logTextLine("", duplicateFile)
 
     logger.info(f"End of {myConfig.NAME()} {myConfig.VERSION()}")

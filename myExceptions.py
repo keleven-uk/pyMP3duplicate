@@ -1,8 +1,9 @@
 ###############################################################################################################
-#    myLogger.py   Kevin Scott     2020                                                                       #
+#    myExceptions.py    Copyright (C) <2020>  <Kevin Scott>                                                   #
 #                                                                                                             #
-#    A Wrapper for logging - based on https://www.toptal.com/python/in-depth-python-logging                   #
+#    A class that raises a custom exception.                                                                  #
 #                                                                                                             #
+###############################################################################################################
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
@@ -19,36 +20,16 @@
 #                                                                                                             #
 ###############################################################################################################
 
-"""
-    usage:
-        logger = myLogger.get_logger(myConfig.NAME() + ".log")
 
-    to write to log - log.debug(text message) [also can use log, error, info, warning, critical & exception]
+class TagReadError(Exception):
+    def __init__(self, *args):
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
 
-    can add exc_info=True to include exception information, not needed with log.exception
-"""
-
-import logging
-from logging.handlers import TimedRotatingFileHandler
-
-
-FORMATTER = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s")
-                                                                 # Could add if needed - %(funcName)s:%(lineno)d
-def get_console_handler():
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(FORMATTER)
-    return console_handler
-
-def get_file_handler(logger_name):
-    file_handler = TimedRotatingFileHandler(logger_name, when="midnight", backupCount=7)  # Only keep 7 previous logs.
-    file_handler.setFormatter(FORMATTER)
-    return file_handler
-
-def get_logger(logger_name):
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)              # better to have too much log than not enough
-    #logger.addHandler(get_console_handler())   # add to log to console
-    logger.addHandler(get_file_handler(logger_name))
-    # with this pattern, it's rarely necessary to propagate the error up to parent
-    logger.propagate = False
-    return logger
+    def __str__(self):
+        if self.message:
+            return 'TagReadError, {0} '.format(self.message)
+        else:
+            return 'TagReadError has been raised'

@@ -1,9 +1,9 @@
 ###############################################################################################################
-#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
+#    myConfig.py    Copyright (C) <2020>  <Kevin Scott>                                                       #
 #                                                                                                             #
-#  A class that acts has a wrapper around the config file - config.toml.                                      #
-#  The config file is first read, then the properties are made available.                                     #
-#  The config file is currently in toml format.
+#    A class that acts has a wrapper around the config file - config.toml.                                    #
+#    The config file is first read, then the properties are made available.                                   #
+#    The config file is currently in toml format.                                                             #
 #                                                                                                             #
 ###############################################################################################################
 ###############################################################################################################
@@ -93,7 +93,7 @@ class Config():
 
     def DB_NAME(self):
         """  Returns the location and filename of the database.
-             if location is empty will just filename, so save next to main script.
+             if location is empty will use just filename, so save next to main script.
         """
         location = self.config['DATABASE']['location']
 

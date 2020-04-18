@@ -10,7 +10,7 @@ title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = '1.1.4'
+myVERSION = '1.1.5'
 myNAME    = 'pyMP3duplicate'
 
 [TQDM]
@@ -19,9 +19,9 @@ ncols = 160     # Width of progress bar, should be equal or smaller then width o
 [TAGS]
 module  = 'tinytag'         # Can be either tinytag, mutagen or eyed3
 ignore  = '**IGNORE**'      # if both duplicate have this in comment, then ignore
-soundex = true              # if true, there Soundex algorithm will be used for matching of tags
+soundex = true           # if true, there Soundex algorithm will be used for matching of tags
                             # if false, tags will be matched as normal strings.
 
 [DATABASE]
-filename = 'dup1.pickle'
+filename = 'dup.pickle'
 location = ''               # if location is empty will just filename, so save next to main script.
