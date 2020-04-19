@@ -3,7 +3,7 @@
 #                                                                                                             #
 #    A class that acts has a wrapper around a dictionary access.                                              #
 #    The items to store are song files,                                                                       #
-#      The key is iether made up of {song.artist}:{tag.title}                                                 #
+#      The key is either made up of {song.artist}:{tag.title}                                                 #
 #        or soundex({song.artist}:{tag.title})                                                                #
 #        or any unique token generated from the song.                                                         #
 #      The data is a list [songFile, songDuration, ignore flag]                                               #
@@ -26,20 +26,22 @@
 ###############################################################################################################
 
 import os
+import time
 import pickle
-
+import datetime
 
 class Library():
     """  A simple class that wraps the library dictionary.
 
          usage:
-             songLibrary = myLibrary.Library()
+         songLibrary = myLibrary.Library()
 
          to add an item              - songLibrary.addItem(key, musicFile, musicDuration)
-         to retrieve an item         - songFile, songDuration = songLibrary.getItem(key)
+         to retrieve an item         - songFile, songDuration, songDuplicate = songLibrary.getItem(key)
          to test for key             - if songLibrary.hasKey(key):
          to return number of items   - l = songLibrary.noOfItems()
-
+         to test database integrity  - songLibrary.check("test")
+         to prune database           - songLibrary.check("delete")
          to load items - songLibrary.load(filename) : this loads using pickle (located at filename).
          to save items - songLibrary.save(filename) : this saves using pickle (located at filename).
 
@@ -56,8 +58,8 @@ class Library():
 
     def addItem(self, key, item1, item2, item3):
         """  Adds to the library at point key, added is a list of items.
-             item1 is song duration.
-             item2 is song path.
+             item1 is song path.
+             item2 is song duration.
              item3 is song ignore flag.
         """
         self.library[key] = [item1, item2, item3]
@@ -67,9 +69,15 @@ class Library():
         """
         return self.library[key]
 
-    def noOfItems(self):
+    def delItem(self, key):
+        """  Deletes item at position key from the library.
+        """
+        del self.library[key]
+
+    def noOfItems(self, filename):
         """  Return the number of entries in the library
         """
+        self.load(filename)
         return len(self.library)
 
     def save(self, filename):
@@ -84,3 +92,31 @@ class Library():
         if os.path.isfile(filename):
             with open(filename, "rb") as f:
                 self.library = pickle.load(f)
+
+    def check(self, filename, mode):
+        """  Runs a database data integrity check.
+        """
+        startTime = time.time()
+        deletions = 0
+        print(f"Running database integrity check on {filename} in {mode} mode")
+
+        print(f"Loading {filename}")
+        self.load(filename)
+
+        for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
+            path, duration, ignore = self.getItem(song)
+            if not path.exists():
+                if mode == "delete":
+                    self.delItem(song)
+                    print(f"Deleting {path}")
+                    deletions += 1
+                else:
+                    print(f"Song does not exist {path}")
+
+        elapsedTimeSecs  = time.time()  - startTime
+        if deletions:
+            print(f"Saving {filename}")
+            self.save(filename)
+            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {deletions} entries from database.")
+        else:
+            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")

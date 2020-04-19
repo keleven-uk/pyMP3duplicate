@@ -1,18 +1,29 @@
-V1.1.5
+V2020.16
+
+    Changed format of version number - now is year.build number.7 digit git commit ID
+    Added a data integrity check for the database[Song Library].
+      With a delete option that will prune the database.
+    Added a method the delete a library entry.  This a private method.
+    Added an command line option to call the data integrity check.
+
+
+V2020.15.b7a2f28
 
     Added custom exception, held in myException.py, which is raised when the tag read has failed.
-    Added a check for fale positives when matching the tags using Soundex.
-      A count of sutch will be displayed at the end of the run.
+    Added a check for false positives when matching the tags using Soundex.
+      A count of such will be displayed at the end of the run.
     Added to the removeThe function to return "" if name is blank.
-      i.e. the artist ot title tag is blank or failed to read.
-V1.1.4
+      i.e. the artist or title tag is blank or failed to read.
+
+
+V2020.14.4c4fd39
 
     Added the ability to match the song artist / title using the Soundex algorithm, to add a sort of
     fuzzy matching.  Also, the matching is done with lower case strings.
       i.e Led Zeppelin should match Led Zeplin.
 
 
-V1.1.3
+V2020.13.e2d3a0f
 
     Added two new config options name and locations of the database, used in loading and saving.
     If the config file is absent, or can't be read, a default one is created and used.
@@ -21,13 +32,13 @@ V1.1.3
     Added the ability to amend to previous duplicate text file or create a new one.
 
 
-V1.1.2
+V2020.12.8f4d74e
 
     Added requirments.txt - to install dependences pip -r requirments.txt.
     Added ignore song count, if not using mutagen.
 
 
-V1.1.1
+V2020.11.b4ee2ae
 
     Added the ability to read the mp3 tags using mutagen.
     Added the ability to ignore certain duplicates files, these may be files with the same
@@ -42,7 +53,7 @@ V1.1.1
       Mutagen is the slowest, needs to read the song twice - about five time slower then Tinytag.
 
 
-V1.1.0
+V2020.10.43df053
 
     Added the ability to use different modules to read the mp3 tags.
       Currently tinytag & eyed3 are supported.  [eyed3 could be used to write tags]
@@ -50,13 +61,7 @@ V1.1.0
       Alterations to pyMP3Duplicate.py by above [added method scanTags].
 
 
-V1.0.9
-
-    Amended the option -v, print the version.  This is now handled the same -l for license.
-    The short version of licence is also not printed with the version info.
-
-
-V1.0.8
+V2020.9.b6dee92
 
     Added tqdm - a very cool progress bar for console windows.
       Both countSongs and scannMusic loop now display a progress bar.
@@ -66,7 +71,7 @@ V1.0.8
       not now needed with progress bar.
 
 
-V1.0.7
+V2020.8.91ee2f4
 
     Added two new files.
       myLibrary - a wrapper around dictionary access, used to store song stuff.
@@ -74,7 +79,7 @@ V1.0.7
     Alterations to pyMP3Duplicate.py by above.
 
 
-V1.0.6
+V2020.7.a971b19
 
     Added a toml config file and a wrapper class in myConfig.py.
       The config only holds contents of _version.py i.e.
@@ -86,7 +91,7 @@ V1.0.6
       Almost identical except for the test for duplicates.
 
 
-V1.0.5
+V2020.6.68a5941
 
     Changed main loop in scanMusic to os.walk from glob.
       Using os.walk seems faster but only just slightly.
@@ -94,7 +99,7 @@ V1.0.5
     Some code clean up.
 
 
-V1.0.4
+V2020.5.4e0b3d8
 
     Added an argument to get the time difference, defaults to 0.5s.
     Getting error when writing some paths to the duplicate file,
@@ -104,7 +109,7 @@ V1.0.4
       Changed the name of the method addKey to addItem.
 
 
-V1.0.3
+V2020.4.7215ad0
 
     Getting strange errors when trying to print song paths, they where of
       type pathlib.path, now they are all cast to str.
@@ -112,13 +117,14 @@ V1.0.3
       before doing comparisons.
 
 
-V1.0.2
+V2020.3.66f1e24
 
     Added an argument to not load the database.
     Added an argument to not save the database.
     Added an argument to build the database only.
 
-V1.0.1
+
+V2020.2.29b90d8
 
     Added methods to save and load the songLibrary - pickles a directory.
     Added an argument to print the number of songs.
@@ -126,7 +132,7 @@ V1.0.1
     Added an argument to not load database on start. i.e. create new one.
 
 
-V1.0.0
+V2020.1.299bd44
 
     basic program completed.
     The program will scan a given directory and report duplicate MP3 files.

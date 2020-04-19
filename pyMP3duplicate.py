@@ -208,7 +208,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                 if mode == "build":  # Only building database - do not check for duplicates.
                     continue
 
-                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+                exi = songLibrary.getItem(key)
 
                 if abs(musicDuration - songDuration) < difference:
                     if myConfig.TAGS() == "mutagen":  # Using mutagen, we should check for ignore flag
@@ -268,12 +268,14 @@ def parseArgs():
         type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file, Amend to previous.")
     parser.add_argument("-d",  "--difference",
         type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
-    parser.add_argument("-xL", "--noLoad",  action="store_true" , help="Do not load database.")
-    parser.add_argument("-xS", "--noSave",  action="store_true" , help="Do not save database.")
-    parser.add_argument("-b",  "--build",   action="store_true" , help="Build the database only.")
-    parser.add_argument("-n",  "--number",  action="store_true" , help="Print the Number of Songs in the database.")
-    parser.add_argument("-l",  "--license", action="store_true" , help="Print the Software License.")
-    parser.add_argument("-v",  "--version", action="store_true" , help="print the version of the application.")
+    parser.add_argument("-xL", "--noLoad",         action="store_true" , help="Do not load database.")
+    parser.add_argument("-xS", "--noSave",         action="store_true" , help="Do not save database.")
+    parser.add_argument("-c",  "--check",          action="store_true" , help="Check database integrity.")
+    parser.add_argument("-cD",  "--checkDelete",   action="store_true" , help="Check database integrity and delete unwanted.")
+    parser.add_argument("-b",  "--build",          action="store_true" , help="Build the database only.")
+    parser.add_argument("-n",  "--number",         action="store_true" , help="Print the Number of Songs in the database.")
+    parser.add_argument("-l",  "--license",        action="store_true" , help="Print the Software License.")
+    parser.add_argument("-v",  "--version",        action="store_true" , help="print the version of the application.")
 
     args = parser.parse_args()
 
@@ -282,30 +284,29 @@ def parseArgs():
         logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()}: version")
         exit(0)
 
-    if args.number:
-        songLibrary.load()
-        l = songLibrary.noOfItems()
-        printShortLicense(myConfig.NAME(), myConfig.VERSION(), "", False)
-        print(f"Song Library has {l} songs")
-        logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Song Library has {l} songs")
-        exit(0)
-
     if args.license:
         printLongLicense(myConfig.NAME(), myConfig.VERSION())
         logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Printed Licence")
         exit(0)
 
-    if not args.sourceDir or not args.sourceDir.exists():
+    if not args.sourceDir and not (args.check or args.checkDelete or args.number):
         logger.error("No Source Directory Supplied.")
         print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
         parser.print_help()
         exit(1)
 
-    if not args.sourceDir or not args.sourceDir.exists():
+    if args.sourceDir and not args.sourceDir.exists():      # Only check source dir exits if one was entered.
         logger.error("Source Directory Does Not Exist.")
         print(f"{colorama.Fore.RED}Source Directory Does Not Exist. {colorama.Fore.RESET}")
         parser.print_help()
         exit(2)
+
+    if args.check:
+        check = "test"
+    elif args.checkDelete:
+        check = "delete"
+    else:
+        check = ""
 
     if args.dupFile:                                            # Delete duplicate file if it exists.
         try:
@@ -316,7 +317,29 @@ def parseArgs():
     else:                                                       # Amend to previous duplicate file, if it exists.
         dfile = args.dupFileAmend
 
-    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference)
+    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number, check)
+
+################################################################################### printNumberOfSougs() ######
+def printNumberOfSougs(DBname):
+    """  Print the number of songs in the library.
+    """
+    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, False)
+    l = songLibrary.noOfItems(DBname)
+    print(f"Song Library has {l} songs")
+    logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Song Library has {l} songs")
+    exit(0)
+
+######################################################################################## checkDatabase() ######
+def checkDatabase(DBname, check):
+    """  Perform a data integrity check on the library.
+
+          if check == test then just report errors.
+          if check == delete then report errors and delete entries.
+    """
+    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, False)
+    logger.info("Running database integrity check")
+    songLibrary.check(DBname, check)
+    exit(3)
 
 ############################################################################################### __main__ ######
 
@@ -331,12 +354,15 @@ if __name__ == "__main__":
     logger.info("-"*100)
     logger.info(f"Start of {myConfig.NAME()} {myConfig.VERSION()}")
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference = parseArgs()
-
-    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, True)
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check = parseArgs()
 
     DBname = myConfig.DB_NAME()
     logger.debug(f"Storing database at {DBname}")
+
+    if number: printNumberOfSougs(DBname)       # Print on number of songs in library.
+    if check:  checkDatabase(DBname, check)     # Run data integrity check on library.
+
+    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, True)
 
     if myConfig.SOUNDEX():
         logger.debug(f"Using Soundex for {myConfig.TAGS()} matching")

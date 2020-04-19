@@ -10,7 +10,7 @@ title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = '1.1.5'
+myVERSION = 'V2020.15'
 myNAME    = 'pyMP3duplicate'
 
 [TQDM]
