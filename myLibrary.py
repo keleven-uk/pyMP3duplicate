@@ -25,7 +25,6 @@
 #                                                                                                             #
 ###############################################################################################################
 
-import os
 import time
 import pickle
 import datetime
@@ -89,7 +88,7 @@ class Library():
     def load(self, filename):
         """  Loads the library from disc - currently uses pickle.
         """
-        if os.path.isfile(filename):
+        if filename.exists():
             with open(filename, "rb") as f:
                 self.library = pickle.load(f)
 
@@ -97,11 +96,15 @@ class Library():
         """  Runs a database data integrity check.
         """
         startTime = time.time()
-        deletions = 0
+        duplicates = 0
+        removed    = 0
         print(f"Running database integrity check on {filename} in {mode} mode")
 
         print(f"Loading {filename}")
         self.load(filename)
+
+        l = self.noOfItems(filename)
+        print(f"Song Library has {l} songs")
 
         for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
             path, duration, ignore = self.getItem(song)
@@ -109,14 +112,21 @@ class Library():
                 if mode == "delete":
                     self.delItem(song)
                     print(f"Deleting {path}")
-                    deletions += 1
+                    removed += 1
                 else:
+                    duplicates += 1
                     print(f"Song does not exist {path}")
 
-        elapsedTimeSecs  = time.time()  - startTime
-        if deletions:
+        elapsedTimeSecs = time.time() - startTime
+
+        if removed:
             print(f"Saving {filename}")
             self.save(filename)
-            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {deletions} entries from database.")
+            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.")
+            l = self.noOfItems(filename)
+            print(f"Song Library has now {l} songs")
         else:
-            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")
+            if duplicates:
+                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {duplicates} duplicats songs.")
+            else:
+                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")

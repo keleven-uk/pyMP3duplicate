@@ -22,10 +22,8 @@
 #                                                                                                             #
 ###############################################################################################################
 
-import os
 import toml
 import colorama
-
 
 class Config():
     """  A class that acts has a wrapper around the config file - config.toml.
@@ -45,7 +43,8 @@ class Config():
 
     def __init__(self):
         try:
-            self.config = toml.load(self.FILE_NAME)      # Load the config file, in toml
+            with open(self.FILE_NAME, "r") as fn:       # In context manager.
+                self.config = toml.load(fn)             # Load the config file, in toml.
         except FileNotFoundError:
             print(f"{colorama.Fore.RED}Config not found. {colorama.Fore.RESET}")
             print(f"{colorama.Fore.YELLOW}Writing default config file. {colorama.Fore.RESET}")
@@ -96,11 +95,12 @@ class Config():
              if location is empty will use just filename, so save next to main script.
         """
         location = self.config['DATABASE']['location']
+        filename = self.config['DATABASE']['filename']
 
-        if not location:
-            return self.config['DATABASE']['filename']
+        if location:
+            return f"{location}\{filename}"
         else:
-            return f"{location}\{self.config['DATABASE']['filename']}"
+            return filename
 
 
     def writeDefaultConfig(self):
@@ -123,8 +123,8 @@ class Config():
 
         st_toml = toml.dumps(config)
 
-        with open(self.FILE_NAME, "w") as configFile:
-            configFile.writelines(st_toml)
+        with open(self.FILE_NAME, "w") as configFile:       # In context manager.
+            configFile.writelines(st_toml)                  # Write config file.
 
-
-        self.config = toml.load(self.FILE_NAME)      # Load the config file, in toml
+        with open(self.FILE_NAME, "r") as fn:               # In context manager.
+            self.config = toml.load(self.fn)                # Load the config file, in toml.

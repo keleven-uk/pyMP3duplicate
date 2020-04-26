@@ -28,7 +28,6 @@ import os
 import sys
 import time
 import eyed3
-import pathlib
 import textwrap
 import datetime
 import argparse
@@ -37,6 +36,7 @@ import myConfig
 import myLogger
 import myLibrary
 from tqdm import tqdm
+from pathlib import Path
 from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
@@ -49,7 +49,6 @@ def checktags(musicFile, songFile):
     """  Used to check if the Soundex algorithm has returned a false positive.
          Returns true if the artist and title of the two songs are the same.
     """
-
     try:                                    # Tries to read tags from the music file.
         tags = TinyTag.get(musicFile)
     except (Exception) as error:           # Can't read tags - log as error.
@@ -81,16 +80,14 @@ def createKey(artist, title):
     """ Creates the key from the artist and title.
         key is either formed from string substitution or created from the soundex of the string.
     """
-    artist = artist.lower()
-    title  = title.lower()
     return (phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX() else f"{artist}:{title}")
 
 ####################################################################################### removeThe #############
 def removeThe(name):
     """  Removes 'the' from the from the beginning of artist and title if present.
          Mainly a problem with artist, to be honest.
+         name is returned lower case.
     """
-
     if name:
         n = name.lower()
         return (name[4:] if n.startswith("the") else name)
@@ -188,11 +185,11 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         if musicFile.is_dir(): continue     # ignore directories.
 
-        if not str(musicFile).endswith(".mp3"):                 # A non music file found.
-            if str(musicFile).endswith(".pickle"): continue     # Ignore database if stored in target directory.
+        if not musicFile.suffix == ".mp3":                 # A non music file found.
+            if musicFile.suffix == ".pickle": continue     # Ignore database if stored in target directory.
             if mode == "scan":
                 logTextLine("-"*80 + "Non Music File Found" + "-"*40, duplicateFile)
-                logTextLine(f"{str(musicFile)} is not a music file",  duplicateFile)
+                logTextLine(f"{musicFile} is not a music file",  duplicateFile)
                 nonMusic += 1
             continue        # continue with next file.
 
@@ -208,7 +205,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                 if mode == "build":  # Only building database - do not check for duplicates.
                     continue
 
-                exi = songLibrary.getItem(key)
+                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
                 if abs(musicDuration - songDuration) < difference:
                     if myConfig.TAGS() == "mutagen":  # Using mutagen, we should check for ignore flag
@@ -219,15 +216,15 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                     if myConfig.SOUNDEX() and not checktags(musicFile, songFile):
                         logTextLine("*"*80 + "Possible False Positive" + "*"*32, duplicateFile)
                         falsePos += 1
-                    logTextLine(f"{str(musicFile)} {musicDuration:.2f}", duplicateFile)
-                    logTextLine(f"{str(songFile)}  {songDuration:.2f}", duplicateFile)
+                    logTextLine(f"{musicFile} {musicDuration:.2f}", duplicateFile)
+                    logTextLine(f"{songFile}  {songDuration:.2f}", duplicateFile)
                     duplicates += 1
 
             else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
                 songLibrary.addItem(key, musicFile, musicDuration, musicDuplicate)
 
         except (Exception) as error:
-            logger.error(f"ERROR : {str(musicFile)} :: {error}", exc_info=True)
+            logger.error(f"ERROR : {musicFile} :: {error}", exc_info=True)
 
     logTextLine("", duplicateFile)
     if nonMusic and ignored:
@@ -258,14 +255,14 @@ def parseArgs():
         A Python MP3 Duplicate finder.
         -----------------------
         The program will scan a given directory and report duplicate MP3 files."""),
-        epilog = f" Kevin Scott (C) 2020 :: {myConfig.NAME()} V{myConfig.VERSION()}")
+        epilog = f" Kevin Scott (C) 2020 :: {myConfig.NAME()} {myConfig.VERSION()}")
 
     parser.add_argument("-s",  "--sourceDir",
-        type=pathlib.Path, action="store", default=False, help="directory of the music files [mp3].")
+        type=Path, action="store", default=False, help="directory of the music files [mp3].")
     parser.add_argument("-f",  "--dupFile",
-        type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file, start afresh.")
+        type=Path, action="store", default=False, help="[Optional] list duplicates to file, start afresh.")
     parser.add_argument("-fA",  "--dupFileAmend",
-        type=pathlib.Path, action="store", default=False, help="[Optional] list duplicates to file, Amend to previous.")
+        type=Path, action="store", default=False, help="[Optional] list duplicates to file, Amend to previous.")
     parser.add_argument("-d",  "--difference",
         type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
     parser.add_argument("-xL", "--noLoad",         action="store_true" , help="Do not load database.")
@@ -319,8 +316,8 @@ def parseArgs():
 
     return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number, check)
 
-################################################################################### printNumberOfSougs() ######
-def printNumberOfSougs(DBname):
+################################################################################### printNumberOfSongs() ######
+def printNumberOfSongs(DBname):
     """  Print the number of songs in the library.
     """
     printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, False)
@@ -356,13 +353,14 @@ if __name__ == "__main__":
 
     sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check = parseArgs()
 
-    DBname = myConfig.DB_NAME()
+    DBname = Path(myConfig.DB_NAME())
     logger.debug(f"Storing database at {DBname}")
 
-    if number: printNumberOfSougs(DBname)       # Print on number of songs in library.
+    if number: printNumberOfSongs(DBname)       # Print on number of songs in library.
     if check:  checkDatabase(DBname, check)     # Run data integrity check on library.
 
-    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, True)
+    flag = (True if duplicateFile else False)   # If no duplicateFile the print to screen.
+    printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, flag)
 
     if myConfig.SOUNDEX():
         logger.debug(f"Using Soundex for {myConfig.TAGS()} matching")

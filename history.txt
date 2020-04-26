@@ -1,3 +1,16 @@
+V2020.l7
+
+    In myConfig.py -
+      Wrapped the loading and saving of the config file in a context manager.
+    In myLibrary.py -
+      Handled filename using pathlib i.e. used path exists instead of os.path.isfile().
+      Also added count of deleted songs.
+    In pyMP3duplicate.py -
+      Used pathlib suffix instead of cating path to string and using endswith.
+      Also used path name instead of casting to string in print statements.
+      Corrected bug in calling of printNumberOfSongs()
+
+
 V2020.16
 
     Changed format of version number - now is year.build number.7 digit git commit ID
