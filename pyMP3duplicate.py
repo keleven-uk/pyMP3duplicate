@@ -187,6 +187,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         if not musicFile.suffix == ".mp3":                 # A non music file found.
             if musicFile.suffix == ".pickle": continue     # Ignore database if stored in target directory.
+            if musicFile.suffix == ".json"  : continue     # Ignore database if stored in target directory.
             if mode == "scan":
                 logTextLine("-"*80 + "Non Music File Found" + "-"*40, duplicateFile)
                 logTextLine(f"{musicFile} is not a music file",  duplicateFile)
@@ -195,6 +196,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
         try:
             count += 1
+
             try:
                 key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
             except (Exception) as error:
@@ -221,7 +223,12 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                     duplicates += 1
 
             else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
-                songLibrary.addItem(key, musicFile, musicDuration, musicDuplicate)
+                songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
+                l = songLibrary.noOfItems(DBname, myConfig.DB_FORMAT())
+
+                if count != l:
+                    logger.error(f"{count}::{l}::{musicFile}")
+                    logger.error(f"{key}::{musicDuration}::{musicDuplicate}")
 
         except (Exception) as error:
             logger.error(f"ERROR : {musicFile} :: {error}", exc_info=True)
@@ -317,17 +324,17 @@ def parseArgs():
     return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number, check)
 
 ################################################################################### printNumberOfSongs() ######
-def printNumberOfSongs(DBname):
+def printNumberOfSongs(DBname, DBformat):
     """  Print the number of songs in the library.
     """
     printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, False)
-    l = songLibrary.noOfItems(DBname)
+    l = songLibrary.noOfItems(DBname, DBformat)
     print(f"Song Library has {l} songs")
     logger.info(f"End of {myConfig.NAME()} V{myConfig.VERSION()} : Song Library has {l} songs")
     exit(0)
 
 ######################################################################################## checkDatabase() ######
-def checkDatabase(DBname, check):
+def checkDatabase(DBname, check, DBformat):
     """  Perform a data integrity check on the library.
 
           if check == test then just report errors.
@@ -335,7 +342,7 @@ def checkDatabase(DBname, check):
     """
     printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, False)
     logger.info("Running database integrity check")
-    songLibrary.check(DBname, check)
+    songLibrary.check(DBname, check, DBformat)
     exit(3)
 
 ############################################################################################### __main__ ######
@@ -353,11 +360,12 @@ if __name__ == "__main__":
 
     sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check = parseArgs()
 
-    DBname = Path(myConfig.DB_NAME())
-    logger.debug(f"Storing database at {DBname}")
+    DBname   = Path(myConfig.DB_NAME())
+    DBformat = myConfig.DB_FORMAT()
+    logger.debug(f"Storing database at {DBname} in {myConfig.DB_FORMAT()} format")
 
-    if number: printNumberOfSongs(DBname)       # Print on number of songs in library.
-    if check:  checkDatabase(DBname, check)     # Run data integrity check on library.
+    if number: printNumberOfSongs(DBname, DBformat)       # Print on number of songs in library.
+    if check:  checkDatabase(DBname, check, DBformat)     # Run data integrity check on library.
 
     flag = (True if duplicateFile else False)   # If no duplicateFile the print to screen.
     printShortLicense(myConfig.NAME(), myConfig.VERSION(), duplicateFile, flag)
@@ -372,7 +380,7 @@ if __name__ == "__main__":
     if noLoad or build:
         logger.debug("Not Loading database")
     else:
-        songLibrary.load(DBname)
+        songLibrary.load(DBname, DBformat)
 
     songsCount = countSongs(sourceDir)
     elapsedTimeSecs  = time.time()  - startTime
@@ -391,7 +399,7 @@ if __name__ == "__main__":
     if noSave:
         logger.debug("Not Saving database")
     else:
-        songLibrary.save(DBname)
+        songLibrary.save(DBname, DBformat)
 
     logTextLine("", duplicateFile)
     elapsedTimeSecs  = time.time()  - startTime

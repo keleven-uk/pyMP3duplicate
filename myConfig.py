@@ -90,18 +90,28 @@ class Config():
         """
         return self.config['TAGS']['soundex']
 
+    def DB_FORMAT(self):
+        """  Returns the format of the song library - either pickle or json.
+        """
+        format = self.config['DATABASE']['format']
+        
+        if format == "json":
+            return "json"
+        else:
+            return "pickle"
+
     def DB_NAME(self):
         """  Returns the location and filename of the database.
              if location is empty will use just filename, so save next to main script.
         """
-        location = self.config['DATABASE']['location']
-        filename = self.config['DATABASE']['filename']
+        location  = self.config['DATABASE']['location']
+        filename  = self.config['DATABASE']['filename']
+        extension = self.config['DATABASE']['format']
 
         if location:
-            return f"{location}\{filename}"
+            return f"{location}\{filename}.{extension}"
         else:
-            return filename
-
+            return f"{filename}.{extension}"
 
     def writeDefaultConfig(self):
         """ Write a default config file.

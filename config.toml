@@ -2,15 +2,16 @@
 #
 #   Use single quotes :-(
 #   true and false are lower case.
+#   location needs double \ i.e. c:\\tmp\\music - well, on windows any way.
 #
 #   March 2020   Kevin Scott
-
+#
 
 title = 'pyMP3duplicates config file'
 
 # version information
 [INFO]
-myVERSION = 'V2020.17'
+myVERSION = 'V2020.18'
 myNAME    = 'pyMP3duplicate'
 
 [TQDM]
@@ -19,9 +20,10 @@ ncols = 160     # Width of progress bar, should be equal or smaller then width o
 [TAGS]
 module  = 'tinytag'         # Can be either tinytag, mutagen or eyed3
 ignore  = '**IGNORE**'      # if both duplicate have this in comment, then ignore
-soundex = true           # if true, there Soundex algorithm will be used for matching of tags
+soundex = false           # if true, there Soundex algorithm will be used for matching of tags
                             # if false, tags will be matched as normal strings.
 
 [DATABASE]
-filename = 'dup.pickle'
-location = ''               # if location is empty will just filename, so save next to main script.
+format   = 'pickle'                     # format of song library - either pickle or json.
+filename = 'dup'                           # The file name of file, the extension is taken from the format.
+location = 'c:\\tmp\\check1'               # if location is empty will just filename, so save next to main script.

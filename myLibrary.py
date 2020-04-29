@@ -8,6 +8,7 @@
 #        or any unique token generated from the song.                                                         #
 #      The data is a list [songFile, songDuration, ignore flag]                                               #
 #                                                                                                             #
+#                                                                                                             #
 ###############################################################################################################
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
@@ -26,8 +27,11 @@
 ###############################################################################################################
 
 import time
+import json
 import pickle
+import pprint
 import datetime
+import pathlib
 
 class Library():
     """  A simple class that wraps the library dictionary.
@@ -73,26 +77,30 @@ class Library():
         """
         del self.library[key]
 
-    def noOfItems(self, filename):
+    def noOfItems(self, filename, format):
         """  Return the number of entries in the library
         """
-        self.load(filename)
+        if not self.library:
+            self.load(filename, format)
         return len(self.library)
 
-    def save(self, filename):
-        """  Save the library to disc - currently uses pickle.
+    def save(self, filename, format):
+        """  Save the library to disc.
         """
-        with open(filename, "wb") as f:
-            pickle.dump(self.library, f)
+        if format == "pickle":
+            self.pickleSave(filename)
+        else:
+            self.jsonSave(filename)
 
-    def load(self, filename):
-        """  Loads the library from disc - currently uses pickle.
+    def load(self, filename, format):
+        """  Loads the library from disc.
         """
-        if filename.exists():
-            with open(filename, "rb") as f:
-                self.library = pickle.load(f)
+        if format == "pickle":
+            self.pickleLoad(filename)
+        else:
+            self.jsonLoad(filename)
 
-    def check(self, filename, mode):
+    def check(self, filename, mode, format):
         """  Runs a database data integrity check.
         """
         startTime = time.time()
@@ -101,9 +109,9 @@ class Library():
         print(f"Running database integrity check on {filename} in {mode} mode")
 
         print(f"Loading {filename}")
-        self.load(filename)
+        self.load(filename, format)
 
-        l = self.noOfItems(filename)
+        l = self.noOfItems(filename, format)
         print(f"Song Library has {l} songs")
 
         for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
@@ -121,12 +129,48 @@ class Library():
 
         if removed:
             print(f"Saving {filename}")
-            self.save(filename)
+            self.save(filename, format)
             print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.")
-            l = self.noOfItems(filename)
+            l = self.noOfItems(filename, format)
             print(f"Song Library has now {l} songs")
         else:
             if duplicates:
-                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {duplicates} duplicats songs.")
+                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {duplicates} duplicates songs.")
             else:
                 print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")
+
+
+#------------- pickle load and save. ------------------
+    def pickleLoad(self, filename):
+        """  Load the song library in pickle format.
+        """
+        if filename.exists():
+            with open(filename, "rb") as f:
+                self.library = pickle.load(f)
+
+    def pickleSave(self, filename):
+        """  Save the song library in pickle format.
+        """
+        with open(filename, "wb") as f:
+            try:
+                pickle.dump(self.library, f)
+            except FileNotFoundError:
+                print("ERROR :: Cannot find library file.")
+#------------- json load and save. ------------------
+    def jsonLoad(self, filename):
+        """  Load the song library in json format.
+        """
+        if filename.exists():
+            with open(filename, "r") as json_file:
+                self.library = json.load(json_file)
+
+    def jsonSave(self, filename):
+        """  Save the song library in json format.
+        """
+
+        print(f"{filename}")
+        with open(filename, "w") as json_file:
+            try:
+                json.dump(self.library, json_file)
+            except FileNotFoundError:
+                print("ERROR :: Cannot find library file.")
