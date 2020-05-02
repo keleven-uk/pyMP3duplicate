@@ -1,3 +1,19 @@
+V2020.19
+
+    In myconfig.py -
+        Added exception toml.TomlDecodeErrror or load routine.
+        Made all methods read only propertys.
+        Added a header to the writeDefaultConfig methond.
+    In myLibrary.py -
+        The library filename and format is now passed to class on initialation.
+        The means this information does not have to be passed to each method.
+        noOfItems methon is now a property.
+        Bugs fixed in check, load & save methods.
+    In pyMP3duplicates.py -
+        Changes to call class methods as propertys.
+        Build mode should now work [I Think].
+
+
 V2020.18
 
     Added config option to either save song library in pickle or json format.

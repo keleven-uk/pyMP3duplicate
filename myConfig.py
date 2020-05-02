@@ -1,9 +1,9 @@
 ###############################################################################################################
 #    myConfig.py    Copyright (C) <2020>  <Kevin Scott>                                                       #
 #                                                                                                             #
-#    A class that acts has a wrapper around the config file - config.toml.                                    #
-#    The config file is first read, then the properties are made available.                                   #
-#    The config file is currently in toml format.                                                             #
+#    A class that acts has a wrapper around the configure file - config.toml.                                 #
+#    The configure file is first read, then the properties are made available.                                #
+#    The configure file is currently in toml format.                                                          #
 #                                                                                                             #
 ###############################################################################################################
 ###############################################################################################################
@@ -26,11 +26,11 @@ import toml
 import colorama
 
 class Config():
-    """  A class that acts has a wrapper around the config file - config.toml.
-         The config file is hard coded and lives in the save directory has the main script.
-         The config file is first read, then the properties are made available.
+    """  A class that acts has a wrapper around the configure file - config.toml.
+         The configure file is hard coded and lives in the save directory has the main script.
+         The configure file is first read, then the properties are made available.
 
-         If config.toml is not found, a default config file is generated.
+         If config.toml is not found, a default configure file is generated.
 
          Use single quotes :-(
 
@@ -43,29 +43,38 @@ class Config():
 
     def __init__(self):
         try:
-            with open(self.FILE_NAME, "r") as fn:       # In context manager.
-                self.config = toml.load(fn)             # Load the config file, in toml.
+            with open(self.FILE_NAME, "r") as configFile:       # In context manager.
+                self.config = toml.load(configFile)             # Load the configure file, in toml.
         except FileNotFoundError:
-            print(f"{colorama.Fore.RED}Config not found. {colorama.Fore.RESET}")
-            print(f"{colorama.Fore.YELLOW}Writing default config file. {colorama.Fore.RESET}")
-            self.writeDefaultConfig()
-            print(f"{colorama.Fore.GREEN}Running program with default config. {colorama.Fore.RESET}")
+            print(f"{colorama.Fore.RED}Configure file not found. {colorama.Fore.RESET}")
+            print(f"{colorama.Fore.YELLOW}Writing default configure file. {colorama.Fore.RESET}")
+            self._writeDefaultConfig()
+            print(f"{colorama.Fore.GREEN}Running program with default configure settings. {colorama.Fore.RESET}")
+        except toml.TomlDecodeError:
+            print(f"{colorama.Fore.RED}Error reading configure file. {colorama.Fore.RESET}")
+            print(f"{colorama.Fore.YELLOW}Writing default configure file. {colorama.Fore.RESET}")
+            self._writeDefaultConfig()
+            print(f"{colorama.Fore.GREEN}Running program with default configure settings. {colorama.Fore.RESET}")
 
+    @property
     def NAME(self):
         """  Returns application name.
         """
         return self.config['INFO']['myNAME']
 
+    @property
     def VERSION(self):
         """  Returns application Version.
         """
         return self.config['INFO']['myVERSION']
 
+    @property
     def NCOLS(self):
         """  Returns Max number of columns for tqdm [width of progress bar].
         """
         return self.config['TQDM']['ncols']
 
+    @property
     def TAGS(self):
         """  Returns the module used to scan the mp3 tags.
              Currently supports three modules tinytag, mutagen or eyed3.
@@ -78,28 +87,32 @@ class Config():
         else:
             return "tinytag"
 
+    @property
     def IGNORE(self):
         """  Returns the ignore marker.
              if both duplicate have this in comment, then ignore
         """
         return self.config['TAGS']['ignore']
 
+    @property
     def SOUNDEX(self):
         """  Returns the Soundex marker.
              if true, uses Soundex for tags matching else use normal strings.
         """
         return self.config['TAGS']['soundex']
 
+    @property
     def DB_FORMAT(self):
         """  Returns the format of the song library - either pickle or json.
         """
         format = self.config['DATABASE']['format']
-        
+
         if format == "json":
             return "json"
         else:
             return "pickle"
 
+    @property
     def DB_NAME(self):
         """  Returns the location and filename of the database.
              if location is empty will use just filename, so save next to main script.
@@ -113,28 +126,37 @@ class Config():
         else:
             return f"{filename}.{extension}"
 
-    def writeDefaultConfig(self):
-        """ Write a default config file.
+    def _writeDefaultConfig(self):
+        """ Write a default configure file.
             This is hard coded  ** TO KEEP UPDATED **
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '1.1.3g',
+        config['INFO'] = {'myVERSION': '2020.19beta',
                           'myNAME'   : 'pyMP3duplicate'}
 
         config['TQDM'] = {'ncols': 160}
 
         config['TAGS'] = {'module' : 'tinytag',
                           'ignore' : '**IGNORE**',
-                          'soundex': true}
+                          'soundex': True}
 
-        config['DATABASE'] = {'filename': 'dup.pickle',
+        config['DATABASE'] = {'format'  : 'pickle',
+                              'filename': 'dup',
                               'location': ''}
 
         st_toml = toml.dumps(config)
 
         with open(self.FILE_NAME, "w") as configFile:       # In context manager.
-            configFile.writelines(st_toml)                  # Write config file.
+            configFile.write("#   Configure files for pyMP3duplicates.py \n")
+            configFile.write("#\n")
+            configFile.write("#   true and false are lower case \n")
+            configFile.write("#   Configure files for pyMP3duplicates.py \n")
+            configFile.write("#   location needs double \ i.e. c:\\tmp\\music - well, on windows any way. \n")
+            configFile.write("#\n")
+            configFile.write("#   March 2020    (c) Kevin Scott \n")
+            configFile.write("\n")
+            configFile.writelines(st_toml)                  # Write configure file.
 
-        with open(self.FILE_NAME, "r") as fn:               # In context manager.
-            self.config = toml.load(self.fn)                # Load the config file, in toml.
+        with open(self.FILE_NAME, "r") as configFile:       # In context manager.
+            self.config = toml.load(configFile)             # Load the configure file, in toml.

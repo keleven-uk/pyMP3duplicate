@@ -26,10 +26,10 @@
 #                                                                                                             #
 ###############################################################################################################
 
+import os
 import time
 import json
 import pickle
-import pprint
 import datetime
 import pathlib
 
@@ -51,8 +51,10 @@ class Library():
          TODO - possibly needs error checking.
     """
 
-    def __init__(self):
-        self.library = {}
+    def __init__(self, DBfilename, DBformat):
+        self.library    = {}
+        self.__filename = pathlib.Path(DBfilename)
+        self.__format   = DBformat
 
     def hasKey(self, key):
         """  Returns true if the key exist in the library.
@@ -75,102 +77,106 @@ class Library():
     def delItem(self, key):
         """  Deletes item at position key from the library.
         """
-        del self.library[key]
+        try:
+            del self.library[key]
+        except (KeyError) as error:
+            print(f"ERROR : Library has no key : {key}")
 
-    def noOfItems(self, filename, format):
+    @property
+    def noOfItems(self):
         """  Return the number of entries in the library
         """
         if not self.library:
-            self.load(filename, format)
+            self.load()
         return len(self.library)
 
-    def save(self, filename, format):
+    def save(self):
         """  Save the library to disc.
         """
-        if format == "pickle":
-            self.pickleSave(filename)
+        if self.__format == "pickle":
+            self.pickleSave()
         else:
-            self.jsonSave(filename)
+            self.jsonSave()
 
-    def load(self, filename, format):
+    def load(self):
         """  Loads the library from disc.
         """
-        if format == "pickle":
-            self.pickleLoad(filename)
+        if self.__format == "pickle":
+            self.pickleLoad()
         else:
-            self.jsonLoad(filename)
+            self.jsonLoad()
 
-    def check(self, filename, mode, format):
+    def check(self, mode):
         """  Runs a database data integrity check.
         """
         startTime = time.time()
-        duplicates = 0
-        removed    = 0
-        print(f"Running database integrity check on {filename} in {mode} mode")
+        missing   = 0
+        removed   = 0
+        print(f"Running database integrity check on {self.__filename} in {mode} mode")
 
-        print(f"Loading {filename}")
-        self.load(filename, format)
+        print(f"Loading {self.__filename}")
+        if not self.library:
+            self.load()
 
-        l = self.noOfItems(filename, format)
+        l = self.noOfItems
         print(f"Song Library has {l} songs")
 
         for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
             path, duration, ignore = self.getItem(song)
-            if not path.exists():
+            if not os.path.isfile(path):
                 if mode == "delete":
                     self.delItem(song)
                     print(f"Deleting {path}")
                     removed += 1
                 else:
-                    duplicates += 1
+                    missing += 1
                     print(f"Song does not exist {path}")
 
         elapsedTimeSecs = time.time() - startTime
 
         if removed:
-            print(f"Saving {filename}")
-            self.save(filename, format)
+            print(f"Saving {self.__filename}")
+            self.save()
             print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.")
-            l = self.noOfItems(filename, format)
+            l = self.noOfItems
             print(f"Song Library has now {l} songs")
         else:
-            if duplicates:
-                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {duplicates} duplicates songs.")
+            if missing:
+                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {missing} missing songs.")
             else:
                 print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")
 
 
 #------------- pickle load and save. ------------------
-    def pickleLoad(self, filename):
+    def pickleLoad(self):
         """  Load the song library in pickle format.
         """
-        if filename.exists():
-            with open(filename, "rb") as f:
-                self.library = pickle.load(f)
+        try:
+            with open(self.__filename, "rb") as pickle_file:
+                self.library = pickle.load(pickle_file)
+        except FileNotFoundError:
+            print(f"ERROR :: Cannot find library file. {__filename}")
+            exit(0)
 
-    def pickleSave(self, filename):
+    def pickleSave(self):
         """  Save the song library in pickle format.
         """
-        with open(filename, "wb") as f:
-            try:
-                pickle.dump(self.library, f)
-            except FileNotFoundError:
-                print("ERROR :: Cannot find library file.")
+        with open(self.__filename, "wb") as pickle_file:
+            pickle.dump(self.library, pickle_file)
+
 #------------- json load and save. ------------------
-    def jsonLoad(self, filename):
+    def jsonLoad(self):
         """  Load the song library in json format.
         """
-        if filename.exists():
-            with open(filename, "r") as json_file:
+        try:
+            with open(self.__filename, "r") as json_file:
                 self.library = json.load(json_file)
+        except FileNotFoundError:
+            print("ERROR :: Cannot find library file.")
+            abort(0)
 
-    def jsonSave(self, filename):
+    def jsonSave(self):
         """  Save the song library in json format.
         """
-
-        print(f"{filename}")
-        with open(filename, "w") as json_file:
-            try:
-                json.dump(self.library, json_file)
-            except FileNotFoundError:
-                print("ERROR :: Cannot find library file.")
+        with open(self.__filename, "w") as json_file:
+            json.dump(self.library, json_file, indent=4)
