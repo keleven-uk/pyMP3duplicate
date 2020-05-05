@@ -32,6 +32,7 @@ import textwrap
 import datetime
 import argparse
 import colorama
+import myTimer
 import myConfig
 import myLogger
 import myLibrary
@@ -176,7 +177,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
     """
     count      = 0      # Number of song files to check.
     duplicates = 0      # Number of duplicate songs.
-    noDups     = 0      # Number of duplicate songs that fall outside of the time differnace.
+    noDups     = 0      # Number of duplicate songs that fall outside of the time difference.
     nonMusic   = 0      # Number of non music files.
     ignored    = 0      # Number of duplicate songs that have been marked to ignore.
     falsePos   = 0      # Number of songs that seem to be duplicate, but ain't.
@@ -198,7 +199,8 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
         key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
 
         if songLibrary.hasKey(key):
-            if mode == "build":   # Only building database - do not check for duplicates.
+            if mode == "scan":   # Only analysis songs if scan mode.
+                                 # If build mode, skip.
 
                 songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
@@ -223,7 +225,9 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
     count = count + noDups + duplicates     # Adjust for duplicates found.
 
     logTextLine("", duplicateFile)
-    if nonMusic and ignored:
+    if mode == "build":
+        logTextLine(f"{count} music files found.", duplicateFile)
+    elif nonMusic and ignored:
         logTextLine(f"{count} music files found with {duplicates} duplicates, \
                     with {nonMusic} non music files and {ignored} songs.", duplicateFile)
     elif nonMusic:
@@ -278,23 +282,27 @@ def parseArgs():
     if args.version:
         printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION}: version")
+        print("Goodbye.")
         exit(0)
 
     if args.license:
         printLongLicense(myConfig.NAME, myConfig.VERSION)
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Printed Licence")
+        print("Goodbye.")
         exit(0)
 
     if not args.sourceDir and not (args.check or args.checkDelete or args.number):
         logger.error("No Source Directory Supplied.")
         print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
         parser.print_help()
+        print("Goodbye.")
         exit(1)
 
     if args.sourceDir and not args.sourceDir.exists():      # Only check source dir exits if one was entered.
         logger.error("Source Directory Does Not Exist.")
         print(f"{colorama.Fore.RED}Source Directory Does Not Exist. {colorama.Fore.RESET}")
         parser.print_help()
+        print("Goodbye.")
         exit(2)
 
     if args.check:
@@ -323,6 +331,7 @@ def printNumberOfSongs():
     l = songLibrary.noOfItems
     print(f"Song Library has {l} songs")
     logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Song Library has {l} songs")
+    print("Goodbye.")
     exit(0)
 
 ######################################################################################## checkDatabase() ######
@@ -335,6 +344,7 @@ def checkDatabase(check):
     printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
     logger.info("Running database integrity check")
     songLibrary.check(check)
+    print("Goodbye.")
     exit(3)
 
 ############################################################################################### __main__ ######
@@ -345,7 +355,10 @@ if __name__ == "__main__":
     myConfig    = myConfig.Config()                                                # Need to do this first.
     songLibrary = myLibrary.Library(Path(myConfig.DB_NAME), myConfig.DB_FORMAT)    # Create the song library
     logger      = myLogger.get_logger(myConfig.NAME + ".log")                      # Create the logger.
+    timer       = myTimer.Timer()
     phonetic    = Soundex()
+
+    timer.Start
 
     logger.info("-"*100)
     logger.info(f"Start of {myConfig.NAME} {myConfig.VERSION}")
@@ -356,7 +369,7 @@ if __name__ == "__main__":
     if number: printNumberOfSongs()       # Print on number of songs in library.
     if check:  checkDatabase(check)       # Run data integrity check on library.
 
-    flag = (True if duplicateFile else False)   # If no duplicateFile the print to screen.
+    flag = (True if duplicateFile else False)   # If no duplicateFile then print to screen.
     printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
 
     if myConfig.SOUNDEX:
@@ -372,16 +385,15 @@ if __name__ == "__main__":
         songLibrary.load()
 
     songsCount = countSongs(sourceDir)
-    elapsedTimeSecs  = time.time()  - startTime
 
     if build:
         logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {datetime.timedelta(seconds = elapsedTimeSecs)}",   duplicateFile)
+        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds",   duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         scanMusic("build", sourceDir, duplicateFile, difference, songsCount)
     else:
         logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
+        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         scanMusic("scan", sourceDir, duplicateFile, difference, songsCount)
 
@@ -391,8 +403,7 @@ if __name__ == "__main__":
         songLibrary.save()
 
     logTextLine("", duplicateFile)
-    elapsedTimeSecs  = time.time()  - startTime
-    logTextLine(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)}", duplicateFile)
+    logTextLine(f"Completed  :: {timer.Stop} Seconds", duplicateFile)
     logTextLine("", duplicateFile)
 
     logger.info(f"End of {myConfig.NAME} {myConfig.VERSION}")

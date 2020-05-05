@@ -1,4 +1,10 @@
-V2020.19
+V2020.20
+    Added myTimer.py - A timer class that tidies up the timing of the program.
+    Changes in pyMP3duplicates.py to accomicate the new timer.
+    First attempts at a help manual.
+
+
+V2020.19.a2c0ef7
 
     In myconfig.py -
         Added exception toml.TomlDecodeErrror or load routine.
@@ -14,7 +20,7 @@ V2020.19
         Build mode should now work [I Think].
 
 
-V2020.18
+V2020.18.86f6d02
 
     Added config option to either save song library in pickle or json format.
     In myConfig.py -
