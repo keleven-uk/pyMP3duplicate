@@ -1,6 +1,15 @@
-V2020.20
+V2021
+
+    In myTimer.py -
+        Added public method the format seconds into hh:mm:ss format.
+        Amended all methods to use above [also used in pyMP3duplicate.py].
+    Added .gitattributes, so github would correctly identify project as python.
+
+
+V2020.20.4cf55b6
+
     Added myTimer.py - A timer class that tidies up the timing of the program.
-    Changes in pyMP3duplicates.py to accomicate the new timer.
+    Changes in pyMP3duplicates.py to accommodate the new timer.
     First attempts at a help manual.
 
 
@@ -8,30 +17,30 @@ V2020.19.a2c0ef7
 
     In myconfig.py -
         Added exception toml.TomlDecodeErrror or load routine.
-        Made all methods read only propertys.
-        Added a header to the writeDefaultConfig methond.
+        Made all methods read only property's.
+        Added a header to the writeDefaultConfig method.
     In myLibrary.py -
-        The library filename and format is now passed to class on initialation.
+        The library filename and format is now passed to class on initialisation.
         The means this information does not have to be passed to each method.
-        noOfItems methon is now a property.
+        noOfItems method is now a property.
         Bugs fixed in check, load & save methods.
     In pyMP3duplicates.py -
-        Changes to call class methods as propertys.
+        Changes to call class methods as property's.
         Build mode should now work [I Think].
 
 
 V2020.18.86f6d02
 
-    Added config option to either save song library in pickle or json format.
+    Added confit option to either save song library in pickle or JSON format.
     In myConfig.py -
         Returns library format.
         The extension of the filename is now taken from the library format.
     In myLibrary.py -
-        Added private methods to handle the load and save in both pickle and json.
+        Added private methods to handle the load and save in both pickle and JSON.
         Amended save and load method to pick depending upon library format.
         Amended noOfItems to check if library already loaded.
     In pyMP3duplicates.py -
-        Ignore files of type .json from scan.
+        Ignore files of type .JSON from scan.
         Amended several method call to include library format.
 
 

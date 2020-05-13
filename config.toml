@@ -7,7 +7,7 @@
 #   March 2020    (c) Kevin Scott
 
 [INFO]
-myVERSION = "2020.20"
+myVERSION = "2020.21"
 myNAME = "pyMP3duplicate"
 
 [TQDM]

@@ -25,11 +25,9 @@
 
 
 import os
-import sys
 import time
 import eyed3
 import textwrap
-import datetime
 import argparse
 import colorama
 import myTimer
@@ -181,7 +179,6 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
     nonMusic   = 0      # Number of non music files.
     ignored    = 0      # Number of duplicate songs that have been marked to ignore.
     falsePos   = 0      # Number of songs that seem to be duplicate, but ain't.
-    ignoreSong = myConfig.IGNORE
 
     for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=1):
 
@@ -213,8 +210,8 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                     if myConfig.SOUNDEX and not checktags(musicFile, songFile):
                         logTextLine("*"*80 + "Possible False Positive" + "*"*32, duplicateFile)
                         falsePos += 1
-                    logTextLine(f"{musicFile} {musicDuration:.2f}", duplicateFile)
-                    logTextLine(f"{songFile}  {songDuration:.2f}", duplicateFile)
+                    logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                    logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
                     duplicates += 1
                 else:  # if abs(musicDuration - songDuration) < difference:
                     noDups += 1
@@ -403,7 +400,7 @@ if __name__ == "__main__":
         songLibrary.save()
 
     logTextLine("", duplicateFile)
-    logTextLine(f"Completed  :: {timer.Stop} Seconds", duplicateFile)
+    logTextLine(f"Completed :: {timer.Stop}", duplicateFile)
     logTextLine("", duplicateFile)
 
     logger.info(f"End of {myConfig.NAME} {myConfig.VERSION}")

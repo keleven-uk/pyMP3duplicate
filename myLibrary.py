@@ -155,7 +155,7 @@ class Library():
             with open(self.__filename, "rb") as pickle_file:
                 self.library = pickle.load(pickle_file)
         except FileNotFoundError:
-            print(f"ERROR :: Cannot find library file. {__filename}")
+            print(f"ERROR :: Cannot find library file. {self.__filename}")
             exit(0)
 
     def pickleSave(self):
@@ -173,7 +173,7 @@ class Library():
                 self.library = json.load(json_file)
         except FileNotFoundError:
             print("ERROR :: Cannot find library file.")
-            abort(0)
+            exit(0)
 
     def jsonSave(self):
         """  Save the song library in json format.
