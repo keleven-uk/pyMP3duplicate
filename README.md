@@ -77,8 +77,10 @@ optional arguments:
 
   -v, --version         show program's version number and exit
 
+  -np, --noPrint        Do Not Print Possible False Positives.
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V2020.21
+
+ Kevin Scott (C) 2020 :: pyMP3duplicate V2020.22
 
 
 

@@ -8,14 +8,14 @@
 #        or any unique token generated from the song.                                                         #
 #      The data is a list [songFile, songDuration, ignore flag]                                               #
 #                                                                                                             #
+#    Uses pickle to load and save the library.                                                               #
 #                                                                                                             #
-###############################################################################################################
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
-#    GNU General Public License as published by the Free Software Foundation, either myVERSION 3 of the       #
-#    License, or (at your option) any later myVERSION.                                                        #
+#    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
+#    License, or (at your option) any later Version.                                                          #
 #                                                                                                             #
 #    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without        #
 #    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
@@ -33,6 +33,7 @@ import pickle
 import datetime
 import pathlib
 
+
 class Library():
     """  A simple class that wraps the library dictionary.
 
@@ -45,8 +46,8 @@ class Library():
          to return number of items   - l = songLibrary.noOfItems()
          to test database integrity  - songLibrary.check("test")
          to prune database           - songLibrary.check("delete")
-         to load items - songLibrary.load(filename) : this loads using pickle (located at filename).
-         to save items - songLibrary.save(filename) : this saves using pickle (located at filename).
+         to load items               - songLibrary.load(filename) : this loads using pickle (located at filename).
+         to save items               - songLibrary.save(filename) : this saves using pickle (located at filename).
 
          TODO - possibly needs error checking.
     """
@@ -79,7 +80,7 @@ class Library():
         """
         try:
             del self.library[key]
-        except (KeyError) as error:
+        except (KeyError):
             print(f"ERROR : Library has no key : {key}")
 
     @property

@@ -7,8 +7,8 @@
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
-#    GNU General Public License as published by the Free Software Foundation, either myVERSION 3 of the       #
-#    License, or (at your option) any later myVERSION.                                                        #
+#    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
+#    License, or (at your option) any later Version.                                                          #
 #                                                                                                             #
 #    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without        #
 #    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
@@ -28,6 +28,7 @@
     can add exc_info=True to include exception information, not needed with log.exception
 """
 
+import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
 

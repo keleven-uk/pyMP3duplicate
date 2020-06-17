@@ -11,8 +11,8 @@
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
-#    GNU General Public License as published by the Free Software Foundation, either myVERSION 3 of the       #
-#    License, or (at your option) any later myVERSION.                                                        #
+#    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
+#    License, or (at your option) any later Version.                                                          #
 #                                                                                                             #
 #    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without        #
 #    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
@@ -50,14 +50,14 @@ def checktags(musicFile, songFile):
     """
     try:                                    # Tries to read tags from the music file.
         tags = TinyTag.get(musicFile)
-    except (Exception) as error:           # Can't read tags - log as error.
+    except:           # Can't read tags - log as error.
         logger.error(f"ERROR : Can't read tags : {musicFile}")
     artist1 = removeThe(tags.artist)
     title1  = removeThe(tags.title)
 
     try:                                    # Tries to read tags from the music file.
         tags = TinyTag.get(songFile)
-    except (Exception) as error:           # Can't read tags - log as error.
+    except:           # Can't read tags - log as error.
         logger.error(f"ERROR : Can't read tags : {songFile}")
     artist2 = removeThe(tags.artist)
     title2  = removeThe(tags.title)
@@ -66,8 +66,8 @@ def checktags(musicFile, songFile):
 
 ####################################################################################### checkToIgnore #########
 def checkToIgnore(musicDuplicate, songDuplicate):
-    """  Each song may carry a ignore flag, return True if these are same.
-         Only checked it tag are read using mutagen.
+    """  Each song may carry a ignore flag, return True if these are the same.
+         Only checked if the tags are read using mutagen.
     """
     if (musicDuplicate == myConfig.IGNORE) and (songDuplicate == myConfig.IGNORE):
         return True
@@ -85,7 +85,7 @@ def createKey(artist, title):
 def removeThe(name):
     """  Removes 'the' from the from the beginning of artist and title if present.
          Mainly a problem with artist, to be honest.
-         name is returned lower case.
+         Name is returned lower case.
     """
     if name:
         n = name.lower()
@@ -103,7 +103,7 @@ def scanTags(musicFile):
     if myConfig.TAGS == "tinytag":
         try:                                    # Tries to read tags from the music file.
             tags = TinyTag.get(musicFile)
-        except (Exception) as error:           # Can't read tags - flag as error.
+        except:           # Can't read tags - flag as error.
             raise TagReadError(f"Tinytag error reading tags {musicFile}")
         artist    = removeThe(tags.artist)
         title     = removeThe(tags.title)
@@ -113,7 +113,7 @@ def scanTags(musicFile):
     elif myConfig.TAGS == "eyed3":
         try:
             tags = eyed3.load(musicFile)
-        except (Exception) as error:
+        except:
             logger.error(f"Eyed3 error reading tags {musicFile}")
             raise TagReadError(f"Eyed3 error reading tags {musicFile}")
         artist    = removeThe(tags.tag.artist)
@@ -125,14 +125,14 @@ def scanTags(musicFile):
         try:
             tags  = ID3(musicFile)
             audio = MP3(musicFile)
-        except (Exception) as error:
+        except:
             raise TagReadError(f"Mutagen error reading tags {musicFile}")
         artist   = removeThe(tags["TPE1"][0])
         title    = removeThe(tags["TIT2"][0])
         duration = audio.info.length
         try:                                        # Try to read duplicate tag.
             duplicate = tags["TXXX:DUPLICATE"][0]   # Ignore if not there.
-        except (Exception) as error:
+        except:
             duplicate = ""
     else:
         # Should not happen, tinytag should be returned by default.
@@ -163,7 +163,7 @@ def countSongs(sourceDir):
     return count
 
 ####################################################################################### scanMusic #############
-def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
+def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount,  noPrint):
     """  Scan the sourceDir, which should contain mp3 files.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then the two are checked.
@@ -182,16 +182,15 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
 
     for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=1):
 
-        if musicFile.is_dir(): continue     # ignore directories.
+        if musicFile.is_dir(): continue                                 # ignore directories.
 
-        if not musicFile.suffix == ".mp3":                 # A non music file found.
-            if musicFile.suffix == ".pickle": continue     # Ignore database if stored in target directory.
-            if musicFile.suffix == ".json"  : continue     # Ignore database if stored in target directory.
-            if mode == "scan":
-                logTextLine("-"*80 + "Non Music File Found" + "-"*40, duplicateFile)
-                logTextLine(f"{musicFile} is not a music file",  duplicateFile)
-                nonMusic += 1
-            continue        # continue with next file.
+        if (mode == "scan") and (not musicFile.suffix == ".mp3"):                            # A non music file found.
+            if musicFile.suffix == ".pickle": continue                  # Ignore database if stored in target directory.
+            if musicFile.suffix == ".json"  : continue                  # Ignore database if stored in target directory.
+            logTextLine("-"*80 + "Non Music File Found" + "-" * 40, duplicateFile)
+            logTextLine(f"{musicFile} is not a music file",  duplicateFile)
+            nonMusic += 1
+
 
         key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
 
@@ -205,11 +204,15 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
                     if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
                         if checkToIgnore(musicDuplicate, songDuplicate):
                             ignored += 1
-                            continue
-                    logTextLine("-"*80 + "Duplicate Found" + "-"*40, duplicateFile)
+                            continue        #  Do not print ignore duplicate
+                    message = " Duplicate Found "
                     if myConfig.SOUNDEX and not checktags(musicFile, songFile):
-                        logTextLine("*"*80 + "Possible False Positive" + "*"*32, duplicateFile)
                         falsePos += 1
+                        if not noPrint:
+                            message = " Possible False Positive "
+                        else:
+                            continue        #  Do not print Possible False Positives
+                    logTextLine("-"*70 + message + "-" * 40, duplicateFile)
                     logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
                     logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
                     duplicates += 1
@@ -237,7 +240,10 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount):
         logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
 
     if falsePos:
-        logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
+        if noPrint:
+            logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
+        else:
+            logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
 ############################################################################################## parseArgs ######
 def parseArgs():
@@ -268,14 +274,16 @@ def parseArgs():
     parser.add_argument("-xL", "--noLoad",         action="store_true" , help="Do not load database.")
     parser.add_argument("-xS", "--noSave",         action="store_true" , help="Do not save database.")
     parser.add_argument("-c",  "--check",          action="store_true" , help="Check database integrity.")
-    parser.add_argument("-cD",  "--checkDelete",   action="store_true" , help="Check database integrity and delete unwanted.")
+    parser.add_argument("-cD", "--checkDelete",    action="store_true" , help="Check database integrity and delete unwanted.")
     parser.add_argument("-b",  "--build",          action="store_true" , help="Build the database only.")
     parser.add_argument("-n",  "--number",         action="store_true" , help="Print the Number of Songs in the database.")
     parser.add_argument("-l",  "--license",        action="store_true" , help="Print the Software License.")
-    parser.add_argument("-v",  "--version",        action="store_true" , help="print the version of the application.")
+    parser.add_argument("-v",  "--version",        action="store_true" , help="Print the version of the application.")
+    parser.add_argument("-np", "--noPrint",        action="store_true" , help="Do Not Print Possible False Positives.")
 
     args = parser.parse_args()
 
+    print(args.noPrint)
     if args.version:
         printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION}: version")
@@ -313,12 +321,12 @@ def parseArgs():
         try:
             dfile = args.dupFile
             os.remove(args.dupFile)
-        except (IOError, os.error) as error:
+        except (IOError, os.error):
             logger.error("Duplication File Does Not Exist.")    # Log error, but don't really care.
     else:                                                       # Amend to previous duplicate file, if it exists.
         dfile = args.dupFileAmend
 
-    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number, check)
+    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number, check,  args.noPrint)
 
 ################################################################################### printNumberOfSongs() ######
 def printNumberOfSongs():
@@ -361,7 +369,7 @@ if __name__ == "__main__":
     logger.info(f"Start of {myConfig.NAME} {myConfig.VERSION}")
     logger.debug(f"Storing database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check,  noPrint = parseArgs()
 
     if number: printNumberOfSongs()       # Print on number of songs in library.
     if check:  checkDatabase(check)       # Run data integrity check on library.
@@ -387,12 +395,12 @@ if __name__ == "__main__":
         logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile)
         logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds",   duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
-        scanMusic("build", sourceDir, duplicateFile, difference, songsCount)
+        scanMusic("build", sourceDir, duplicateFile, difference, songsCount, noPrint)
     else:
         logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
         logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
-        scanMusic("scan", sourceDir, duplicateFile, difference, songsCount)
+        scanMusic("scan", sourceDir, duplicateFile, difference, songsCount, noPrint)
 
     if noSave:
         logger.debug("Not Saving database")

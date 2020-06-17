@@ -1,4 +1,11 @@
-V2021
+V2020.22
+
+    In pyMP3duplicates.py -
+        Added option to not print "Possible False Positive" items.
+    Added Eric6 project files.
+
+
+V2020.21
 
     In myTimer.py -
         Added public method the format seconds into hh:mm:ss format.
