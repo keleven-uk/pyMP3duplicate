@@ -8,7 +8,7 @@
 #        or any unique token generated from the song.                                                         #
 #      The data is a list [songFile, songDuration, ignore flag]                                               #
 #                                                                                                             #
-#    Uses pickle to load and save the library.                                                               #
+#    Uses pickle to load and save the library.                                                                #
 #                                                                                                             #
 ###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
@@ -46,21 +46,24 @@ class Library():
          to return number of items   - l = songLibrary.noOfItems()
          to test database integrity  - songLibrary.check("test")
          to prune database           - songLibrary.check("delete")
-         to load items               - songLibrary.load(filename) : this loads using pickle (located at filename).
-         to save items               - songLibrary.save(filename) : this saves using pickle (located at filename).
+         to load items               - songLibrary.load()
+         to save items               - songLibrary.save()
 
          TODO - possibly needs error checking.
     """
 
     def __init__(self, DBfilename, DBformat):
-        self.library    = {}
-        self.__filename = pathlib.Path(DBfilename)
-        self.__format   = DBformat
+        self.library     = {}
+        self.__filename  = pathlib.Path(DBfilename)
+        self.__format    = DBformat
+        self.__overWrite = True     #  Originally set to overwrite DB file.
+
 
     def hasKey(self, key):
         """  Returns true if the key exist in the library.
         """
         return key in self.library
+
 
     def addItem(self, key, item1, item2, item3):
         """  Adds to the library at point key, added is a list of items.
@@ -70,10 +73,12 @@ class Library():
         """
         self.library[key] = [item1, item2, item3]
 
+
     def getItem(self, key):
         """  Returns items at position key from the library.
         """
         return self.library[key]
+
 
     def delItem(self, key):
         """  Deletes item at position key from the library.
@@ -83,6 +88,7 @@ class Library():
         except (KeyError):
             print(f"ERROR : Library has no key : {key}")
 
+
     @property
     def noOfItems(self):
         """  Return the number of entries in the library
@@ -90,6 +96,14 @@ class Library():
         if not self.library:
             self.load()
         return len(self.library)
+
+
+    def DBOverWrite(self, mode):
+        """  If set to True the old database file, if exists, will be overwritten.
+             If set to False the old database file will be backed up before new one is written.
+        """
+        self.__overWrite = mode
+
 
     def save(self):
         """  Save the library to disc.
@@ -99,6 +113,7 @@ class Library():
         else:
             self.jsonSave()
 
+
     def load(self):
         """  Loads the library from disc.
         """
@@ -106,6 +121,7 @@ class Library():
             self.pickleLoad()
         else:
             self.jsonLoad()
+
 
     def check(self, mode):
         """  Runs a database data integrity check.
@@ -162,6 +178,10 @@ class Library():
     def pickleSave(self):
         """  Save the song library in pickle format.
         """
+        if not self.__overWrite:
+            if self.__filename.exists():
+                now = datetime.datetime.now()
+                self.__filename.rename(str(self.__filename) + "." + now.strftime("%Y%m%d%H%M%S"))
         with open(self.__filename, "wb") as pickle_file:
             pickle.dump(self.library, pickle_file)
 
@@ -179,5 +199,9 @@ class Library():
     def jsonSave(self):
         """  Save the song library in json format.
         """
+        if not self.__overWrite:
+            if self.__filename.exists():
+                now = datetime.datetime.now()
+                self.__filename.rename(str(self.__filename) + "." + now.strftime("%Y%m%d%H%M%S"))
         with open(self.__filename, "w") as json_file:
             json.dump(self.library, json_file, indent=4)

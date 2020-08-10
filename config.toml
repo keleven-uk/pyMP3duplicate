@@ -21,4 +21,5 @@ soundex = true
 [DATABASE]
 format = "pickle"
 filename = "dup"
-location = ""
+location = ""              #  if used, remember a trail slash \.
+overwrite = false

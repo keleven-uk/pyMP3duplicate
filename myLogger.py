@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLogger.py   Kevin Scott     2020                                                                       #
+#    myLogger.py   Copyright (C) <2020>  <Kevin Scott>                                                        #
 #                                                                                                             #
 #    A Wrapper for logging - based on https://www.toptal.com/python/in-depth-python-logging                   #
 #                                                                                                             #

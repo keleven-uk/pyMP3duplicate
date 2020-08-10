@@ -1,11 +1,27 @@
-V2020.22
+V0202.23
+
+    In myConfig.py
+        Added the property, DB_OVERWRITE, if set to False a backup of the database file is made.
+            The option also added to config.toml.
+        Finished off the property DB_LOCATION.  This was set but never implemented.
+    In myLibrary.py
+        Added the method DBOverWrite, which is set to DB_OVERWRITE from MyConfig.
+            The save methods where amended to check if file exits and to copy the
+            original out of the way if needed.  It date stamps the backup copy.
+    In pyMP3duplicate.py
+        Changes to implement the option DB_OVERWRITE.
+        Corrected a small bug when a non music file was uncounted.
+
+
+V2020.22.30f9a16
 
     In pyMP3duplicates.py -
         Added option to not print "Possible False Positive" items.
     Added Eric6 project files.
+    Cleaned up code and licence text.
 
 
-V2020.21
+V2020.21.5e81399
 
     In myTimer.py -
         Added public method the format seconds into hh:mm:ss format.

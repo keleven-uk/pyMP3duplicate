@@ -81,7 +81,7 @@ class Timer():
         hours, minutes   = divmod(minutes, 60)
 
         if hours:
-            return f"{hours:d}h:{minutes}m:{seconds:0.2f}s"
+            return f"{hours:f}h:{minutes}m:{seconds:0.2f}s"
         elif minutes:
             return f"{minutes:0.0f}m:{seconds:0.2f}s"
         else:

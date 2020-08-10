@@ -5,7 +5,7 @@
 #    The configure file is first read, then the properties are made available.                                #
 #    The configure file is currently in toml format.                                                          #
 #                                                                                                             #
-#############################################################################################################################################################################################################################
+###############################################################################################################
 #    Copyright (C) <2020>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
@@ -55,11 +55,13 @@ class Config():
             self._writeDefaultConfig()
             print(f"{colorama.Fore.GREEN}Running program with default configure settings. {colorama.Fore.RESET}")
 
+
     @property
     def NAME(self):
         """  Returns application name.
         """
         return self.config['INFO']['myNAME']
+
 
     @property
     def VERSION(self):
@@ -67,11 +69,13 @@ class Config():
         """
         return self.config['INFO']['myVERSION']
 
+
     @property
     def NCOLS(self):
         """  Returns Max number of columns for tqdm [width of progress bar].
         """
         return self.config['TQDM']['ncols']
+
 
     @property
     def TAGS(self):
@@ -86,6 +90,7 @@ class Config():
         else:
             return "tinytag"
 
+
     @property
     def IGNORE(self):
         """  Returns the ignore marker.
@@ -93,12 +98,14 @@ class Config():
         """
         return self.config['TAGS']['ignore']
 
+
     @property
     def SOUNDEX(self):
         """  Returns the Soundex marker.
              if true, uses Soundex for tags matching else use normal strings.
         """
         return self.config['TAGS']['soundex']
+
 
     @property
     def DB_FORMAT(self):
@@ -110,6 +117,7 @@ class Config():
             return "json"
         else:
             return "pickle"
+
 
     @property
     def DB_NAME(self):
@@ -125,13 +133,29 @@ class Config():
         else:
             return f"{filename}.{extension}"
 
+
+    @property
+    def DB_LOCATION(self):
+        """  Returns the location [path] of the database.
+             If empty, then save in the same directory has the script.
+        """
+        return self.config['DATABASE']['location']
+
+    @property
+    def DB_OVERWRITE(self):
+        """  If set to True the old database file, if exists, will be overwritten.
+             If set to False the old database file will be backed up before new one is written.
+        """
+        return self.config['DATABASE']['overwrite']
+
+
     def _writeDefaultConfig(self):
         """ Write a default configure file.
             This is hard coded  ** TO KEEP UPDATED **
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '2020.19beta',
+        config['INFO'] = {'myVERSION': '2020.23',
                           'myNAME'   : 'pyMP3duplicate'}
 
         config['TQDM'] = {'ncols': 160}
@@ -140,9 +164,10 @@ class Config():
                           'ignore' : '**IGNORE**',
                           'soundex': True}
 
-        config['DATABASE'] = {'format'  : 'pickle',
-                              'filename': 'dup',
-                              'location': ''}
+        config['DATABASE'] = {'format'   : 'pickle',
+                              'filename' : 'dup',
+                              'location' : '',
+                              'overwrite': False}
 
         st_toml = toml.dumps(config)
 

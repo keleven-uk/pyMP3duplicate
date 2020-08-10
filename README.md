@@ -80,7 +80,7 @@ optional arguments:
   -np, --noPrint        Do Not Print Possible False Positives.
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V2020.22
+ Kevin Scott (C) 2020 :: pyMP3duplicate V2020.23
 
 
 

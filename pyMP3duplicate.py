@@ -1,9 +1,8 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020>  <Kevin Scott>                                                     #
-#                                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020>  <Kevin Scott>                                                     #                                                                                                             #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
-# usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]   #
+# usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERENCE] [-xL] [-xS] [-b] [-n] [-l] [-v]   #
 #                                                                                                             #
 #     For changes see history.txt                                                                             #
 #                                                                                                             #
@@ -39,6 +38,7 @@ from pathlib import Path
 from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
+#from functools import lru_cache
 from libindic.soundex import Soundex
 from myExceptions import TagReadError
 from myLicense import printLongLicense, printShortLicense, logTextLine
@@ -82,6 +82,7 @@ def createKey(artist, title):
     return (phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX else f"{artist}:{title}")
 
 ####################################################################################### removeThe #############
+#@lru_cache()
 def removeThe(name):
     """  Removes 'the' from the from the beginning of artist and title if present.
          Mainly a problem with artist, to be honest.
@@ -184,13 +185,13 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount,  noPrint):
 
         if musicFile.is_dir(): continue                                 # ignore directories.
 
-        if (mode == "scan") and (not musicFile.suffix == ".mp3"):                            # A non music file found.
+        if (mode == "scan") and (musicFile.suffix != ".mp3"):           # A non music file found.
             if musicFile.suffix == ".pickle": continue                  # Ignore database if stored in target directory.
             if musicFile.suffix == ".json"  : continue                  # Ignore database if stored in target directory.
             logTextLine("-"*80 + "Non Music File Found" + "-" * 40, duplicateFile)
             logTextLine(f"{musicFile} is not a music file",  duplicateFile)
             nonMusic += 1
-
+            continue
 
         key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
 
@@ -357,9 +358,14 @@ def checkDatabase(check):
 if __name__ == "__main__":
 
     startTime   = time.time()
-    myConfig    = myConfig.Config()                                                # Need to do this first.
-    songLibrary = myLibrary.Library(Path(myConfig.DB_NAME), myConfig.DB_FORMAT)    # Create the song library
-    logger      = myLogger.get_logger(myConfig.NAME + ".log")                      # Create the logger.
+
+    myConfig    = myConfig.Config()                                     # Need to do this first.
+
+    DBpath = Path(myConfig.DB_LOCATION + myConfig.DB_NAME)
+    print(f"DBpath = {DBpath}")
+
+    songLibrary = myLibrary.Library(DBpath, myConfig.DB_FORMAT)         # Create the song library.
+    logger      = myLogger.get_logger(myConfig.NAME + ".log")           # Create the logger.
     timer       = myTimer.Timer()
     phonetic    = Soundex()
 
@@ -369,7 +375,7 @@ if __name__ == "__main__":
     logger.info(f"Start of {myConfig.NAME} {myConfig.VERSION}")
     logger.debug(f"Storing database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check,  noPrint = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint = parseArgs()
 
     if number: printNumberOfSongs()       # Print on number of songs in library.
     if check:  checkDatabase(check)       # Run data integrity check on library.
@@ -405,12 +411,18 @@ if __name__ == "__main__":
     if noSave:
         logger.debug("Not Saving database")
     else:
+        if not myConfig.DB_OVERWRITE:
+            logger.debug(f"Not over writing database {DBpath}")
+        songLibrary.DBOverWrite(myConfig.DB_OVERWRITE)
         songLibrary.save()
 
+    timeStop = timer.Stop
     logTextLine("", duplicateFile)
-    logTextLine(f"Completed :: {timer.Stop}", duplicateFile)
+    logTextLine(f"Completed :: {timeStop}", duplicateFile)
     logTextLine("", duplicateFile)
 
+    #logger.info(f"{removeThe.cache_info()}")
+    logger.info(f"Completed :: {timeStop}")
     logger.info(f"End of {myConfig.NAME} {myConfig.VERSION}")
 
     exit(0)
