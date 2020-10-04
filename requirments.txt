@@ -1,10 +1,14 @@
-###### Requirements without Version Specifiers ######
-eyed3
-colorama
-tqdm
-mutagen
-tinytag
-libindic-soundex
-
-###### Requirements with Version Specifiers ######
-libindic-utils>=1.0.3
+colorama==0.4.3
+deprecation==2.1.0
+eyeD3==0.9.5
+filetype==1.0.7
+libindic-soundex==1.0.2
+libindic-utils==1.0.3
+mutagen==1.45.1
+packaging==20.4
+plyer==1.4.3
+pyparsing==2.4.7
+six==1.15.0
+tinytag==1.4.0
+toml==0.10.1
+tqdm==4.50.0

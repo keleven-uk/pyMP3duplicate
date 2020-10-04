@@ -1,3 +1,16 @@
+V0202.24
+
+    In myConfig.py
+        Added the property, NOTIFICATION, if set then system tray notification will be displayed
+        at the start and end of the program [and any other times I think will be useful].
+    In pyMP3duplicate.py
+        Changes to implement the option NOTIFICATION.
+        More changes to the scan / mode mode thing.
+        Corrected a bug if the path to duplicate file is nonsense, the file will be created if does not exist.
+    Added an Icon to be used with notifications.
+    Added plyer to requirements.txt [for Notifications.]
+
+
 V0202.23
 
     In myConfig.py
@@ -12,6 +25,20 @@ V0202.23
         Changes to implement the option DB_OVERWRITE.
         Corrected a small bug when a non music file was uncounted.
 
+        -----------------------------------------------------------------------------------
+        File                                            blank        comment           code
+        -----------------------------------------------------------------------------------
+        pyMP3duplicate\pyMP3duplicate.py		 64             84            279
+        pyMP3duplicate\myLibrary.py			    35             72            100
+        pyMP3duplicate\myConfig.py			    39             60             87
+        pyMP3duplicate\myTimer.py			    16             40             32
+        pyMP3duplicate\myLicense.py			  8             39             20
+        pyMP3duplicate\myLogger.py			     8             29             18
+        pyMP3duplicate\config.toml			     4              7             14
+        pyMP3duplicate\myExceptions.py	     3             20             11
+        -----------------------------------------------------------------------------------
+        SUM:						                      177            351            561
+        -----------------------------------------------------------------------------------
 
 V2020.22.30f9a16
 

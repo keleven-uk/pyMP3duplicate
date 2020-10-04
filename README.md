@@ -42,7 +42,7 @@
       i.e The Sweet will match Sweet and Led Zeppelin should match Led Zepelin.
 
 
-To install dependences pip -r requirments.txt
+To install dependencies pip -r requirements.txt
 
 usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]
 
@@ -80,7 +80,7 @@ optional arguments:
   -np, --noPrint        Do Not Print Possible False Positives.
 
 
- Kevin Scott (C) 2020 :: pyMP3duplicate V2020.23
+ Kevin Scott (C) 2020 :: pyMP3duplicate V2020.24
 
 
 

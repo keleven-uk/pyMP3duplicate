@@ -71,6 +71,12 @@ class Config():
 
 
     @property
+    def NOTIFICATION(self):
+        """  Returns the [system tray] Notification marker.
+        """
+        return self.config['APPLICATION']['notification']
+
+    @property
     def NCOLS(self):
         """  Returns Max number of columns for tqdm [width of progress bar].
         """
@@ -155,8 +161,10 @@ class Config():
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '2020.23',
+        config['INFO'] = {'myVERSION': '2020.24',
                           'myNAME'   : 'pyMP3duplicate'}
+
+        config['APPLICATION'] = {'notification': True}
 
         config['TQDM'] = {'ncols': 160}
 

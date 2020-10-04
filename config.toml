@@ -7,14 +7,17 @@
 #   March 2020    (c) Kevin Scott
 
 [INFO]
-myVERSION = "2020.22"
+myVERSION = "2020.24"
 myNAME = "pyMP3duplicate"
+
+[APPLICATION]
+notification=true
 
 [TQDM]
 ncols = 160
 
 [TAGS]
-module = "tinytag"
+module = "TinyTag"
 ignore = "**IGNORE**"
 soundex = true
 

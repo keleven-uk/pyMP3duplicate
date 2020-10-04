@@ -38,6 +38,7 @@ from pathlib import Path
 from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
+from plyer import notification
 #from functools import lru_cache
 from libindic.soundex import Soundex
 from myExceptions import TagReadError
@@ -185,7 +186,8 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount,  noPrint):
 
         if musicFile.is_dir(): continue                                 # ignore directories.
 
-        if (mode == "scan") and (musicFile.suffix != ".mp3"):           # A non music file found.
+        if (musicFile.suffix != ".mp3"):                                # A non music file found.
+            if mode == "build": continue                                # Ignore non .mp3 files if in build mode.
             if musicFile.suffix == ".pickle": continue                  # Ignore database if stored in target directory.
             if musicFile.suffix == ".json"  : continue                  # Ignore database if stored in target directory.
             logTextLine("-"*80 + "Non Music File Found" + "-" * 40, duplicateFile)
@@ -196,29 +198,30 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount,  noPrint):
         key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
 
         if songLibrary.hasKey(key):
-            if mode == "scan":   # Only analysis songs if scan mode.
-                                 # If build mode, skip.
+            if mode == "build": continue    # Only analyse songs if in scan mode.
+                                            # If build mode, skip.
 
-                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+            songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
-                if abs(musicDuration - songDuration) < difference:
-                    if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
-                        if checkToIgnore(musicDuplicate, songDuplicate):
-                            ignored += 1
-                            continue        #  Do not print ignore duplicate
-                    message = " Duplicate Found "
-                    if myConfig.SOUNDEX and not checktags(musicFile, songFile):
-                        falsePos += 1
-                        if not noPrint:
-                            message = " Possible False Positive "
-                        else:
-                            continue        #  Do not print Possible False Positives
-                    logTextLine("-"*70 + message + "-" * 40, duplicateFile)
-                    logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                    logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
-                    duplicates += 1
-                else:  # if abs(musicDuration - songDuration) < difference:
-                    noDups += 1
+            if abs(musicDuration - songDuration) < difference:
+                if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
+                    if checkToIgnore(musicDuplicate, songDuplicate):
+                        ignored += 1
+                        continue        #  Do not print ignore duplicate
+                message = " Duplicate Found "
+                if myConfig.SOUNDEX and not checktags(musicFile, songFile):
+                    falsePos += 1
+                    if not noPrint:
+                        message = " Possible False Positive "
+                    else:
+                        continue        #  Do not print Possible False Positives
+                logTextLine("-"*70 + message + "-" * 40, duplicateFile)
+                logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                duplicates += 1
+            else:  # if abs(musicDuration - songDuration) < difference:
+                noDups += 1
+
         else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
             songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
             count += 1
@@ -255,6 +258,7 @@ def parseArgs():
          Exit code 0 - program has exited normally, after print version, licence or help.
          Exit Code 1 - No source directory supplied.
          Exit code 2 - Source directory does not exist.
+         Exit code 3 - Duplicate File Directory Does Not Exist.
     """
     parser = argparse.ArgumentParser(
         formatter_class = argparse.RawTextHelpFormatter,
@@ -284,7 +288,6 @@ def parseArgs():
 
     args = parser.parse_args()
 
-    print(args.noPrint)
     if args.version:
         printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION}: version")
@@ -310,6 +313,13 @@ def parseArgs():
         parser.print_help()
         print("Goodbye.")
         exit(2)
+
+    if args.dupFile and not args.dupFile.parent.exists():      # Only check Duplicate File Directory exits if one was entered.
+        logger.error("Duplicate File Directory Does Not Exist.")
+        print(f"{colorama.Fore.RED}Duplicate File Directory Does Not Exist. {colorama.Fore.RESET}")
+        parser.print_help()
+        print("Goodbye.")
+        exit(3)
 
     if args.check:
         check = "test"
@@ -347,10 +357,13 @@ def checkDatabase(check):
           if check == test then just report errors.
           if check == delete then report errors and delete entries.
     """
+    message = "Running Database Integrity Check"
+    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
     printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
-    logger.info("Running database integrity check")
+    logger.info(message)
     songLibrary.check(check)
     print("Goodbye.")
+    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, "Database Check Ended", myConfig.NAME, icon, timeout)
     exit(3)
 
 ############################################################################################### __main__ ######
@@ -359,10 +372,12 @@ if __name__ == "__main__":
 
     startTime   = time.time()
 
+    icon    = "tea.icon"    #  icon used by notifications
+    timeout = 5             #  timeout used by notifications in seconds
+
     myConfig    = myConfig.Config()                                     # Need to do this first.
 
     DBpath = Path(myConfig.DB_LOCATION + myConfig.DB_NAME)
-    print(f"DBpath = {DBpath}")
 
     songLibrary = myLibrary.Library(DBpath, myConfig.DB_FORMAT)         # Create the song library.
     logger      = myLogger.get_logger(myConfig.NAME + ".log")           # Create the logger.
@@ -371,9 +386,17 @@ if __name__ == "__main__":
 
     timer.Start
 
+    if myConfig.SOUNDEX:
+        mode = f"Using Soundex for {myConfig.TAGS} matching"
+    else:
+        mode = f"Using Strings for {myConfig.TAGS} matching"
+
+    message = f"Start of {myConfig.NAME} {myConfig.VERSION}"
+    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
     logger.info("-"*100)
-    logger.info(f"Start of {myConfig.NAME} {myConfig.VERSION}")
-    logger.debug(f"Storing database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
+    logger.info(message)
+    logger.debug(f"Using database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
+    logger.debug(f"{mode}")
 
     sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint = parseArgs()
 
@@ -382,13 +405,6 @@ if __name__ == "__main__":
 
     flag = (True if duplicateFile else False)   # If no duplicateFile then print to screen.
     printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
-
-    if myConfig.SOUNDEX:
-        logger.debug(f"Using Soundex for {myConfig.TAGS} matching")
-        mode = f"Using Soundex for {myConfig.TAGS} matching"
-    else:
-        logger.debug(f"Using Strings for {myConfig.TAGS} matching")
-        mode = f"Using Strings for {myConfig.TAGS} matching"
 
     if noLoad or build:
         logger.debug("Not Loading database")
@@ -399,13 +415,15 @@ if __name__ == "__main__":
 
     if build:
         logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds",   duplicateFile)
+        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
+        logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
         scanMusic("build", sourceDir, duplicateFile, difference, songsCount, noPrint)
     else:
         logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
         logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
+        logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
         scanMusic("scan", sourceDir, duplicateFile, difference, songsCount, noPrint)
 
     if noSave:
@@ -417,12 +435,16 @@ if __name__ == "__main__":
         songLibrary.save()
 
     timeStop = timer.Stop
+
+    message = f"{myConfig.NAME} Completed :: {timeStop}"
+
     logTextLine("", duplicateFile)
-    logTextLine(f"Completed :: {timeStop}", duplicateFile)
+    logTextLine(message, duplicateFile)
     logTextLine("", duplicateFile)
 
     #logger.info(f"{removeThe.cache_info()}")
-    logger.info(f"Completed :: {timeStop}")
+    logger.info(message)
     logger.info(f"End of {myConfig.NAME} {myConfig.VERSION}")
 
+    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
     exit(0)
