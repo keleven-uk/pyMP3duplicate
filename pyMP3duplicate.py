@@ -372,7 +372,7 @@ if __name__ == "__main__":
 
     startTime   = time.time()
 
-    icon    = "tea.icon"    #  icon used by notifications
+    icon    = "tea.ico"    #  icon used by notifications
     timeout = 5             #  timeout used by notifications in seconds
 
     myConfig    = myConfig.Config()                                     # Need to do this first.
