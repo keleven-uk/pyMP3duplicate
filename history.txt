@@ -1,4 +1,18 @@
-v2020.25
+V2020.26
+
+    Some of the imports haven't made V3.9 yet, so still using V3.9 - oh hum.
+    Renamed requirments.txt to requirements.txt, I had spelt it wrong.
+    Added pyCharm project files.
+    In myConfig.py
+        Added the property, ZAP_RECYCLE, if set then the zap option uses the
+        recycle bin otherwise plain delete.
+    In pyMP3duplicate.py
+        now import the library send2trash [requirements.txt updated]
+        Implemented the option to delete none music files.
+        This either to the recycle bin or not, depending upon above option.
+        Started to format code using pyCharm.
+
+v2020.25.931da7a
 
     Renamed LICENSE to LICENSE.txt
     To make sure all code has been committed, upgrade to python V3.9

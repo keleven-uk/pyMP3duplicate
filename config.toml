@@ -7,7 +7,7 @@
 #   March 2020    (c) Kevin Scott
 
 [INFO]
-myVERSION = "2020.24"
+myVERSION = "2020.26"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]
@@ -26,3 +26,7 @@ format = "pickle"
 filename = "dup"
 location = ""              #  if used, remember a trail slash \.
 overwrite = false
+
+[ZAP]
+recycle = true
+

@@ -154,6 +154,13 @@ class Config():
         """
         return self.config['DATABASE']['overwrite']
 
+    @property
+    def ZAP_RECYCLE(self):
+        """  If set to True the recycle bin will be used for deletes.
+             If set to False all deletes are final :-(.
+        """
+        return self.config['ZAP']['recycle']
+
 
     def _writeDefaultConfig(self):
         """ Write a default configure file.
@@ -176,6 +183,8 @@ class Config():
                               'filename' : 'dup',
                               'location' : '',
                               'overwrite': False}
+
+        config['ZAP'] = {'recycle': True}
 
         st_toml = toml.dumps(config)
 
