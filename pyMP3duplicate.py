@@ -26,6 +26,7 @@
 import os
 import time
 import eyed3
+import shutil
 import textwrap
 import argparse
 import colorama
@@ -49,23 +50,26 @@ from myLicense import printLongLicense, printShortLicense, logTextLine
 ####################################################################################### checktags #############
 def checktags(musicFile, songFile):
     """  Used to check if the Soundex algorithm has returned a false positive.
-         Returns true if the artist and title of the two songs are the same.
+         Returns True if the artist and title of the two songs are the same.
+         Returns False if there is an error.
     """
     try:  # Tries to read tags from the music file.
         tags = TinyTag.get(musicFile)
-    except:  # Can't read tags - log as error.
+    except Exception as e:  # Can't read tags - log as error.
         logger.error(f"ERROR : Can't read tags : {musicFile}")
+        return False
     artist1 = removeThe(tags.artist)
     title1 = removeThe(tags.title)
 
     try:  # Tries to read tags from the music file.
         tags = TinyTag.get(songFile)
-    except:  # Can't read tags - log as error.
+    except Exception as e:  # Can't read tags - log as error.
         logger.error(f"ERROR : Can't read tags : {songFile}")
+        return False
     artist2 = removeThe(tags.artist)
     title2 = removeThe(tags.title)
 
-    return (True if (artist1 == artist2) and (title1 == title2) else False)
+    return True if (artist1 == artist2) and (title1 == title2) else False
 
 
 ####################################################################################### checkToIgnore #########
@@ -84,7 +88,7 @@ def createKey(artist, title):
     """ Creates the key from the artist and title.
         key is either formed from string substitution or created from the soundex of the string.
     """
-    return (phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX else f"{artist}:{title}")
+    return phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX else f"{artist}:{title}"
 
 
 ####################################################################################### removeThe #############
@@ -96,7 +100,7 @@ def removeThe(name):
     """
     if name:
         n = name.lower()
-        return (name[4:] if n.startswith("the") else name)
+        return name[4:] if n.startswith("the") else name
     else:
         return ""
 
@@ -111,7 +115,7 @@ def scanTags(musicFile):
     if myConfig.TAGS == "tinytag":
         try:  # Tries to read tags from the music file.
             tags = TinyTag.get(musicFile)
-        except:  # Can't read tags - flag as error.
+        except Exception as e:  # Can't read tags - flag as error.
             raise TagReadError(f"Tinytag error reading tags {musicFile}")
         artist = removeThe(tags.artist)
         title = removeThe(tags.title)
@@ -121,7 +125,7 @@ def scanTags(musicFile):
     elif myConfig.TAGS == "eyed3":
         try:
             tags = eyed3.load(musicFile)
-        except:
+        except Exception as e:
             logger.error(f"Eyed3 error reading tags {musicFile}")
             raise TagReadError(f"Eyed3 error reading tags {musicFile}")
         artist = removeThe(tags.tag.artist)
@@ -133,14 +137,14 @@ def scanTags(musicFile):
         try:
             tags = ID3(musicFile)
             audio = MP3(musicFile)
-        except:
+        except Exception as e:
             raise TagReadError(f"Mutagen error reading tags {musicFile}")
         artist = removeThe(tags["TPE1"][0])
         title = removeThe(tags["TIT2"][0])
         duration = audio.info.length
         try:  # Try to read duplicate tag.
             duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
-        except:
+        except Exception as e:
             duplicate = ""
     else:
         # Should not happen, tinytag should be returned by default.
@@ -165,7 +169,7 @@ def countSongs(sourceDir):
     """
     print("Counting Songs")
     count = 0
-    for musicFile in tqdm(sourceDir.glob("**/*.mp3"), unit="songs", ncols=myConfig.NCOLS, position=0):
+    for musicFile in tqdm(sourceDir.glob("**/*.mp3"), unit="songs", ncols=myConfig.NCOLS, position=1):
         count += 1
 
     print(f"... with a song count of {count}")
@@ -183,21 +187,19 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
 
          Uses tqdm - a very cool progress bar for console windows.
     """
-    count = 0  # Number of song files to check.
+    count      = 0  # Number of song files to check.
     duplicates = 0  # Number of duplicate songs.
-    noDups = 0  # Number of duplicate songs that fall outside of the time difference.
-    nonMusic = 0  # Number of non music files.
-    ignored = 0  # Number of duplicate songs that have been marked to ignore.
-    falsePos = 0  # Number of songs that seem to be duplicate, but ain't.
+    noDups     = 0  # Number of duplicate songs that fall outside of the time difference.
+    nonMusic   = 0  # Number of non music files.
+    ignored    = 0  # Number of duplicate songs that have been marked to ignore.
+    falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
 
-    for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=1):
+    for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=2):
 
-        if musicFile.is_dir(): continue  # ignore directories.
-
-        if (musicFile.suffix != ".mp3"):  # A non music file found.
-            if mode == "build": continue  # Ignore non .mp3 files if in build mode.
+        if musicFile.suffix != ".mp3":                  # A non music file found.
+            if mode == "build": continue                # Ignore non .mp3 files if in build mode.
             if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
-            if musicFile.suffix == ".json": continue  # Ignore database if stored in target directory.
+            if musicFile.suffix == ".json": continue    # Ignore database if stored in target directory.
             zapNoneMusicFile(musicFile, zap)
             nonMusic += 1
             continue
@@ -235,6 +237,8 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
 
     count = count + noDups + duplicates  # Adjust for duplicates found.
 
+    if zap and myConfig.EMPTY_DIR: removeEmptyDir(sourceDir, duplicateFile)
+
     logTextLine("", duplicateFile)
     if mode == "build":
         logTextLine(f"{count} music files found.", duplicateFile)
@@ -257,7 +261,33 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
         else:
             logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
+############################################################################################## removeEmptyDir( #######
+def removeEmptyDir(sourceDir, duplicateFile):
+    """ Scan and delete empty directories.
+        Called if myConfig.EMPTY_DIR is true.
+    """
+    timeDir = myTimer.Timer()
+    timeDir.Start
+    noOfDirs = 0
+    print("\nRunning Empty Directory Check\n")
+    logger.info("Running Empty Directory Check")
+    for musicDir in sourceDir.glob("**/*"):
+        if musicDir.is_dir():
+            if len(os.listdir(musicDir)) == 0:
+                noOfDirs += 1
+                logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
+                logTextLine(f"{musicDir}", duplicateFile)
 
+                if myConfig.ZAP_RECYCLE:
+                    send2trash(str(musicDir))  # Move to recycle bin.
+                else:
+                    shutil.rmtree(musicDir, ignore_errors=True, onerror=None)  # Permanently remove directory
+
+    if noOfDirs != 0:
+        message = f"Removed {noOfDirs} empty directories in  :: {timeDir.Stop}"
+        logTextLine("", duplicateFile)
+        logTextLine(message, duplicateFile)
+        logger.info(message)
 ############################################################################################## zapNoneMusicFile ######
 def zapNoneMusicFile(musicFile, zap):
     """ Zap [delete] any none music file."""
@@ -402,7 +432,7 @@ if __name__ == "__main__":
 
     startTime = time.time()
 
-    icon = "tea.ico"  # icon used by notifications
+    icon    = "tea.ico"  # icon used by notifications
     timeout = 5  # timeout used by notifications in seconds
 
     myConfig = myConfig.Config()  # Need to do this first.
@@ -410,9 +440,9 @@ if __name__ == "__main__":
     DBpath = Path(myConfig.DB_LOCATION + myConfig.DB_NAME)
 
     songLibrary = myLibrary.Library(DBpath, myConfig.DB_FORMAT)  # Create the song library.
-    logger = myLogger.get_logger(myConfig.NAME + ".log")  # Create the logger.
-    timer = myTimer.Timer()
-    phonetic = Soundex()
+    logger      = myLogger.get_logger(myConfig.NAME + ".log")  # Create the logger.
+    timer       = myTimer.Timer()
+    phonetic    = Soundex()
 
     timer.Start
 
@@ -478,6 +508,7 @@ if __name__ == "__main__":
     logTextLine("", duplicateFile)
     logTextLine(message, duplicateFile)
     logTextLine("", duplicateFile)
+    print(message)
 
     # logger.info(f"{removeThe.cache_info()}")
     logger.info(message)

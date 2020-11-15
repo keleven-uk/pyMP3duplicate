@@ -25,6 +25,10 @@
 
     The -xS & -xL can be useful for a test run, so the database is left UN-touched.
 
+    The -zD flag if specified zap [delete] none music files.
+        Delete to recycle bin or plainf delete is set via a user option.
+        Will find and delete empty directories, selectable by user option.
+         
     Added tqdm - a very cool progress bar for console windows.
 
     Added the ability to use different modules to read the mp3 tags.
@@ -44,43 +48,31 @@
 
 To install dependencies pip -r requirements.txt
 
-usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERANCE] [-xL] [-xS] [-b] [-n] [-l] [-v]
+usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-c] [-b] [-n] [-l] [-v] [-xL] [-xS] [-np] [-zD] [-cD]
 
 A Python MP3 Duplicate finder.
 -----------------------
-The program will scan a given directory and report duplicate MP3 files.
-
-optional arguments:
   -h, --help            show this help message and exit
-
   -s SOURCEDIR, --sourceDir SOURCEDIR
                         directory of the music files [mp3].
-
   -f DUPFILE, --dupFile DUPFILE
                         [Optional] list duplicates to file, start afresh.
-
   -fA DUPFILEAMEND, --dupFileAmend DUPFILEAMEND
                         [Optional] list duplicates to file, Amend to previous.
-
   -d DIFFERENCE, --difference DIFFERENCE
                         Time difference between songs, default = 0.5s.
-
-  -xL, --noLoad         Do not load database.
-
-  -xS, --noSave         Do not save database.
-
+  -c, --check           Check database integrity.
   -b, --build           Build the database only.
-
-  -n, --number          print the Number of Songs in the database.
-
+  -n, --number          Print the Number of Songs in the database.
   -l, --license         Print the Software License.
-
-  -v, --version         show program's version number and exit
-
+  -v, --version         Print the version of the application.
+  -xL, --noLoad         Do not load database.
+  -xS, --noSave         Do not save database.
   -np, --noPrint        Do Not Print Possible False Positives.
+  -zD, --zapNoneMusic   Zap [DELETE] none music files.
+  -cD, --checkDelete    Check database integrity and delete unwanted.
 
-
- Kevin Scott (C) 2020 :: pyMP3duplicate V2020.24
+ Kevin Scott (C) 2020 :: pyMP3duplicate 2020.27
 
 
 

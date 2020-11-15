@@ -1,32 +1,32 @@
-#   Config files for pyMP3duplicates.py
+#   Configure files for pyMP3duplicates.py 
 #
-#   true and false are lowe case
-#   Config files for pyMP3duplicates.py
-#   location needs double \ i.e. c:\tmp\music - well, on windows any way.
+#   true and false are lower case 
+#   Configure files for pyMP3duplicates.py 
+#   location needs double \ i.e. c:\tmp\music - well, on windows any way. 
 #
-#   March 2020    (c) Kevin Scott
+#   March 2020    (c) Kevin Scott 
 
 [INFO]
-myVERSION = "2020.26"
+myVERSION = "2020.27"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]
-notification=true
+notification = true
 
 [TQDM]
 ncols = 160
 
 [TAGS]
-module = "TinyTag"
+module = "tinytag"
 ignore = "**IGNORE**"
 soundex = true
 
 [DATABASE]
 format = "pickle"
 filename = "dup"
-location = ""              #  if used, remember a trail slash \.
+location = ""
 overwrite = false
 
 [ZAP]
 recycle = true
-
+emptyDir = true

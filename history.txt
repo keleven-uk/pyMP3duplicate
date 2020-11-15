@@ -1,11 +1,26 @@
-V2020.26
+V2020.27
 
-    Some of the imports haven't made V3.9 yet, so still using V3.9 - oh hum.
+    Added user option emptyDir, which will find and delete empty directories.
+    This is only active is -zD option is used.
+    In myConfig.py
+        Added the property, EMPTY_DIR, is set then empty directories
+        are found and deleted.
+    In pyMP3duplicate.py
+        Tried to make try blocks more descriptive.
+        Changes to call removeEmptyDir() is needed.
+        More changes to format code.
+            [But I like my equal symbols, comments and imports to line up.]
+
+
+V2020.26.8d33ed9
+
+    Some of the imports haven't made V3.9 yet, so still using V3.8 - oh hum.
     Renamed requirments.txt to requirements.txt, I had spelt it wrong.
     Added pyCharm project files.
+    Added the option to delete non music files [-zD].
     In myConfig.py
         Added the property, ZAP_RECYCLE, if set then the zap option uses the
-        recycle bin otherwise plain delete.
+        recycle bin otherwise plain delete.  This is called by the argument -zD
     In pyMP3duplicate.py
         now import the library send2trash [requirements.txt updated]
         Implemented the option to delete none music files.

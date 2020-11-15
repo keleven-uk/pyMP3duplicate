@@ -24,6 +24,7 @@
 import toml
 import colorama
 
+
 class Config():
     """  A class that acts has a wrapper around the configure file - config.toml.
          The configure file is hard coded and lives in the save directory has the main script.
@@ -38,7 +39,6 @@ class Config():
     """
 
     FILE_NAME = "config.toml"
-
 
     def __init__(self):
         try:
@@ -55,20 +55,17 @@ class Config():
             self._writeDefaultConfig()
             print(f"{colorama.Fore.GREEN}Running program with default configure settings. {colorama.Fore.RESET}")
 
-
     @property
     def NAME(self):
         """  Returns application name.
         """
         return self.config['INFO']['myNAME']
 
-
     @property
     def VERSION(self):
         """  Returns application Version.
         """
         return self.config['INFO']['myVERSION']
-
 
     @property
     def NOTIFICATION(self):
@@ -81,7 +78,6 @@ class Config():
         """  Returns Max number of columns for tqdm [width of progress bar].
         """
         return self.config['TQDM']['ncols']
-
 
     @property
     def TAGS(self):
@@ -96,7 +92,6 @@ class Config():
         else:
             return "tinytag"
 
-
     @property
     def IGNORE(self):
         """  Returns the ignore marker.
@@ -104,14 +99,12 @@ class Config():
         """
         return self.config['TAGS']['ignore']
 
-
     @property
     def SOUNDEX(self):
         """  Returns the Soundex marker.
              if true, uses Soundex for tags matching else use normal strings.
         """
         return self.config['TAGS']['soundex']
-
 
     @property
     def DB_FORMAT(self):
@@ -123,7 +116,6 @@ class Config():
             return "json"
         else:
             return "pickle"
-
 
     @property
     def DB_NAME(self):
@@ -138,7 +130,6 @@ class Config():
             return f"{location}\{filename}.{extension}"
         else:
             return f"{filename}.{extension}"
-
 
     @property
     def DB_LOCATION(self):
@@ -161,6 +152,12 @@ class Config():
         """
         return self.config['ZAP']['recycle']
 
+    @property
+    def EMPTY_DIR(self):
+        """  If set to True then delete empty directories.
+             If set to False ignore empty directories
+        """
+        return self.config['ZAP']['emptyDir']
 
     def _writeDefaultConfig(self):
         """ Write a default configure file.
@@ -168,7 +165,7 @@ class Config():
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '2020.24',
+        config['INFO'] = {'myVERSION': '2020.27',
                           'myNAME'   : 'pyMP3duplicate'}
 
         config['APPLICATION'] = {'notification': True}
@@ -184,7 +181,8 @@ class Config():
                               'location' : '',
                               'overwrite': False}
 
-        config['ZAP'] = {'recycle': True}
+        config['ZAP'] = {'recycle' : True,
+                         'emptyDir': True}
 
         st_toml = toml.dumps(config)
 
