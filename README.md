@@ -72,7 +72,7 @@ A Python MP3 Duplicate finder.
   -zD, --zapNoneMusic   Zap [DELETE] none music files.
   -cD, --checkDelete    Check database integrity and delete unwanted.
 
- Kevin Scott (C) 2020 :: pyMP3duplicate 2020.27
+ Kevin Scott (C) 2020 :: pyMP3duplicate 2020.28
 
 
 

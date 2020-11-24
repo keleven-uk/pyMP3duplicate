@@ -197,6 +197,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
     for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=2):
 
         if musicFile.suffix != ".mp3":                  # A non music file found.
+            if musicFile.is_dir(): continue             # Ignore directories - for loop picks up dirs like Dr. John.
             if mode == "build": continue                # Ignore non .mp3 files if in build mode.
             if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
             if musicFile.suffix == ".json": continue    # Ignore database if stored in target directory.
@@ -331,16 +332,17 @@ def parseArgs():
                         help="[Optional] list duplicates to file, Amend to previous.")
     parser.add_argument("-d", "--difference",
                         type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
-    parser.add_argument("-c", "--check", action="store_true", help="Check database integrity.")
     parser.add_argument("-b", "--build", action="store_true", help="Build the database only.")
     parser.add_argument("-n", "--number", action="store_true", help="Print the Number of Songs in the database.")
     parser.add_argument("-l", "--license", action="store_true", help="Print the Software License.")
     parser.add_argument("-v", "--version", action="store_true", help="Print the version of the application.")
+    parser.add_argument("-c", "--check", action="store_true", help="Check database integrity.")
+    parser.add_argument("-cD", "--checkDelete", action="store_true",
+                        help="Check database integrity and delete unwanted.")
     parser.add_argument("-xL", "--noLoad", action="store_true", help="Do not load database.")
     parser.add_argument("-xS", "--noSave", action="store_true", help="Do not save database.")
     parser.add_argument("-np", "--noPrint", action="store_true", help="Do Not Print Possible False Positives.")
     parser.add_argument("-zD", "--zapNoneMusic", action="store_true", help="Zap [DELETE] none music files.")
-    parser.add_argument("-cD", "--checkDelete", action="store_true", help="Check database integrity and delete unwanted.")
 
     args = parser.parse_args()
 

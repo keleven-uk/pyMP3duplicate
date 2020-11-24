@@ -1,4 +1,11 @@
-V2020.27
+V2020.28.
+
+    Corrected bug, if the music file was a non music file and delete is chosen.
+    Certain directories that contain a period could also be deleted.  [i.e. Dr.John].
+    Added a check so that directories are ignored.
+
+
+V2020.27.2029586
 
     Added user option emptyDir, which will find and delete empty directories.
     This is only active is -zD option is used.
