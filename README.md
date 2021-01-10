@@ -48,7 +48,8 @@
 
 To install dependencies pip -r requirements.txt
 
-usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-c] [-b] [-n] [-l] [-v] [-xL] [-xS] [-np] [-zD] [-cD]
+usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] 
+                                                            [-b] [-n] [-l] [-v] [-e] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
 
 A Python MP3 Duplicate finder.
 -----------------------
@@ -61,18 +62,19 @@ A Python MP3 Duplicate finder.
                         [Optional] list duplicates to file, Amend to previous.
   -d DIFFERENCE, --difference DIFFERENCE
                         Time difference between songs, default = 0.5s.
-  -c, --check           Check database integrity.
   -b, --build           Build the database only.
   -n, --number          Print the Number of Songs in the database.
   -l, --license         Print the Software License.
   -v, --version         Print the version of the application.
+  -e, --explorer        Load program working directory into file explorer.
+  -c, --check           Check database integrity.
+  -cD, --checkDelete    Check database integrity and delete unwanted.
   -xL, --noLoad         Do not load database.
   -xS, --noSave         Do not save database.
   -np, --noPrint        Do Not Print Possible False Positives.
   -zD, --zapNoneMusic   Zap [DELETE] none music files.
-  -cD, --checkDelete    Check database integrity and delete unwanted.
 
- Kevin Scott (C) 2020 :: pyMP3duplicate 2020.28
+ Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.29
 
 
 

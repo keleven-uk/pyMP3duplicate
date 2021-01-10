@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020>  <Kevin Scott>                                                     #                                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020-2021>  <Kevin Scott>                                                     #                                                                                                             #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 # usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERENCE] [-xL] [-xS] [-b] [-n] [-l] [-v]   #
@@ -7,7 +7,7 @@
 #     For changes see history.txt                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -175,7 +175,6 @@ def countSongs(sourceDir):
     print(f"... with a song count of {count}")
     return count
 
-
 ####################################################################################### scanMusic #############
 def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, zap):
     """  Scan the sourceDir, which should contain mp3 files.
@@ -238,7 +237,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
 
     count = count + noDups + duplicates  # Adjust for duplicates found.
 
-    if zap and myConfig.EMPTY_DIR: removeEmptyDir(sourceDir, duplicateFile)
+    if zap and myConfig.EMPTY_DIR and mode == "scan": removeEmptyDir(sourceDir, duplicateFile)
 
     logTextLine("", duplicateFile)
     if mode == "build":
@@ -312,6 +311,7 @@ def parseArgs():
          Checks the arguments and will exit if not valid.
 
          Exit code 0 - program has exited normally, after print version, licence or help.
+         Exit code 0 - Program has exited normally, after Loading program working directory into file explorer.
          Exit Code 1 - No source directory supplied.
          Exit code 2 - Source directory does not exist.
          Exit code 3 - Duplicate File Directory Does Not Exist.
@@ -322,10 +322,9 @@ def parseArgs():
         A Python MP3 Duplicate finder.
         -----------------------
         The program will scan a given directory and report duplicate MP3 files."""),
-        epilog=f" Kevin Scott (C) 2020 :: {myConfig.NAME} {myConfig.VERSION}")
+        epilog=f" Kevin Scott (C) 2020-2021 :: {myConfig.NAME} {myConfig.VERSION}")
 
-    parser.add_argument("-s", "--sourceDir",
-                        type=Path, action="store", default=False, help="directory of the music files [mp3].")
+    parser.add_argument("-s", "--sourceDir", type=Path, action="store", help="directory of the music files [mp3].")
     parser.add_argument("-f", "--dupFile", type=Path, action="store", default=False,
                         help="[Optional] list duplicates to file, start afresh.")
     parser.add_argument("-fA", "--dupFileAmend", type=Path, action="store", default=False,
@@ -336,6 +335,7 @@ def parseArgs():
     parser.add_argument("-n", "--number", action="store_true", help="Print the Number of Songs in the database.")
     parser.add_argument("-l", "--license", action="store_true", help="Print the Software License.")
     parser.add_argument("-v", "--version", action="store_true", help="Print the version of the application.")
+    parser.add_argument("-e", "--explorer", action="store_true", help="Load program working directory into file explorer.")
     parser.add_argument("-c", "--check", action="store_true", help="Check database integrity.")
     parser.add_argument("-cD", "--checkDelete", action="store_true",
                         help="Check database integrity and delete unwanted.")
@@ -358,7 +358,7 @@ def parseArgs():
         print("Goodbye.")
         exit(0)
 
-    if not args.sourceDir and not (args.check or args.checkDelete or args.number):
+    if not args.sourceDir and not (args.check or args.checkDelete or args.number or args.explorer):
         logger.error("No Source Directory Supplied.")
         print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
         parser.print_help()
@@ -396,7 +396,7 @@ def parseArgs():
         dfile = args.dupFileAmend
 
     return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number,
-            check, args.noPrint, args.zapNoneMusic)
+            check, args.noPrint, args.zapNoneMusic, args.explorer)
 
 
 ################################################################################### printNumberOfSongs() ######
@@ -428,6 +428,15 @@ def checkDatabase(check):
     exit(3)
 
 
+######################################################################################## loadExplorer() ######
+def loadExplorer():
+    """  Load program working directory into file explorer.
+    """
+    try:
+        os.startfile(os.getcwd(), "explore")
+    except NotImplementedError as error:
+        logger.error(error)
+    exit(0)
 ############################################################################################### __main__ ######
 
 if __name__ == "__main__":
@@ -460,10 +469,11 @@ if __name__ == "__main__":
     logger.debug(f"Using database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
     logger.debug(f"{mode}")
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer = parseArgs()
 
-    if number: printNumberOfSongs()  # Print on number of songs in library.
-    if check:  checkDatabase(check)  # Run data integrity check on library.
+    if number:   printNumberOfSongs()  # Print on number of songs in library.
+    if check:    checkDatabase(check)  # Run data integrity check on library.
+    if explorer: loadExplorer()        # Load program working directory n file explorer.
 
     flag = (True if duplicateFile else False)  # If no duplicateFile then print to screen.
     printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
@@ -487,7 +497,7 @@ if __name__ == "__main__":
         logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("build", sourceDir, duplicateFile, difference, songsCount, noPrint)
+        scanMusic("build", sourceDir, duplicateFile, difference, songsCount, noPrint, zap)
     else:
         logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
         logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)

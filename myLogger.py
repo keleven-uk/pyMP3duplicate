@@ -1,10 +1,10 @@
 ###############################################################################################################
-#    myLogger.py   Copyright (C) <2020>  <Kevin Scott>                                                        #
+#    myLogger.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                        #
 #                                                                                                             #
 #    A Wrapper for logging - based on https://www.toptal.com/python/in-depth-python-logging                   #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #

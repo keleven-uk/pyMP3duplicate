@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLibrary.py   Copyright (C) <2020>  <Kevin Scott>                                                       #
+#    myLibrary.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                       #
 #                                                                                                             #
 #    A class that acts has a wrapper around a dictionary access.                                              #
 #    The items to store are song files,                                                                       #
@@ -11,7 +11,7 @@
 #    Uses pickle to load and save the library.                                                                #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #

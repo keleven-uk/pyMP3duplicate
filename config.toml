@@ -4,10 +4,10 @@
 #   Configure files for pyMP3duplicates.py 
 #   location needs double \ i.e. c:\tmp\music - well, on windows any way. 
 #
-#   March 2020    (c) Kevin Scott 
+#   Copyright (C) <2020-2021>  <Kevin Scott>
 
 [INFO]
-myVERSION = "2020.28"
+myVERSION = "2021.29"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]

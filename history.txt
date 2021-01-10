@@ -1,4 +1,14 @@
-V2020.28.
+V2021.29
+
+    In pyMP3duplicate.py
+        RemoveEmptyDir is now only performed in scan mode.
+        Added -e option, Load program working directory into file explorer.
+            I find this useful :-)
+        Corrected bug, where the zap option was not been passed in build mode.
+    Amended all copyright to be 2020-2021.
+
+
+V2020.28.568b231
 
     Corrected bug, if the music file was a non music file and delete is chosen.
     Certain directories that contain a period could also be deleted.  [i.e. Dr.John].
