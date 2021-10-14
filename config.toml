@@ -1,13 +1,13 @@
-#   Configure files for pyMP3duplicates.py 
+#   Configure files for pyMP3duplicates.py
 #
-#   true and false are lower case 
-#   Configure files for pyMP3duplicates.py 
-#   location needs double \ i.e. c:\tmp\music - well, on windows any way. 
+#   true and false are lower case
+#   Configure files for pyMP3duplicates.py
+#   location needs double \ i.e. c:\tmp\music - well, on windows any way.
 #
 #   Copyright (C) <2020-2021>  <Kevin Scott>
 
 [INFO]
-myVERSION = "2021.29"
+myVERSION = "2021.30"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]

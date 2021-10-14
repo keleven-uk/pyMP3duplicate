@@ -1,4 +1,10 @@
-V2021.29
+V2021.30
+
+    Switched to alive_bar instead of tqdm for progress bar.
+        Added to requirements.txt.
+    Some more code formatting improvements, similar to below.
+
+V2021.29.4ff0f2d
 
     In pyMP3duplicate.py
         RemoveEmptyDir is now only performed in scan mode.

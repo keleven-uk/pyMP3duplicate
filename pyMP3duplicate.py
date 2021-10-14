@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020-2021>  <Kevin Scott>                                                     #                                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020-2021>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 # usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERENCE] [-xL] [-xS] [-b] [-n] [-l] [-v]   #
@@ -7,7 +7,7 @@
 #     For changes see history.txt                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -44,6 +44,7 @@ from send2trash import send2trash
 # from functools import lru_cache
 from libindic.soundex import Soundex
 from myExceptions import TagReadError
+from alive_progress import alive_bar
 from myLicense import printLongLicense, printShortLicense, logTextLine
 
 
@@ -193,47 +194,52 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
     ignored    = 0  # Number of duplicate songs that have been marked to ignore.
     falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
 
-    for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=2):
+    #for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=2):
+    
+    with alive_bar(songsCount, bar="circles", spinner="notes") as bar:
+        for musicFile in sourceDir.glob("**/*.*"):
 
-        if musicFile.suffix != ".mp3":                  # A non music file found.
-            if musicFile.is_dir(): continue             # Ignore directories - for loop picks up dirs like Dr. John.
-            if mode == "build": continue                # Ignore non .mp3 files if in build mode.
-            if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
-            if musicFile.suffix == ".json": continue    # Ignore database if stored in target directory.
-            zapNoneMusicFile(musicFile, zap)
-            nonMusic += 1
-            continue
+            if musicFile.suffix != ".mp3":                  # A non music file found.
+                if musicFile.is_dir(): continue             # Ignore directories - for loop picks up dirs like Dr. John.
+                if mode == "build": continue                # Ignore non .mp3 files if in build mode.
+                if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
+                if musicFile.suffix == ".json": continue    # Ignore database if stored in target directory.
+                zapNoneMusicFile(musicFile, zap)
+                nonMusic += 1
+                continue
 
-        key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+            key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
 
-        if songLibrary.hasKey(key):
-            if mode == "build": continue  # Only analyse songs if in scan mode.
-            # If build mode, skip.
+            if songLibrary.hasKey(key):
+                if mode == "build": continue  # Only analyse songs if in scan mode.
+                # If build mode, skip.
 
-            songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
-            if abs(musicDuration - songDuration) < difference:
-                if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
-                    if checkToIgnore(musicDuplicate, songDuplicate):
-                        ignored += 1
-                        continue  # Do not print ignore duplicate
-                message = " Duplicate Found "
-                if myConfig.SOUNDEX and not checktags(musicFile, songFile):
-                    falsePos += 1
-                    if not noPrint:
-                        message = " Possible False Positive "
-                    else:
-                        continue  # Do not print Possible False Positives
-                logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
-                duplicates += 1
-            else:  # if abs(musicDuration - songDuration) < difference:
-                noDups += 1
+                if abs(musicDuration - songDuration) < difference:
+                    if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
+                        if checkToIgnore(musicDuplicate, songDuplicate):
+                            ignored += 1
+                            continue  # Do not print ignore duplicate
+                    message = " Duplicate Found "
+                    if myConfig.SOUNDEX and not checktags(musicFile, songFile):
+                        falsePos += 1
+                        if not noPrint:
+                            message = " Possible False Positive "
+                        else:
+                            continue  # Do not print Possible False Positives
+                    logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
+                    logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                    logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                    duplicates += 1
+                else:  # if abs(musicDuration - songDuration) < difference:
+                    noDups += 1
 
-        else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
-            songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
-            count += 1
+            else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
+                songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
+                count += 1
+                
+            bar()   #  Update alive_bar.
 
     count = count + noDups + duplicates  # Adjust for duplicates found.
 

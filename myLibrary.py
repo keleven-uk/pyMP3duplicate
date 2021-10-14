@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLibrary.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                       #
+#    myLibrary.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                  #
 #                                                                                                             #
 #    A class that acts has a wrapper around a dictionary access.                                              #
 #    The items to store are song files,                                                                       #
@@ -8,10 +8,11 @@
 #        or any unique token generated from the song.                                                         #
 #      The data is a list [songFile, songDuration, ignore flag]                                               #
 #                                                                                                             #
-#    Uses pickle to load and save the library.                                                                #
+#    Uses pickle or json to load and save the library.                                                        #
+#    The format is specified when the library is created.                                                     #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
