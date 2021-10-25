@@ -1,14 +1,13 @@
-alive-progress==1.6.2
+about-time==3.1.1
+alive-progress==2.1.0
 colorama==0.4.4
 deprecation==2.1.0
 eyeD3==0.9.5
 filetype==1.0.7
+grapheme==0.6.0
 libindic-soundex==1.0.2
 libindic-utils==1.0.3
-llvmlite==0.36.0
 mutagen==1.45.1
-numba==0.53.1
-numpy==1.21.2
 packaging==20.4
 plyer==1.4.3
 pyparsing==2.4.7

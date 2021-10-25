@@ -24,6 +24,7 @@
 
 
 import os
+import sys
 import time
 import eyed3
 import shutil
@@ -186,6 +187,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
          mode = "build" -- the sourceDir is scanned and the database is built only, duplicates are not checked.
 
          Uses tqdm - a very cool progress bar for console windows.
+         Now uses alive_bar a even more cool progress bar for console windows.
     """
     count      = 0  # Number of song files to check.
     duplicates = 0  # Number of duplicate songs.
@@ -195,7 +197,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
     falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
 
     #for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=2):
-    
+
     with alive_bar(songsCount, bar="circles", spinner="notes") as bar:
         for musicFile in sourceDir.glob("**/*.*"):
 
@@ -238,7 +240,7 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
             else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
                 songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
                 count += 1
-                
+
             bar()   #  Update alive_bar.
 
     count = count + noDups + duplicates  # Adjust for duplicates found.
@@ -354,6 +356,8 @@ def parseArgs():
 
     if args.version:
         printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
+        print(f"Running on {sys.version} Python")
+        logger.info(f"Running on {sys.version} Python")
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION}: version")
         print("Goodbye.")
         exit(0)
@@ -461,6 +465,8 @@ if __name__ == "__main__":
     timer       = myTimer.Timer()
     phonetic    = Soundex()
 
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer = parseArgs()
+
     timer.Start
 
     if myConfig.SOUNDEX:
@@ -474,8 +480,6 @@ if __name__ == "__main__":
     logger.info(message)
     logger.debug(f"Using database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
     logger.debug(f"{mode}")
-
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer = parseArgs()
 
     if number:   printNumberOfSongs()  # Print on number of songs in library.
     if check:    checkDatabase(check)  # Run data integrity check on library.

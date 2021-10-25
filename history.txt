@@ -1,8 +1,18 @@
-V2021.30
+V2021.31
+
+    Amended the -v version to also show Python version.
+        Need to import sys.
+    Cleaned up requirements.txt
+    Moved the call to parseArgs() to earlier in the main code.
+
+
+V2021.30.0723d68
 
     Switched to alive_bar instead of tqdm for progress bar.
-        Added to requirements.txt.
+        Added to requirements.txt.git add .
     Some more code formatting improvements, similar to below.
+    Amended the -v version to also show Python version.
+
 
 V2021.29.4ff0f2d
 
