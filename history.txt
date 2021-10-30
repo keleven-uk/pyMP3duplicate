@@ -1,10 +1,33 @@
-V2021.31
+V2021.32
+
+    Created branch python_3.10, to test Python V3.10
+    Amended pyMP3Duplicate.py to use the new match [case] statement instead of
+    multiple if's in the scanTags function.
+    Upgraded all packages to test on V3.10 - all seem to work.
+
+
+V2021.31.f554fea
 
     Amended the -v version to also show Python version.
         Need to import sys.
     Cleaned up requirements.txt
     Moved the call to parseArgs() to earlier in the main code.
 
+    -----------------------------------------------------------------------------------
+    File                                            blank        comment           code
+    -----------------------------------------------------------------------------------
+    pyMP3duplicate\pyMP3duplicate.py                   84             99            357
+    pyMP3duplicate\myLibrary.py                        35             73            100
+    pyMP3duplicate\myConfig.py                         34             68             99
+    pyMP3duplicate\myTimer.py                          16             40             32
+    pyMP3duplicate\myLicense.py                         8             39             20
+    pyMP3duplicate\config.toml                          6              7             19
+    pyMP3duplicate\myLogger.py                          8             29             18
+    pyMP3duplicate\myExceptions.py                      3             20             11
+    -----------------------------------------------------------------------------------
+    SUM:                                              194            375            656
+    -----------------------------------------------------------------------------------
+    stats by cloc
 
 V2021.30.0723d68
 

@@ -114,45 +114,46 @@ def scanTags(musicFile):
 
          If there is a problem reading the tags, raise an exception.
     """
-    if myConfig.TAGS == "tinytag":
-        try:  # Tries to read tags from the music file.
-            tags = TinyTag.get(musicFile)
-        except Exception as e:  # Can't read tags - flag as error.
-            raise TagReadError(f"Tinytag error reading tags {musicFile}")
-        artist = removeThe(tags.artist)
-        title = removeThe(tags.title)
-        duration = tags.duration
-        duplicate = ""
-
-    elif myConfig.TAGS == "eyed3":
-        try:
-            tags = eyed3.load(musicFile)
-        except Exception as e:
-            logger.error(f"Eyed3 error reading tags {musicFile}")
-            raise TagReadError(f"Eyed3 error reading tags {musicFile}")
-        artist = removeThe(tags.tag.artist)
-        title = removeThe(tags.tag.title)
-        duration = tags.info.time_secs
-        duplicate = ""
-
-    elif myConfig.TAGS == "mutagen":
-        try:
-            tags = ID3(musicFile)
-            audio = MP3(musicFile)
-        except Exception as e:
-            raise TagReadError(f"Mutagen error reading tags {musicFile}")
-        artist = removeThe(tags["TPE1"][0])
-        title = removeThe(tags["TIT2"][0])
-        duration = audio.info.length
-        try:  # Try to read duplicate tag.
-            duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
-        except Exception as e:
+    match myConfig.TAGS:
+        case "tinytag":
+            try:  # Tries to read tags from the music file.
+                tags = TinyTag.get(musicFile)
+            except Exception as e:  # Can't read tags - flag as error.
+                raise TagReadError(f"Tinytag error reading tags {musicFile}")
+            artist = removeThe(tags.artist)
+            title = removeThe(tags.title)
+            duration = tags.duration
             duplicate = ""
-    else:
-        # Should not happen, tinytag should be returned by default.
-        logger.error("Unknown use option for Tags Module.")
-        print(f"{colorama.Fore.RED}Unknown use option for Tags Module.{colorama.Fore.RESET}")
-        exit(4)
+
+        case "eyed3":
+            try:
+                tags = eyed3.load(musicFile)
+            except Exception as e:
+                logger.error(f"Eyed3 error reading tags {musicFile}")
+                raise TagReadError(f"Eyed3 error reading tags {musicFile}")
+            artist = removeThe(tags.tag.artist)
+            title = removeThe(tags.tag.title)
+            duration = tags.info.time_secs
+            duplicate = ""
+
+        case "mutagen":
+            try:
+                tags = ID3(musicFile)
+                audio = MP3(musicFile)
+            except Exception as e:
+                raise TagReadError(f"Mutagen error reading tags {musicFile}")
+            artist = removeThe(tags["TPE1"][0])
+            title = removeThe(tags["TIT2"][0])
+            duration = audio.info.length
+            try:  # Try to read duplicate tag.
+                duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
+            except Exception as e:
+                duplicate = ""
+        case _:
+            # Should not happen, tinytag should be returned by default.
+            logger.error("Unknown user option for Tags Module.")
+            print(f"{colorama.Fore.RED}Unknown user option for Tags Module.{colorama.Fore.RESET}")
+            exit(4)
 
     if not duration:  # In case there is no valid duration time on the mp3 file.
         musicDuration = 0
