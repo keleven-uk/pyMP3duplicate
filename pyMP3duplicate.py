@@ -118,6 +118,7 @@ def scanTags(musicFile):
         try:  # Tries to read tags from the music file.
             tags = TinyTag.get(musicFile)
         except Exception as e:  # Can't read tags - flag as error.
+            logger.error(f"Tinytag error reading tags :: {e} ")
             raise TagReadError(f"Tinytag error reading tags {musicFile}")
         artist = removeThe(tags.artist)
         title = removeThe(tags.title)
@@ -128,7 +129,7 @@ def scanTags(musicFile):
         try:
             tags = eyed3.load(musicFile)
         except Exception as e:
-            logger.error(f"Eyed3 error reading tags {musicFile}")
+            logger.error(f"Eyed3 error reading tags  :: {musicFile}")
             raise TagReadError(f"Eyed3 error reading tags {musicFile}")
         artist = removeThe(tags.tag.artist)
         title = removeThe(tags.tag.title)
@@ -140,6 +141,7 @@ def scanTags(musicFile):
             tags = ID3(musicFile)
             audio = MP3(musicFile)
         except Exception as e:
+            logger.error(f"Nutagen error reading tags :: {e} ")
             raise TagReadError(f"Mutagen error reading tags {musicFile}")
         artist = removeThe(tags["TPE1"][0])
         title = removeThe(tags["TIT2"][0])
@@ -210,7 +212,11 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
                 nonMusic += 1
                 continue
 
-            key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+            try:
+                key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+            except Exception as e:  # Can't read tags - flag as error.
+                logger.debug(f"Raised exception at calling scanTags :: {e} ")
+                continue
 
             if songLibrary.hasKey(key):
                 if mode == "build": continue  # Only analyse songs if in scan mode.
@@ -286,10 +292,13 @@ def removeEmptyDir(sourceDir, duplicateFile):
                 logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
                 logTextLine(f"{musicDir}", duplicateFile)
 
-                if myConfig.ZAP_RECYCLE:
-                    send2trash(str(musicDir))  # Move to recycle bin.
-                else:
-                    shutil.rmtree(musicDir, ignore_errors=True, onerror=None)  # Permanently remove directory
+                try:
+                    if myConfig.ZAP_RECYCLE:
+                        send2trash(str(musicDir))  # Move to recycle bin.
+                    else:
+                        shutil.rmtree(musicDir, ignore_errors=True, onerror=None)  # Permanently remove directory
+                except OSError:
+                    logger.error(f"ERROR : Can't delete Directory : {musicDir}")
 
     if noOfDirs != 0:
         message = f"Removed {noOfDirs} empty directories in  :: {timeDir.Stop}"

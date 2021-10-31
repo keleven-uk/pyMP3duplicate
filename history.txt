@@ -1,4 +1,14 @@
-V2021.31
+V2021.33.
+
+    When upgraded Tinytag to V1.6, it started throwing errors that it can't read some ID3 tags.
+    This crashed the program.  Added try except clauses to the scanTags function to catch these.
+    The error look like internal to Tinytag, I was just not catching them.
+    Added a try except to the calling of scantags, to I can pass to next next music
+    file if an error is found.
+    Also added a try except clause to the removeEmptryDir function.
+
+
+V2021.31.f554fea
 
     Amended the -v version to also show Python version.
         Need to import sys.
