@@ -1,4 +1,28 @@
-V2021.32
+** all builds are to the master branch, unless stated.
+
+V2021.34    [branch python_3.10]
+
+    Made changes from build 33 below to the python_3.10 branch.
+    Tried pyjion to test for increase in speed - seems to be very small.
+    Amended countSongs to build a list of filenames, so this can be passed to scanMusic.
+        This was an attempt to increase the speed, eliminating a second file system scan.
+    Moved the deletion of empty directories and non music file into the same function - removeUnwanted.
+        This is not called after scanMusic and not from within.
+        This was done to clean up the logic and the calling of scanMusic.
+    Updated README.md
+
+
+V2021.33.2140d3f
+
+    When upgraded Tinytag to V1.6, it started throwing errors that it can't read some ID3 tags.
+    This crashed the program.  Added try except clauses to the scanTags function to catch these.
+    The error look like internal to Tinytag, I was just not catching them.
+    Added a try except to the calling of scantags, to I can pass to next next music
+    file if an error is found.
+    Also added a try except clause to the removeEmptryDir function.
+
+
+V2021.32    [branch python_3.10]
 
     Created branch python_3.10, to test Python V3.10
     Amended pyMP3Duplicate.py to use the new match [case] statement instead of

@@ -28,7 +28,7 @@
     The -zD flag if specified zap [delete] none music files.
         Delete to recycle bin or plainf delete is set via a user option.
         Will find and delete empty directories, selectable by user option.
-         
+
     Added tqdm - a very cool progress bar for console windows.
 
     Added the ability to use different modules to read the mp3 tags.
@@ -48,11 +48,13 @@
 
 To install dependencies pip -r requirements.txt
 
-usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] 
-                                                            [-b] [-n] [-l] [-v] [-e] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
+usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-b] [-n] [-l] [-v] [-e] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
 
 A Python MP3 Duplicate finder.
 -----------------------
+The program will scan a given directory and report duplicate MP3 files.
+
+options:
   -h, --help            show this help message and exit
   -s SOURCEDIR, --sourceDir SOURCEDIR
                         directory of the music files [mp3].
@@ -74,7 +76,7 @@ A Python MP3 Duplicate finder.
   -np, --noPrint        Do Not Print Possible False Positives.
   -zD, --zapNoneMusic   Zap [DELETE] none music files.
 
- Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.29
+ Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.34
 
 
 
