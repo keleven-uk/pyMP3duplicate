@@ -42,14 +42,14 @@ from plyer import notification
 from send2trash import send2trash
 #from functools import lru_cache
 from libindic.soundex import Soundex
-from myExceptions import TagReadError
 from alive_progress import alive_bar
 
-import myTimer
-import myConfig
-import myLogger
-import myLibrary
-from myLicense import printLongLicense, printShortLicense, logTextLine
+from Lib import myTimer
+from Lib import myConfig
+from Lib import myLogger
+from Lib import myLibrary
+from Lib import myLicense
+from Lib import myExceptions
 
 #try:
     #import pyjion
@@ -124,7 +124,7 @@ def scanTags(musicFile):
                 tags = TinyTag.get(musicFile)
             except Exception as e:  # Can't read tags - flag as error.
                 logger.error(f"Tinytag error reading tags :: {e} ")
-                raise TagReadError(f"Tinytag error reading tags {musicFile}")
+                raise myExceptions.TagReadError(f"Tinytag error reading tags {musicFile}")
             artist    = removeThe(tags.artist)
             title     = removeThe(tags.title)
             duration  = tags.duration
@@ -135,7 +135,7 @@ def scanTags(musicFile):
                 tags = eyed3.load(musicFile)
             except Exception as e:
                 logger.error(f"Eyed3 error reading tags :: {musicFile}")
-                raise TagReadError(f"Eyed3 error reading tags {musicFile}")
+                raise myExceptions.TagReadError(f"Eyed3 error reading tags {musicFile}")
             artist    = removeThe(tags.tag.artist)
             title     = removeThe(tags.tag.title)
             duration  = tags.info.time_secs
@@ -147,7 +147,7 @@ def scanTags(musicFile):
                 audio = MP3(musicFile)
             except Exception as e:
                 logger.error(f"Nutagen error reading tags :: {e} ")
-                raise TagReadError(f"Mutagen error reading tags {musicFile}")
+                raise myExceptions.TagReadError(f"Mutagen error reading tags {musicFile}")
             artist   = removeThe(tags["TPE1"][0])
             title    = removeThe(tags["TIT2"][0])
             duration = audio.info.length
@@ -228,9 +228,9 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint):
                             message = " Possible False Positive "
                         else:
                             continue  # Do not print Possible False Positives
-                    logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                    logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                    logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                    myLicense.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
+                    myLicense.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                    myLicense.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
                     duplicates += 1
                 else:  # if abs(musicDuration - songDuration) < difference:
                     noDups += 1
@@ -242,22 +242,22 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint):
 
     count = songLibrary.noOfItems + noDups + duplicates  # Adjust for duplicates found.
 
-    logTextLine("", duplicateFile)
+    myLicense.logTextLine("", duplicateFile)
     if mode == "build":
-        logTextLine(f"{count} music files found.", duplicateFile)
+        myLicense.logTextLine(f"{count} music files found.", duplicateFile)
     elif ignored:
-        logTextLine(f"{count} music files found with {duplicates} duplicates, with {ignored} songs.", duplicateFile)
+        myLicense.logTextLine(f"{count} music files found with {duplicates} duplicates, with {ignored} songs.", duplicateFile)
     else:
-        logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
+        myLicense.logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
 
     if noDups:
-        logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
+        myLicense.logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
 
     if falsePos:
         if noPrint:
-            logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
+            myLicense.logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
         else:
-            logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
+            myLicense.logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
 ############################################################################################## removeEmptyDir( #######
 def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap):
@@ -283,16 +283,16 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap):
         if emptyDir and musicFile.is_dir():
             if not len(os.listdir(musicFile)):
                 noOfDirs += 1
-                logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
-                logTextLine(f"{musicFile}", duplicateFile)
+                myLicense.logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
+                myLicense.logTextLine(f"{musicFile}", duplicateFile)
                 zapEmptyDir(musicFile)
 
         if zap and musicFile.is_file():
             if musicFile.suffix != ".mp3":                  # A non music file found.
                 if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
                 if musicFile.suffix == ".json"  : continue  # Ignore database if stored in target directory.
-                logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
-                logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
+                myLicense.logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
+                myLicense.logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
                 zapNoneMusicFile(musicFile)
                 nonMusic += 1
 
@@ -304,8 +304,8 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap):
 
     if message != "":
         print(message)
-        logTextLine("", duplicateFile)
-        logTextLine(message, duplicateFile)
+        myLicense.logTextLine("", duplicateFile)
+        myLicense.logTextLine(message, duplicateFile)
         logger.info(message)
 
 ################################################################################################## zapEmptyDir ######
@@ -375,7 +375,7 @@ def parseArgs():
     args = parser.parse_args()
 
     if args.version:
-        printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
+        myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
         print(f"Running on {sys.version} Python")
         logger.info(f"Running on {sys.version} Python")
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION}: version")
@@ -383,7 +383,7 @@ def parseArgs():
         exit(0)
 
     if args.license:
-        printLongLicense(myConfig.NAME, myConfig.VERSION)
+        myLicense.printLongLicense(myConfig.NAME, myConfig.VERSION)
         logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Printed Licence")
         print("Goodbye.")
         exit(0)
@@ -432,7 +432,7 @@ def parseArgs():
 def printNumberOfSongs():
     """  Print the number of songs in the library.
     """
-    printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
+    myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
     l = songLibrary.noOfItems
     print(f"Song Library has {l} songs")
     logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Song Library has {l} songs")
@@ -448,7 +448,7 @@ def checkDatabase(check):
     """
     message = "Running Database Integrity Check"
     if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
-    printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
+    myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
     logger.info(message)
     songLibrary.check(check)
     print("Goodbye.")
@@ -471,15 +471,16 @@ if __name__ == "__main__":
 
     startTime = time.time()
 
-    icon    = "tea.ico"  # icon used by notifications
+    icon    = "resources\\tea.ico"  # icon used by notifications
     timeout = 5  # timeout used by notifications in seconds
 
     myConfig = myConfig.Config()  # Need to do this first.
 
-    DBpath = Path(myConfig.DB_LOCATION + myConfig.DB_NAME)
+    DBpath = Path("data", myConfig.DB_LOCATION + myConfig.DB_NAME)
+    LGpath = "data\\" +myConfig.NAME +".log"                     #  Must be a string for a logger path.
 
     songLibrary = myLibrary.Library(DBpath, myConfig.DB_FORMAT)  # Create the song library.
-    logger      = myLogger.get_logger(myConfig.NAME + ".log")  # Create the logger.
+    logger      = myLogger.get_logger(LGpath)                    # Create the logger.
     timer       = myTimer.Timer()
     phonetic    = Soundex()
 
@@ -504,7 +505,7 @@ if __name__ == "__main__":
     if explorer: loadExplorer()        # Load program working directory n file explorer.
 
     flag = (True if duplicateFile else False)  # If no duplicateFile then print to screen.
-    printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
+    myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
 
     if noLoad or build:
         logger.debug("Not Loading database")
@@ -521,15 +522,15 @@ if __name__ == "__main__":
     songsCount = countSongs(sourceDir, fileList)
 
     if build:
-        logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
+        myLicense.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
                     duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
+        myLicense.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
         scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint)
     else:
-        logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
+        myLicense.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
+        myLicense.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
         scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint)
@@ -547,9 +548,9 @@ if __name__ == "__main__":
 
     message = f"{myConfig.NAME} Completed :: {timeStop}"
 
-    logTextLine("", duplicateFile)
-    logTextLine(message, duplicateFile)
-    logTextLine("", duplicateFile)
+    myLicense.logTextLine("", duplicateFile)
+    myLicense.logTextLine(message, duplicateFile)
+    myLicense.logTextLine("", duplicateFile)
     print(message)
 
     #logger.info(f"{removeThe.cache_info()}")

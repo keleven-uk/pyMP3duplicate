@@ -1,5 +1,33 @@
 ** all builds are to the master branch, unless stated.
 
+
+V2021.35    [branch python_3.10]
+
+	Tried to make the directory structure less cluttered.
+	It now look like this
+
+	config.toml
+	LICENCE.txt
+	README.md
+	requirements.txt
+	data\
+	  |  dup.pickle			    [database file, not git tracked]
+	  |  pyMP3duplicate.log		[logging file,  not git tracked]
+	docs\
+	  |  help\
+	  |  history.txt
+	Lib\
+	  |  __init__.py
+	  |  myConfig.py
+	  |  myExceptions.py
+	  |  myLibrary.py
+	  |  myLicense.py
+	  |  myLogger.py
+	  |  myTimer.py
+	resources\
+	  |  tea.icon
+
+
 V2021.34    [branch python_3.10]
 
     Made changes from build 33 below to the python_3.10 branch.
