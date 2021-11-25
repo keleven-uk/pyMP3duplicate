@@ -48,7 +48,7 @@
 
 To install dependencies pip -r requirements.txt
 
-usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-b] [-n] [-l] [-v] [-e] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
+usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-b] [-n] [-l] [-v] [-e] [-t] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
 
 A Python MP3 Duplicate finder.
 -----------------------
@@ -69,6 +69,7 @@ options:
   -l, --license         Print the Software License.
   -v, --version         Print the version of the application.
   -e, --explorer        Load program working directory into file explorer.
+  -t, --checkThe        Check for a artist for trailing ',the'.
   -c, --check           Check database integrity.
   -cD, --checkDelete    Check database integrity and delete unwanted.
   -xL, --noLoad         Do not load database.
@@ -76,7 +77,7 @@ options:
   -np, --noPrint        Do Not Print Possible False Positives.
   -zD, --zapNoneMusic   Zap [DELETE] none music files.
 
- Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.34
+ Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.36
 
 
 

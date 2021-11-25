@@ -90,8 +90,7 @@ celerybeat-schedule
 .venv
 venv/
 ENV/
-env_3.9.6/
-env_3.10/
+env_3.10.0/
 
 # Spyder project settings
 .spyderproject

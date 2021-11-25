@@ -111,6 +111,17 @@ def removeThe(name):
     else:
         return ""
 
+####################################################################################### checkThe #############
+#@lru_cache()
+def trailingThe(name):
+    """   Checks the name for a trailing the, i.e.  Shadows, the instead of The Shadows.
+          Returns True is found else returns False.
+    """
+
+    if name:
+        n = name.lower()
+        return n.endswith("the")
+
 ####################################################################################### scanTags ##############
 def scanTags(musicFile):
     """  Scans the musicfile for the required tags.
@@ -185,7 +196,7 @@ def countSongs(sourceDir, fileList):
     return len(fileList)
 
 ####################################################################################### scanMusic #############
-def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint):
+def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe):
     """  Scan the list fileList, which should contain mp3 files only.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then the two are checked.
@@ -201,6 +212,7 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint):
     noDups     = 0  # Number of duplicate songs that fall outside of the time difference.
     ignored    = 0  # Number of duplicate songs that have been marked to ignore.
     falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
+    noTrailing = 0  # Number of songs that have a trailing the  i.e.  Shadows, the instead of The Shadows.
 
     with alive_bar(songsCount, bar="circles", spinner="notes") as bar:
         for musicFile in fileList:
@@ -210,6 +222,11 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint):
             except Exception as e:  # Can't read tags - flag as error.
                 logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
+
+            if checkThe and trailingThe(artist):
+                myLicense.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
+                myLicense.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
+                noTrailing +=1
 
             if songLibrary.hasKey(key):
                 if mode == "build": continue  # Only analyse songs if in scan mode.
@@ -252,6 +269,9 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint):
 
     if noDups:
         myLicense.logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
+
+    if noTrailing:
+        myLicense.logTextLine(f" Found possible {noTrailing} artists with a trailing 'the' in their name.", duplicateFile)
 
     if falsePos:
         if noPrint:
@@ -364,9 +384,9 @@ def parseArgs():
     parser.add_argument("-l", "--license", action="store_true", help="Print the Software License.")
     parser.add_argument("-v", "--version", action="store_true", help="Print the version of the application.")
     parser.add_argument("-e", "--explorer", action="store_true", help="Load program working directory into file explorer.")
+    parser.add_argument("-t", "--checkThe", action="store_true", help="Check for a artist for trailing ',the'.")
     parser.add_argument("-c", "--check", action="store_true", help="Check database integrity.")
-    parser.add_argument("-cD", "--checkDelete", action="store_true",
-                        help="Check database integrity and delete unwanted.")
+    parser.add_argument("-cD", "--checkDelete", action="store_true", help="Check database integrity and delete unwanted.")
     parser.add_argument("-xL", "--noLoad", action="store_true", help="Do not load database.")
     parser.add_argument("-xS", "--noSave", action="store_true", help="Do not save database.")
     parser.add_argument("-np", "--noPrint", action="store_true", help="Do Not Print Possible False Positives.")
@@ -426,7 +446,7 @@ def parseArgs():
         dfile = args.dupFileAmend
 
     return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number,
-            check, args.noPrint, args.zapNoneMusic, args.explorer)
+            check, args.noPrint, args.zapNoneMusic, args.explorer, args.checkThe)
 
 ################################################################################### printNumberOfSongs() ######
 def printNumberOfSongs():
@@ -484,7 +504,7 @@ if __name__ == "__main__":
     timer       = myTimer.Timer()
     phonetic    = Soundex()
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer, checkThe = parseArgs()
 
     timer.Start
 
@@ -527,14 +547,15 @@ if __name__ == "__main__":
         myLicense.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint)
+        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe)
     else:
         myLicense.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
         myLicense.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint)
+        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe)
         removeUnwanted(sourceDir, duplicateFile, myConfig.EMPTY_DIR, zap)
+
 
     if noSave:
         logger.debug("Not Saving database")

@@ -1,6 +1,13 @@
 ** all builds are to the master branch, unless stated.
 
 
+V2021.36    [branch python_3.10]
+
+    Added an option to check the artist field for trailing 'the'
+        i.e.  "Shadows, The" instead of "The Shadows".
+    If one is found an entry is either printed to screen or added to duplicate file.
+
+
 V2021.35    [branch python_3.10]
 
 	Tried to make the directory structure less cluttered.
