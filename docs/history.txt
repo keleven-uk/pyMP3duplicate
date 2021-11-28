@@ -1,6 +1,17 @@
 ** all builds are to the master branch, unless stated.
 
 
+V2021.37    [branch python_3.10]
+
+    Renamed Lib directory to src.
+    Created a new directory utils under src.
+    Moved the functions removeThe(). trailingThe(), createKey() & loadExplorer()
+    to src/utils/duplicateUtils.py
+    Moved the functions removeUnwanted(),zapEmptryDir() & zapFile()
+    to src/utils/zapUtils.py
+    Amended the main scripts to import and call the new utils functions.
+
+
 V2021.36    [branch python_3.10]
 
     Added an option to check the artist field for trailing 'the'

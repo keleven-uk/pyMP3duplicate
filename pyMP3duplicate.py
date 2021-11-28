@@ -24,7 +24,6 @@
 #                                                                                                             #
 ###############################################################################################################
 
-
 import os
 import sys
 import time
@@ -39,23 +38,24 @@ from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
 from plyer import notification
-from send2trash import send2trash
 #from functools import lru_cache
-from libindic.soundex import Soundex
 from alive_progress import alive_bar
 
-from Lib import myTimer
-from Lib import myConfig
-from Lib import myLogger
-from Lib import myLibrary
-from Lib import myLicense
-from Lib import myExceptions
+import src.myTimer as myTimer
+import src.myConfig as myConfig
+import src.myLogger as myLogger
+import src.myLibrary as myLibrary
+import src.myLicense as myLicense
+import src.myExceptions as myExceptions
+import src.utils.zapUtils as zapUtils
+import src.utils.duplicateUtils as duplicateUtils
 
-#try:
-    #import pyjion
-    #pyjion.enable()
-#except:
-    #pass
+
+try:
+    import pyjion
+    pyjion.enable()
+except:
+    pass
 
 ####################################################################################### checktags #############
 def checktags(musicFile, songFile):
@@ -68,16 +68,16 @@ def checktags(musicFile, songFile):
     except Exception as e:  # Can't read tags - log as error.
         logger.error(f"ERROR : Can't read tags : {musicFile}")
         return False
-    artist1 = removeThe(tags.artist)
-    title1 = removeThe(tags.title)
+    artist1 = duplicateUtils.removeThe(tags.artist)
+    title1 = duplicateUtils.removeThe(tags.title)
 
     try:  # Tries to read tags from the music file.
         tags = TinyTag.get(songFile)
     except Exception as e:  # Can't read tags - log as error.
         logger.error(f"ERROR : Can't read tags : {songFile}")
         return False
-    artist2 = removeThe(tags.artist)
-    title2  = removeThe(tags.title)
+    artist2 = duplicateUtils.removeThe(tags.artist)
+    title2  = duplicateUtils.removeThe(tags.title)
 
     return True if (artist1 == artist2) and (title1 == title2) else False
 
@@ -90,37 +90,6 @@ def checkToIgnore(musicDuplicate, songDuplicate):
         return True
     else:
         return False
-
-####################################################################################### createKey #############
-def createKey(artist, title):
-    """ Creates the key from the artist and title.
-        key is either formed from string substitution or created from the soundex of the string.
-    """
-    return phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX else f"{artist}:{title}"
-
-####################################################################################### removeThe #############
-#@lru_cache()
-def removeThe(name):
-    """  Removes 'the' from the from the beginning of artist and title if present.
-         Mainly a problem with artist, to be honest.
-         Name is returned lower case.
-    """
-    if name:
-        n = name.lower()
-        return name[4:] if n.startswith("the") else name
-    else:
-        return ""
-
-####################################################################################### checkThe #############
-#@lru_cache()
-def trailingThe(name):
-    """   Checks the name for a trailing the, i.e.  Shadows, the instead of The Shadows.
-          Returns True is found else returns False.
-    """
-
-    if name:
-        n = name.lower()
-        return n.endswith("the")
 
 ####################################################################################### scanTags ##############
 def scanTags(musicFile):
@@ -136,8 +105,8 @@ def scanTags(musicFile):
             except Exception as e:  # Can't read tags - flag as error.
                 logger.error(f"Tinytag error reading tags :: {e} ")
                 raise myExceptions.TagReadError(f"Tinytag error reading tags {musicFile}")
-            artist    = removeThe(tags.artist)
-            title     = removeThe(tags.title)
+            artist    = duplicateUtils.removeThe(tags.artist)
+            title     = duplicateUtils.removeThe(tags.title)
             duration  = tags.duration
             duplicate = ""
 
@@ -147,8 +116,8 @@ def scanTags(musicFile):
             except Exception as e:
                 logger.error(f"Eyed3 error reading tags :: {musicFile}")
                 raise myExceptions.TagReadError(f"Eyed3 error reading tags {musicFile}")
-            artist    = removeThe(tags.tag.artist)
-            title     = removeThe(tags.tag.title)
+            artist    = duplicateUtils.removeThe(tags.tag.artist)
+            title     = duplicateUtils.removeThe(tags.tag.title)
             duration  = tags.info.time_secs
             duplicate = ""
 
@@ -159,8 +128,8 @@ def scanTags(musicFile):
             except Exception as e:
                 logger.error(f"Nutagen error reading tags :: {e} ")
                 raise myExceptions.TagReadError(f"Mutagen error reading tags {musicFile}")
-            artist   = removeThe(tags["TPE1"][0])
-            title    = removeThe(tags["TIT2"][0])
+            artist   = duplicateUtils.removeThe(tags["TPE1"][0])
+            title    = duplicateUtils.emoveThe(tags["TIT2"][0])
             duration = audio.info.length
             try:  # Try to read duplicate tag.
                 duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
@@ -177,7 +146,7 @@ def scanTags(musicFile):
     else:
         musicDuration = round(duration, 2)
 
-    key = createKey(artist, title)
+    key = duplicateUtils.createKey(artist, title, myConfig.SOUNDEX)
     return key, musicDuration, duplicate, artist, title
 
 ####################################################################################### countSongs ############
@@ -223,7 +192,7 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
                 logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
 
-            if checkThe and trailingThe(artist):
+            if checkThe and duplicateUtils.trailingThe(artist):
                 myLicense.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
                 myLicense.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
                 noTrailing +=1
@@ -279,78 +248,21 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
         else:
             myLicense.logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
-############################################################################################## removeEmptyDir( #######
-def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap):
-    """ Scan and delete empty directories and zap Non Music files.
-        Will remove empty dire if emptyDir is true, set in config file.
-        Will remove non music files if zap is true, set at command line.
+######################################################################################## checkDatabase() ######
+def checkDatabase(check, dfile):
+    """  Perform a data integrity check on the library.
 
-        NB : Cannot use fileList, need to look at dirs and all files not just .mp3 files.
-             Therefore need to scan file system again.
+          if check == test then just report errors.
+          if check == delete then report errors and delete entries.
     """
-
-    timeDir = myTimer.Timer()
-    timeDir.Start
-
-    noOfDirs = 0
-    nonMusic = 0
-    message  = ""
-
-    print("\nRunning Empty Directory Check and zap Non Music files.\n")
-    logger.info("Running Empty Directory Check and zap Non Music files.")
-
-    for musicFile in sourceDir.glob("**/*"):
-        if emptyDir and musicFile.is_dir():
-            if not len(os.listdir(musicFile)):
-                noOfDirs += 1
-                myLicense.logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
-                myLicense.logTextLine(f"{musicFile}", duplicateFile)
-                zapEmptyDir(musicFile)
-
-        if zap and musicFile.is_file():
-            if musicFile.suffix != ".mp3":                  # A non music file found.
-                if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
-                if musicFile.suffix == ".json"  : continue  # Ignore database if stored in target directory.
-                myLicense.logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
-                myLicense.logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
-                zapNoneMusicFile(musicFile)
-                nonMusic += 1
-
-    if nonMusic != 0:
-        message += f" Removed {nonMusic} non music files."
-
-    if noOfDirs != 0:
-        message += f" Removed {noOfDirs} empty directories in {timeDir.Stop}."
-
-    if message != "":
-        print(message)
-        myLicense.logTextLine("", duplicateFile)
-        myLicense.logTextLine(message, duplicateFile)
-        logger.info(message)
-
-################################################################################################## zapEmptyDir ######
-def zapEmptyDir(musicFile):
-    """ Zap [delete] any empty dir."""
-
-    try:
-        if myConfig.ZAP_RECYCLE:
-            send2trash(str(musicFile))  # Move to recycle bin.
-        else:
-            shutil.rmtree(musicFile, ignore_errors=True, onerror=None)  # Permanently remove directory
-    except OSError:
-        logger.error(f"ERROR : Can't delete Directory : {musicFile}")
-
-############################################################################################## zapNoneMusicFile ######
-def zapNoneMusicFile(musicFile):
-    """ Zap [delete] any none music file."""
-
-    try:
-        if myConfig.ZAP_RECYCLE:
-            send2trash(str(musicFile))
-        else:
-            os.remove(musicFile)
-    except OSError:
-        logger.error(f"ERROR : Can't delete file : {musicFile}")
+    message = "Running Database Integrity Check"
+    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
+    myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, dfile, False)
+    logger.info(message)
+    songLibrary.check(check)
+    print("Goodbye.")
+    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, "Database Check Ended", myConfig.NAME, icon, timeout)
+    exit(3)
 
 ############################################################################################## parseArgs ######
 def parseArgs():
@@ -429,13 +341,6 @@ def parseArgs():
         print("Goodbye.")
         exit(3)
 
-    if args.check:
-        check = "test"
-    elif args.checkDelete:
-        check = "delete"
-    else:
-        check = ""
-
     if args.dupFile:  # Delete duplicate file if it exists.
         try:
             dfile = args.dupFile
@@ -445,45 +350,25 @@ def parseArgs():
     else:  # Amend to previous duplicate file, if it exists.
         dfile = args.dupFileAmend
 
-    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number,
-            check, args.noPrint, args.zapNoneMusic, args.explorer, args.checkThe)
+    if args.number :
+        myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, dfile, False)
+        l = songLibrary.noOfItems
+        print(f"Song Library has {l} songs")                 # Print on number of songs in library.
+        print("Goodbye.")
+        exit(0)
 
-################################################################################### printNumberOfSongs() ######
-def printNumberOfSongs():
-    """  Print the number of songs in the library.
-    """
-    myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
-    l = songLibrary.noOfItems
-    print(f"Song Library has {l} songs")
-    logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Song Library has {l} songs")
-    print("Goodbye.")
-    exit(0)
+    if args.check:
+        check = "test"
+        checkDatabase("test", dfile)                    # Run data integrity check in test mode on library.
+    elif args.checkDelete:
+        checkDatabase("delete", dfile)                  # Run data integrity check in delete mode on library.
 
-######################################################################################## checkDatabase() ######
-def checkDatabase(check):
-    """  Perform a data integrity check on the library.
+    if args.explorer:
+        duplicateUtils.loadExplorer(logger)             # Load program working directory n file explorer.
+        print("Goodbye.")
+        exit(0)
 
-          if check == test then just report errors.
-          if check == delete then report errors and delete entries.
-    """
-    message = "Running Database Integrity Check"
-    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
-    myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
-    logger.info(message)
-    songLibrary.check(check)
-    print("Goodbye.")
-    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, "Database Check Ended", myConfig.NAME, icon, timeout)
-    exit(3)
-
-######################################################################################## loadExplorer() ######
-def loadExplorer():
-    """  Load program working directory into file explorer.
-    """
-    try:
-        os.startfile(os.getcwd(), "explore")
-    except NotImplementedError as error:
-        logger.error(error)
-    exit(0)
+    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.noPrint, args.zapNoneMusic, args.checkThe)
 
 ############################################################################################### __main__ ######
 
@@ -502,9 +387,8 @@ if __name__ == "__main__":
     songLibrary = myLibrary.Library(DBpath, myConfig.DB_FORMAT)  # Create the song library.
     logger      = myLogger.get_logger(LGpath)                    # Create the logger.
     timer       = myTimer.Timer()
-    phonetic    = Soundex()
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer, checkThe = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, noPrint, zap, checkThe = parseArgs()
 
     timer.Start
 
@@ -519,10 +403,6 @@ if __name__ == "__main__":
     logger.info(message)
     logger.debug(f"Using database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
     logger.debug(f"{mode}")
-
-    if number:   printNumberOfSongs()  # Print on number of songs in library.
-    if check:    checkDatabase(check)  # Run data integrity check on library.
-    if explorer: loadExplorer()        # Load program working directory n file explorer.
 
     flag = (True if duplicateFile else False)  # If no duplicateFile then print to screen.
     myLicense.printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
@@ -554,7 +434,7 @@ if __name__ == "__main__":
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
         scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe)
-        removeUnwanted(sourceDir, duplicateFile, myConfig.EMPTY_DIR, zap)
+        zapUtils.removeUnwanted(sourceDir, duplicateFile, myConfig.EMPTY_DIR, zap, myConfig.ZAP_RECYCLE, logger)
 
 
     if noSave:
