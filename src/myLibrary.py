@@ -34,23 +34,27 @@ import pickle
 import datetime
 import pathlib
 
+import src.myExceptions as myExceptions
+
 
 class Library():
     """  A simple class that wraps the library dictionary.
 
          usage:
-         songLibrary = myLibrary.Library()
+         songLibrary = myLibrary.Library(name, format)
+            name = name of datebase
+            format = format used to save database = either pickle or jason.
 
-         to add an item              - songLibrary.addItem(key, musicFile, musicDuration)
-         to retrieve an item         - songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+         to add an item              - songLibrary.addItem(key, musicFile, musicDuration) - Data specific.
+         to retrieve an item         - songFile, songDuration, songDuplicate = songLibrary.getItem(key) - Data specific.
          to test for key             - if songLibrary.hasKey(key):
          to return number of items   - l = songLibrary.noOfItems()
-         to test database integrity  - songLibrary.check("test")
+         to test database integrity  - songLibrary.check("test") - Data specific.
          to prune database           - songLibrary.check("delete")
          to load items               - songLibrary.load()
          to save items               - songLibrary.save()
 
-         TODO - possibly needs error checking.
+         TODO - possibly needs error checking [some done, some to go].
     """
 
     def __init__(self, DBfilename, DBformat):
@@ -78,7 +82,10 @@ class Library():
     def getItem(self, key):
         """  Returns items at position key from the library.
         """
-        return self.library[key]
+        if self.hasKey(key):
+            return self.library[key]
+        else:
+            raise myExceptions.LibraryError
 
 
     def delItem(self, key):
@@ -87,7 +94,7 @@ class Library():
         try:
             del self.library[key]
         except (KeyError):
-            print(f"ERROR : Library has no key : {key}")
+            raise myExceptions.LibraryError
 
 
     @property
@@ -122,6 +129,12 @@ class Library():
             self.pickleLoad()
         else:
             self.jsonLoad()
+
+
+    def clear(self):
+        """  Clears the library.
+        """
+        self.library.clear()
 
 
     def check(self, mode):
@@ -173,8 +186,9 @@ class Library():
             with open(self.__filename, "rb") as pickle_file:
                 self.library = pickle.load(pickle_file)
         except FileNotFoundError:
-            print(f"ERROR :: Cannot find library file. {self.__filename}")
-            exit(0)
+            print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
+            self.library = {}
+
 
     def pickleSave(self):
         """  Save the song library in pickle format.
@@ -194,8 +208,8 @@ class Library():
             with open(self.__filename, "r") as json_file:
                 self.library = json.load(json_file)
         except FileNotFoundError:
-            print("ERROR :: Cannot find library file.")
-            exit(0)
+            print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
+            self.library = {}
 
     def jsonSave(self):
         """  Save the song library in json format.

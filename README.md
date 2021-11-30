@@ -77,8 +77,7 @@ options:
   -np, --noPrint        Do Not Print Possible False Positives.
   -zD, --zapNoneMusic   Zap [DELETE] none music files.
 
- Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.36
-
+ Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.38
 
 
 

@@ -1,14 +1,49 @@
 ** all builds are to the master branch, unless stated.
 
 
+V2021.38    [branch python_3.10]
+
+    Added a test directory.
+    Added two test files test_duplicateUtils.py & test_myLibrary.py.
+        Both to be run with pytest.
+    Moved the functions checkTags() & scanTags() to tagUtils.py in src/ustils.
+    Moved function createKey() & checkToIgnore() to duplicateUtils.py
+    Moved function logTextLive() from MyLicense to duplicate.py
+    In MyLibrary amended getItem() to raise an exception if item not found.
+    In MyLibrary amended delItem() to raise an exception if item not found.
+    In MyLibrary added clear() to clear all items from the library.
+    In MyLibrary amended the load routines, they now return an empty library
+        if not file found.
+
+    ---------------------------------------------------------------------------------------------
+    File                                                      blank        comment           code
+    ---------------------------------------------------------------------------------------------
+    pyMP3duplicate\pyMP3duplicate.py                             61             53            238
+    pyMP3duplicate\src\myLibrary.py                              39             77            106
+    pyMP3duplicate\test\test_myLibrary.py                        28             27            101
+    pyMP3duplicate\src\myConfig.py                               34             68             99
+    pyMP3duplicate\src\utils\tagUtils.py                         12             30             68
+    pyMP3duplicate\src\utils\zapUtils.py                         18             32             52
+    pyMP3duplicate\src\utils\duplicateUtils.py                   15             45             34
+    pyMP3duplicate\src\myTimer.py                                16             40             32
+    pyMP3duplicate\src\myExceptions.py                            6             20             22
+    pyMP3duplicate\config.toml                                    6              7             19
+    pyMP3duplicate\src\myLogger.py                                8             29             18
+    pyMP3duplicate\src\myLicense.py                               5             35             15
+    pyMP3duplicate\test\test_duplicateUtils.py                    4             19              8
+    ---------------------------------------------------------------------------------------------
+    SUM:                                                        252            482            812
+    ---------------------------------------------------------------------------------------------
+
+
 V2021.37    [branch python_3.10]
 
     Renamed Lib directory to src.
     Created a new directory utils under src.
     Moved the functions removeThe(). trailingThe(), createKey() & loadExplorer()
-    to src/utils/duplicateUtils.py
+        to src/utils/duplicateUtils.py
     Moved the functions removeUnwanted(),zapEmptryDir() & zapFile()
-    to src/utils/zapUtils.py
+        to src/utils/zapUtils.py
     Amended the main scripts to import and call the new utils functions.
 
 

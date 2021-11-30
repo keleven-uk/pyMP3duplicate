@@ -32,13 +32,8 @@ import shutil
 import textwrap
 import argparse
 import colorama
-from tqdm import tqdm
 from pathlib import Path
-from mutagen.id3 import ID3
-from mutagen.mp3 import MP3
-from tinytag import TinyTag
 from plyer import notification
-#from functools import lru_cache
 from alive_progress import alive_bar
 
 import src.myTimer as myTimer
@@ -48,6 +43,7 @@ import src.myLibrary as myLibrary
 import src.myLicense as myLicense
 import src.myExceptions as myExceptions
 import src.utils.zapUtils as zapUtils
+import src.utils.tagUtils as tagUtils
 import src.utils.duplicateUtils as duplicateUtils
 
 
@@ -57,115 +53,9 @@ try:
 except:
     pass
 
-####################################################################################### checktags #############
-def checktags(musicFile, songFile):
-    """  Used to check if the Soundex algorithm has returned a false positive.
-         Returns True if the artist and title of the two songs are the same.
-         Returns False if there is an error.
-    """
-    try:  # Tries to read tags from the music file.
-        tags = TinyTag.get(musicFile)
-    except Exception as e:  # Can't read tags - log as error.
-        logger.error(f"ERROR : Can't read tags : {musicFile}")
-        return False
-    artist1 = duplicateUtils.removeThe(tags.artist)
-    title1 = duplicateUtils.removeThe(tags.title)
-
-    try:  # Tries to read tags from the music file.
-        tags = TinyTag.get(songFile)
-    except Exception as e:  # Can't read tags - log as error.
-        logger.error(f"ERROR : Can't read tags : {songFile}")
-        return False
-    artist2 = duplicateUtils.removeThe(tags.artist)
-    title2  = duplicateUtils.removeThe(tags.title)
-
-    return True if (artist1 == artist2) and (title1 == title2) else False
-
-####################################################################################### checkToIgnore #########
-def checkToIgnore(musicDuplicate, songDuplicate):
-    """  Each song may carry a ignore flag, return True if these are the same.
-         Only checked if the tags are read using mutagen.
-    """
-    if (musicDuplicate == myConfig.IGNORE) and (songDuplicate == myConfig.IGNORE):
-        return True
-    else:
-        return False
-
-####################################################################################### scanTags ##############
-def scanTags(musicFile):
-    """  Scans the musicfile for the required tags.
-         Will use the method indicated in the user configure.
-
-         If there is a problem reading the tags, raise an exception.
-    """
-    match myConfig.TAGS:
-        case "tinytag":
-            try:  # Tries to read tags from the music file.
-                tags = TinyTag.get(musicFile)
-            except Exception as e:  # Can't read tags - flag as error.
-                logger.error(f"Tinytag error reading tags :: {e} ")
-                raise myExceptions.TagReadError(f"Tinytag error reading tags {musicFile}")
-            artist    = duplicateUtils.removeThe(tags.artist)
-            title     = duplicateUtils.removeThe(tags.title)
-            duration  = tags.duration
-            duplicate = ""
-
-        case "eyed3":
-            try:
-                tags = eyed3.load(musicFile)
-            except Exception as e:
-                logger.error(f"Eyed3 error reading tags :: {musicFile}")
-                raise myExceptions.TagReadError(f"Eyed3 error reading tags {musicFile}")
-            artist    = duplicateUtils.removeThe(tags.tag.artist)
-            title     = duplicateUtils.removeThe(tags.tag.title)
-            duration  = tags.info.time_secs
-            duplicate = ""
-
-        case "mutagen":
-            try:
-                tags  = ID3(musicFile)
-                audio = MP3(musicFile)
-            except Exception as e:
-                logger.error(f"Nutagen error reading tags :: {e} ")
-                raise myExceptions.TagReadError(f"Mutagen error reading tags {musicFile}")
-            artist   = duplicateUtils.removeThe(tags["TPE1"][0])
-            title    = duplicateUtils.emoveThe(tags["TIT2"][0])
-            duration = audio.info.length
-            try:  # Try to read duplicate tag.
-                duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
-            except Exception as e:
-                duplicate = ""
-        case _:
-            # Should not happen, tinytag should be returned by default.
-            logger.error("Unknown user option for Tags Module.")
-            print(f"{colorama.Fore.RED}Unknown user option for Tags Module.{colorama.Fore.RESET}")
-            exit(4)
-
-    if not duration:  # In case there is no valid duration time on the mp3 file.
-        musicDuration = 0
-    else:
-        musicDuration = round(duration, 2)
-
-    key = duplicateUtils.createKey(artist, title, myConfig.SOUNDEX)
-    return key, musicDuration, duplicate, artist, title
-
-####################################################################################### countSongs ############
-def countSongs(sourceDir, fileList):
-    """  Count the number of songs [.mp3 files] in the sourceDir.
-         The filename are save in a list fileList, this is then passed to scanMusic.
-         Takes just over a second at 160000 files approx.
-    """
-    count = 0
-
-    print("Counting Songs")
-    for musicFile in tqdm(sourceDir.glob("**/*.mp3"), unit="songs", ncols=myConfig.NCOLS, position=1):
-        fileList.append(musicFile)
-
-    print(f"... with a song count of {len(fileList)}")
-    return len(fileList)
 
 ####################################################################################### scanMusic #############
-def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe):
+def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe, soundex):
     """  Scan the list fileList, which should contain mp3 files only.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then the two are checked.
@@ -187,14 +77,14 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
         for musicFile in fileList:
 
             try:
-                key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(myConfig.TAGS, musicFile, soundex)
             except Exception as e:  # Can't read tags - flag as error.
                 logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
 
             if checkThe and duplicateUtils.trailingThe(artist):
-                myLicense.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
-                myLicense.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
+                duplicateUtils.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
+                duplicateUtils.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
                 noTrailing +=1
 
             if songLibrary.hasKey(key):
@@ -204,19 +94,19 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
 
                 if abs(musicDuration - songDuration) < difference:
                     if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
-                        if checkToIgnore(musicDuplicate, songDuplicate):
+                        if duplicateUtils.checkToIgnore(musicDuplicate, songDuplicate, myConfig.IGNORE):
                             ignored += 1
                             continue  # Do not print ignore duplicate
                     message = " Duplicate Found "
-                    if myConfig.SOUNDEX and not checktags(musicFile, songFile):
+                    if myConfig.SOUNDEX and not tagUtils.checktags(musicFile, songFile):
                         falsePos += 1
                         if not noPrint:
                             message = " Possible False Positive "
                         else:
                             continue  # Do not print Possible False Positives
-                    myLicense.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                    myLicense.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                    myLicense.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                    duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
+                    duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                    duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
                     duplicates += 1
                 else:  # if abs(musicDuration - songDuration) < difference:
                     noDups += 1
@@ -228,25 +118,25 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
 
     count = songLibrary.noOfItems + noDups + duplicates  # Adjust for duplicates found.
 
-    myLicense.logTextLine("", duplicateFile)
+    duplicateUtils.logTextLine("", duplicateFile)
     if mode == "build":
-        myLicense.logTextLine(f"{count} music files found.", duplicateFile)
+        duplicateUtils.logTextLine(f"{count} music files found.", duplicateFile)
     elif ignored:
-        myLicense.logTextLine(f"{count} music files found with {duplicates} duplicates, with {ignored} songs.", duplicateFile)
+        duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates, with {ignored} songs.", duplicateFile)
     else:
-        myLicense.logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
+        duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
 
     if noDups:
-        myLicense.logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
+        duplicateUtils.logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
 
     if noTrailing:
-        myLicense.logTextLine(f" Found possible {noTrailing} artists with a trailing 'the' in their name.", duplicateFile)
+        duplicateUtils.logTextLine(f" Found possible {noTrailing} artists with a trailing 'the' in their name.", duplicateFile)
 
     if falsePos:
         if noPrint:
-            myLicense.logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
+            duplicateUtils.logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
         else:
-            myLicense.logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
+            duplicateUtils.logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
 ######################################################################################## checkDatabase() ######
 def checkDatabase(check, dfile):
@@ -419,21 +309,21 @@ if __name__ == "__main__":
             logger.debug("Will zap [Delete mode] none music files.")
 
     fileList = []
-    songsCount = countSongs(sourceDir, fileList)
+    songsCount = duplicateUtils.countSongs(sourceDir, fileList, myConfig.NCOLS)
 
     if build:
-        myLicense.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
+        duplicateUtils.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
                     duplicateFile)
-        myLicense.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
+        duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe)
+        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, myConfig.SOUNDEX)
     else:
-        myLicense.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
-        myLicense.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
+        duplicateUtils.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
+        duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
         logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
         logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe)
+        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, myConfig.SOUNDEX)
         zapUtils.removeUnwanted(sourceDir, duplicateFile, myConfig.EMPTY_DIR, zap, myConfig.ZAP_RECYCLE, logger)
 
 
@@ -449,9 +339,9 @@ if __name__ == "__main__":
 
     message = f"{myConfig.NAME} Completed :: {timeStop}"
 
-    myLicense.logTextLine("", duplicateFile)
-    myLicense.logTextLine(message, duplicateFile)
-    myLicense.logTextLine("", duplicateFile)
+    duplicateUtils.logTextLine("", duplicateFile)
+    duplicateUtils.logTextLine(message, duplicateFile)
+    duplicateUtils.logTextLine("", duplicateFile)
     print(message)
 
     #logger.info(f"{removeThe.cache_info()}")
