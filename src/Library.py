@@ -34,7 +34,7 @@ import pickle
 import datetime
 import pathlib
 
-import src.myExceptions as myExceptions
+import src.Exceptions as myExceptions
 
 
 class Library():
@@ -137,20 +137,24 @@ class Library():
         self.library.clear()
 
 
-    def check(self, mode):
+    def check(self, mode, logger=None):
         """  Runs a database data integrity check.
+
+             If a logger is passed in, then use it - else ignore.
         """
         startTime = time.time()
         missing   = 0
         removed   = 0
-        print(f"Running database integrity check on {self.__filename} in {mode} mode")
 
-        print(f"Loading {self.__filename}")
+        if logger: logger.info("-" * 100)
+        self.displayMessage(f"Running database integrity check on {self.__filename} in {mode} mode", logger)
+        self.displayMessage(f"Loading {self.__filename}", logger)
+
         if not self.library:
             self.load()
 
         l = self.noOfItems
-        print(f"Song Library has {l} songs")
+        self.displayMessage(f"Song Library has {l} songs", logger)
 
         for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
             path, duration, ignore = self.getItem(song)
@@ -166,16 +170,26 @@ class Library():
         elapsedTimeSecs = time.time() - startTime
 
         if removed:
-            print(f"Saving {self.__filename}")
+            self.displayMessage(f"Saving {self.__filename}", logger)
             self.save()
-            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.")
+            self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.", logger)
             l = self.noOfItems
-            print(f"Song Library has now {l} songs")
+            self.displayMessage(f"Song Library has now {l} songs", logger)
         else:
             if missing:
-                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {missing} missing songs.")
+                l = self.noOfItems
+                self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {missing} missing songs.", logger)
             else:
-                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")
+               self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.", logger)
+
+
+#-------------
+    def displayMessage(self, message, logger=None):
+        """   Display the message to screen and pass to logger if required.
+              If a logger is passed in, then use it - else ignore.
+        """
+        print(message)
+        if logger: logger.info(message)
 
 
 #------------- pickle load and save. ------------------

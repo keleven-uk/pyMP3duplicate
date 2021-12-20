@@ -19,21 +19,21 @@
 ###############################################################################################################
 
 import pytest
-import src.myLibrary as myLibrary
-import src.myExceptions as myExceptions
+import src.Library as Library
+import src.Exceptions as Exceptions
 
 
 @pytest.fixture
 def db_library(tmp_path):
     """  Set up the pickle database.  """
     db = tmp_path / "testLibrary.pickle"
-    return myLibrary.Library(db, "pickle")
+    return Library.Library(db, "pickle")
 
 @pytest.fixture
 def ja_library(tmp_path):
     """  Set up the jason database.  """
     db = tmp_path / "testLibrary.jason"
-    return myLibrary.Library(db, "jason")
+    return Library.Library(db, "jason")
 
 #-----------------------------------------------------------------  test add to library ------------------------
 def test_library_pickle_add(db_library):
@@ -54,7 +54,7 @@ def test_library_pickle_get(db_library):
 
 def test_library_pickle_get_fail(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    with pytest.raises(myExceptions.LibraryError) as execInfo:
+    with pytest.raises(Exceptions.LibraryError) as execInfo:
         r1, r2, r3 = db_library.getItem("two")
     assert str(execInfo.value) == "LibraryError has been raised"
 
@@ -67,7 +67,7 @@ def test_library_jason_get(ja_library):
 
 def test_library_jason_get_fail(ja_library):
     ja_library.addItem("one", "data1", "data2", "data3")
-    with pytest.raises(myExceptions.LibraryError) as execInfo:
+    with pytest.raises(Exceptions.LibraryError) as execInfo:
         r1, r2, r3 = ja_library.getItem("two")
     assert str(execInfo.value) == "LibraryError has been raised"
 
@@ -99,7 +99,7 @@ def test_library_pickle_del(db_library):
 
 def test_library_pickle_del_fail(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    with pytest.raises(myExceptions.LibraryError) as execInfo:
+    with pytest.raises(Exceptions.LibraryError) as execInfo:
         db_library.delItem("two")
     assert str(execInfo.value) == "LibraryError has been raised"
 
@@ -112,7 +112,7 @@ def test_library_jason_del(db_library):
 
 def test_library_jason_del_fail(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    with pytest.raises(myExceptions.LibraryError) as execInfo:
+    with pytest.raises(Exceptions.LibraryError) as execInfo:
         db_library.delItem("two")
     assert str(execInfo.value) == "LibraryError has been raised"
 

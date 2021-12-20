@@ -28,7 +28,7 @@ import src.utils.duplicateUtils as duplicateUtils
 phonetic = Soundex()
 
 ####################################################################################### checktags #############
-def checktags(musicFile, songFile):
+def checkTags(musicFile, songFile, logger):
     """  Used to check if the Soundex algorithm has returned a false positive.
          Returns True if the artist and title of the two songs are the same.
          Returns False if there is an error.

@@ -21,9 +21,9 @@
 import os
 from send2trash import send2trash
 
-import src.myTimer as myTimer
-import src.myLicense as myLicense
-
+import src.Timer as myTimer
+import src.License as myLicense
+import src.utils.duplicateUtils as duplicateUtils
 
 timer = myTimer.Timer()
 
@@ -52,16 +52,16 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap, recycle, logger):
         if emptyDir and musicFile.is_dir():
             if not len(os.listdir(musicFile)):
                 noOfDirs += 1
-                myLicense.logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
-                myLicense.logTextLine(f"{musicFile}", duplicateFile)
+                duplicateUtils.logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
+                duplicateUtils.logTextLine(f"{musicFile}", duplicateFile)
                 zapEmptyDir(musicFile, recycle)
 
         if zap and musicFile.is_file():
             if musicFile.suffix != ".mp3":                  # A non music file found.
                 if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
                 if musicFile.suffix == ".json"  : continue  # Ignore database if stored in target directory.
-                myLicense.logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
-                myLicense.logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
+                duplicateUtils.logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
+                duplicateUtils.logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
                 zapFile(musicFile, recycle)
                 nonMusic += 1
 
@@ -73,8 +73,8 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap, recycle, logger):
 
     if message != "":
         print(message)
-        myLicense.logTextLine("", duplicateFile)
-        myLicense.logTextLine(message, duplicateFile)
+        duplicateUtils.logTextLine("", duplicateFile)
+        duplicateUtils.logTextLine(message, duplicateFile)
         logger.info(message)
 
 ################################################################################################## zapEmptyDir ######

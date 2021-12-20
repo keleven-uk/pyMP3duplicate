@@ -1,6 +1,21 @@
 ** all builds are to the master branch, unless stated.
 
 
+V2021.39    [branch python_3.10]
+
+    Refactoring continues.
+    Removed my from all src\my*.py.
+        Amended all files to reflect this.
+    Moved the parseArgs function to it's own file src\arg.py
+    Added the argument logger=None to src\Library.py\check/
+        If a logger is supplied, log progress of database check.
+    Added the argument logger=None to src\utils\duplicateUtils\logTextLine.
+        If a logger is supplied, log test as well as print to screen.
+    Added the argument logger=None to src\utils\tagUtils\checktags.
+    Removed stuff from main program which now resides in src\ modules.
+    Added commands.text - examplke usage.
+
+
 V2021.38    [branch python_3.10]
 
     Added a test directory.
@@ -8,7 +23,7 @@ V2021.38    [branch python_3.10]
         Both to be run with pytest.
     Moved the functions checkTags() & scanTags() to tagUtils.py in src/ustils.
     Moved function createKey() & checkToIgnore() to duplicateUtils.py
-    Moved function logTextLive() from MyLicense to duplicate.py
+    Moved function logTextLine() from MyLicense to duplicate.py
     In MyLibrary amended getItem() to raise an exception if item not found.
     In MyLibrary amended delItem() to raise an exception if item not found.
     In MyLibrary added clear() to clear all items from the library.
@@ -41,9 +56,9 @@ V2021.37    [branch python_3.10]
     Renamed Lib directory to src.
     Created a new directory utils under src.
     Moved the functions removeThe(). trailingThe(), createKey() & loadExplorer()
-        to src/utils/duplicateUtils.py
+        to src\utils\duplicateUtils.py
     Moved the functions removeUnwanted(),zapEmptryDir() & zapFile()
-        to src/utils/zapUtils.py
+        to src\utils\zapUtils.py
     Amended the main scripts to import and call the new utils functions.
 
 

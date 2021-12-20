@@ -20,6 +20,9 @@
 
 import os
 from tqdm import tqdm
+from plyer import notification
+
+import src.License as License
 
 ####################################################################################### removeThe #############
 def removeThe(name):
@@ -82,13 +85,33 @@ def countSongs(sourceDir, fileList, NCOLS):
 
 
 ####################################################################################### printDuplicate ########
-def logTextLine(textLine, textFile):
+def logTextLine(textLine, textFile, logger=None):
     """  if the textFile is set, then write the line of text to that file, else print to screen.
 
          textLine needs to be a string, for f.write - NOT a path.
+
+         If a logger is passed in, then use it - else ignore.
     """
     if textFile:
         with open(textFile, encoding='utf-8', mode="a") as f:     # Open in amend mode, important.
             f.write(textLine + "\n")
     else:
         print(textLine)
+
+    if logger: logger.info(textLine)
+
+######################################################################################## checkDatabase() ######
+def checkDatabase(songLibrary, check, dfile, logger, appName, appVersion, icon, timeout, NOTIFICATION):
+    """  Perform a data integrity check on the library.
+
+          if check == test then just report errors.
+          if check == delete then report errors and delete entries.
+    """
+    if NOTIFICATION: notification.notify(appName, "Database Check Started", appName, icon, timeout)
+    License.printShortLicense(appName, appName, dfile, False)
+    songLibrary.check(check, logger)
+    print("Goodbye.")
+    if NOTIFICATION: notification.notify(appName, "Database Check Ended", appName, icon, timeout)
+    exit(3)
+
+#(Config.NAME, message, Config.NAME, icon, timeout)
