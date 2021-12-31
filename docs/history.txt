@@ -1,4 +1,121 @@
-V2021.33.
+** all builds are to the master branch, unless stated.
+
+
+V2021.39    [branch python_3.10]
+
+    Test against Python 3.10.1
+    More attempts at formatting README.md
+
+
+V2021.39    [branch python_3.10]
+
+    Refactoring continues.
+    Removed my from all src\my*.py.
+        Amended all files to reflect this.
+    Moved the parseArgs function to it's own file src\arg.py
+    Added the argument logger=None to src\Library.py\check/
+        If a logger is supplied, log progress of database check.
+    Added the argument logger=None to src\utils\duplicateUtils\logTextLine.
+        If a logger is supplied, log test as well as print to screen.
+    Added the argument logger=None to src\utils\tagUtils\checktags.
+    Removed stuff from main program which now resides in src\ modules.
+    Added commands.text - examplke usage.
+
+
+V2021.38    [branch python_3.10]
+
+    Added a test directory.
+    Added two test files test_duplicateUtils.py & test_myLibrary.py.
+        Both to be run with pytest.
+    Moved the functions checkTags() & scanTags() to tagUtils.py in src/ustils.
+    Moved function createKey() & checkToIgnore() to duplicateUtils.py
+    Moved function logTextLine() from MyLicense to duplicate.py
+    In MyLibrary amended getItem() to raise an exception if item not found.
+    In MyLibrary amended delItem() to raise an exception if item not found.
+    In MyLibrary added clear() to clear all items from the library.
+    In MyLibrary amended the load routines, they now return an empty library
+        if not file found.
+
+    ---------------------------------------------------------------------------------------------
+    File                                                      blank        comment           code
+    ---------------------------------------------------------------------------------------------
+    pyMP3duplicate\pyMP3duplicate.py                             61             53            238
+    pyMP3duplicate\src\myLibrary.py                              39             77            106
+    pyMP3duplicate\test\test_myLibrary.py                        28             27            101
+    pyMP3duplicate\src\myConfig.py                               34             68             99
+    pyMP3duplicate\src\utils\tagUtils.py                         12             30             68
+    pyMP3duplicate\src\utils\zapUtils.py                         18             32             52
+    pyMP3duplicate\src\utils\duplicateUtils.py                   15             45             34
+    pyMP3duplicate\src\myTimer.py                                16             40             32
+    pyMP3duplicate\src\myExceptions.py                            6             20             22
+    pyMP3duplicate\config.toml                                    6              7             19
+    pyMP3duplicate\src\myLogger.py                                8             29             18
+    pyMP3duplicate\src\myLicense.py                               5             35             15
+    pyMP3duplicate\test\test_duplicateUtils.py                    4             19              8
+    ---------------------------------------------------------------------------------------------
+    SUM:                                                        252            482            812
+    ---------------------------------------------------------------------------------------------
+
+
+V2021.37    [branch python_3.10]
+
+    Renamed Lib directory to src.
+    Created a new directory utils under src.
+    Moved the functions removeThe(). trailingThe(), createKey() & loadExplorer()
+        to src\utils\duplicateUtils.py
+    Moved the functions removeUnwanted(),zapEmptryDir() & zapFile()
+        to src\utils\zapUtils.py
+    Amended the main scripts to import and call the new utils functions.
+
+
+V2021.36    [branch python_3.10]
+
+    Added an option to check the artist field for trailing 'the'
+        i.e.  "Shadows, The" instead of "The Shadows".
+    If one is found an entry is either printed to screen or added to duplicate file.
+
+
+V2021.35    [branch python_3.10]
+
+	Tried to make the directory structure less cluttered.
+	It now look like this
+
+	config.toml
+	LICENCE.txt
+	README.md
+	requirements.txt
+	data\
+	  |  dup.pickle			    [database file, not git tracked]
+	  |  pyMP3duplicate.log		[logging file,  not git tracked]
+	docs\
+	  |  help\
+	  |  history.txt
+	Lib\
+	  |  __init__.py
+	  |  myConfig.py
+	  |  myExceptions.py
+	  |  myLibrary.py
+	  |  myLicense.py
+	  |  myLogger.py
+	  |  myTimer.py
+	resources\
+	  |  tea.icon
+
+
+V2021.34    [branch python_3.10]
+
+    Made changes from build 33 below to the python_3.10 branch.
+    Tried pyjion to test for increase in speed - seems to be very small.
+    Amended countSongs to build a list of filenames, so this can be passed to scanMusic.
+        This was an attempt to increase the speed, eliminating a second file system scan.
+    Moved the deletion of empty directories and non music file into the same function - removeUnwanted.
+        This is not called after scanMusic and not from within.
+        This was done to clean up the logic and the calling of scanMusic.
+    Updated README.md
+
+
+V2021.33.2140d3f
+>>>>>>> python_3.10:docs/history.txt
 
     When upgraded Tinytag to V1.6, it started throwing errors that it can't read some ID3 tags.
     This crashed the program.  Added try except clauses to the scanTags function to catch these.
@@ -8,6 +125,17 @@ V2021.33.
     Also added a try except clause to the removeEmptryDir function.
 
 
+<<<<<<< HEAD:history.txt
+=======
+V2021.32    [branch python_3.10]
+
+    Created branch python_3.10, to test Python V3.10
+    Amended pyMP3Duplicate.py to use the new match [case] statement instead of
+    multiple if's in the scanTags function.
+    Upgraded all packages to test on V3.10 - all seem to work.
+
+
+>>>>>>> python_3.10:docs/history.txt
 V2021.31.f554fea
 
     Amended the -v version to also show Python version.
@@ -15,6 +143,21 @@ V2021.31.f554fea
     Cleaned up requirements.txt
     Moved the call to parseArgs() to earlier in the main code.
 
+    -----------------------------------------------------------------------------------
+    File                                            blank        comment           code
+    -----------------------------------------------------------------------------------
+    pyMP3duplicate\pyMP3duplicate.py                   84             99            357
+    pyMP3duplicate\myLibrary.py                        35             73            100
+    pyMP3duplicate\myConfig.py                         34             68             99
+    pyMP3duplicate\myTimer.py                          16             40             32
+    pyMP3duplicate\myLicense.py                         8             39             20
+    pyMP3duplicate\config.toml                          6              7             19
+    pyMP3duplicate\myLogger.py                          8             29             18
+    pyMP3duplicate\myExceptions.py                      3             20             11
+    -----------------------------------------------------------------------------------
+    SUM:                                              194            375            656
+    -----------------------------------------------------------------------------------
+    stats by cloc
 
 V2021.30.0723d68
 

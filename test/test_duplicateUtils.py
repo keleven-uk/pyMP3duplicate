@@ -1,10 +1,9 @@
 ###############################################################################################################
-#    myExceptions.py    Copyright (C) <2020-2021>  <Kevin Scott>                                                   #
-#                                                                                                             #
-#    A class that raises a custom exception.                                                                  #
+#    test_duplicateUtils.py   Copyright (C) <2020-2021>  <Kevin Scott>                                        #                                                                                                             #                                                                                                             #
+#    test for helper and utility functions in duplicateUtils.py                                               #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -19,16 +18,14 @@
 #                                                                                                             #
 ###############################################################################################################
 
+import pytest
+import src.utils.duplicateUtils as duplicateUtils
 
-class TagReadError(Exception):
-    def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
 
-    def __str__(self):
-        if self.message:
-            return 'TagReadError, {0} '.format(self.message)
-        else:
-            return 'TagReadError has been raised'
+@pytest.mark.parametrize("test_input, expected_output", [ ("The Shadows", "Shadows"), ("Shadows", "Shadows"), ("", "") ] )
+def test_removeThe(test_input, expected_output):
+    assert duplicateUtils.removeThe(test_input) == expected_output
+
+@pytest.mark.parametrize("test_input, expected_output", [ ("Shadows, the", True), ("Shadows, The", True), ("The Shadows", False), ("Ken Boothe", False), ("", "") ] )
+def test_trailingThe(test_input, expected_output):
+    assert duplicateUtils.trailingThe(test_input) == expected_output

@@ -34,23 +34,27 @@ import pickle
 import datetime
 import pathlib
 
+import src.Exceptions as myExceptions
+
 
 class Library():
     """  A simple class that wraps the library dictionary.
 
          usage:
-         songLibrary = myLibrary.Library()
+         songLibrary = myLibrary.Library(name, format)
+            name = name of datebase
+            format = format used to save database = either pickle or jason.
 
-         to add an item              - songLibrary.addItem(key, musicFile, musicDuration)
-         to retrieve an item         - songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+         to add an item              - songLibrary.addItem(key, musicFile, musicDuration) - Data specific.
+         to retrieve an item         - songFile, songDuration, songDuplicate = songLibrary.getItem(key) - Data specific.
          to test for key             - if songLibrary.hasKey(key):
          to return number of items   - l = songLibrary.noOfItems()
-         to test database integrity  - songLibrary.check("test")
+         to test database integrity  - songLibrary.check("test") - Data specific.
          to prune database           - songLibrary.check("delete")
          to load items               - songLibrary.load()
          to save items               - songLibrary.save()
 
-         TODO - possibly needs error checking.
+         TODO - possibly needs error checking [some done, some to go].
     """
 
     def __init__(self, DBfilename, DBformat):
@@ -78,7 +82,10 @@ class Library():
     def getItem(self, key):
         """  Returns items at position key from the library.
         """
-        return self.library[key]
+        if self.hasKey(key):
+            return self.library[key]
+        else:
+            raise myExceptions.LibraryError
 
 
     def delItem(self, key):
@@ -87,7 +94,7 @@ class Library():
         try:
             del self.library[key]
         except (KeyError):
-            print(f"ERROR : Library has no key : {key}")
+            raise myExceptions.LibraryError
 
 
     @property
@@ -124,20 +131,30 @@ class Library():
             self.jsonLoad()
 
 
-    def check(self, mode):
+    def clear(self):
+        """  Clears the library.
+        """
+        self.library.clear()
+
+
+    def check(self, mode, logger=None):
         """  Runs a database data integrity check.
+
+             If a logger is passed in, then use it - else ignore.
         """
         startTime = time.time()
         missing   = 0
         removed   = 0
-        print(f"Running database integrity check on {self.__filename} in {mode} mode")
 
-        print(f"Loading {self.__filename}")
+        if logger: logger.info("-" * 100)
+        self.displayMessage(f"Running database integrity check on {self.__filename} in {mode} mode", logger)
+        self.displayMessage(f"Loading {self.__filename}", logger)
+
         if not self.library:
             self.load()
 
         l = self.noOfItems
-        print(f"Song Library has {l} songs")
+        self.displayMessage(f"Song Library has {l} songs", logger)
 
         for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
             path, duration, ignore = self.getItem(song)
@@ -153,16 +170,26 @@ class Library():
         elapsedTimeSecs = time.time() - startTime
 
         if removed:
-            print(f"Saving {self.__filename}")
+            self.displayMessage(f"Saving {self.__filename}", logger)
             self.save()
-            print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.")
+            self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.", logger)
             l = self.noOfItems
-            print(f"Song Library has now {l} songs")
+            self.displayMessage(f"Song Library has now {l} songs", logger)
         else:
             if missing:
-                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {missing} missing songs.")
+                l = self.noOfItems
+                self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {missing} missing songs.", logger)
             else:
-                print(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.")
+               self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.", logger)
+
+
+#-------------
+    def displayMessage(self, message, logger=None):
+        """   Display the message to screen and pass to logger if required.
+              If a logger is passed in, then use it - else ignore.
+        """
+        print(message)
+        if logger: logger.info(message)
 
 
 #------------- pickle load and save. ------------------
@@ -173,8 +200,9 @@ class Library():
             with open(self.__filename, "rb") as pickle_file:
                 self.library = pickle.load(pickle_file)
         except FileNotFoundError:
-            print(f"ERROR :: Cannot find library file. {self.__filename}")
-            exit(0)
+            print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
+            self.library = {}
+
 
     def pickleSave(self):
         """  Save the song library in pickle format.
@@ -194,8 +222,8 @@ class Library():
             with open(self.__filename, "r") as json_file:
                 self.library = json.load(json_file)
         except FileNotFoundError:
-            print("ERROR :: Cannot find library file.")
-            exit(0)
+            print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
+            self.library = {}
 
     def jsonSave(self):
         """  Save the song library in json format.

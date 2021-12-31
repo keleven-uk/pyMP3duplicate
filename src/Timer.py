@@ -1,10 +1,10 @@
 ###############################################################################################################
-#    myTimer.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                         #
+#    myTimer.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                    #
 #                                                                                                             #
 #    Inspired by https://realpython.com/python-timer/                                                         #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #

@@ -2,7 +2,9 @@
 #    pyMP3duplicate   Copyright (C) <2020-2021>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
-# usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-d DIFFERENCE] [-xL] [-xS] [-b] [-n] [-l] [-v]   #
+#  Usage:                                                                                                     #
+# pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-b] [-n] [-l]        #
+#                                                              [-v] [-e] [-c] [-cD] [-xL] [-xS] [-np] [-zD]   #
 #                                                                                                             #
 #     For changes see history.txt                                                                             #
 #                                                                                                             #
@@ -22,171 +24,40 @@
 #                                                                                                             #
 ###############################################################################################################
 
-
 import os
-import sys
 import time
 import eyed3
-import shutil
-import textwrap
-import argparse
-import colorama
-import myTimer
-import myConfig
-import myLogger
-import myLibrary
-from tqdm import tqdm
+
 from pathlib import Path
-from mutagen.id3 import ID3
-from mutagen.mp3 import MP3
-from tinytag import TinyTag
 from plyer import notification
-from send2trash import send2trash
-# from functools import lru_cache
-from libindic.soundex import Soundex
-from myExceptions import TagReadError
 from alive_progress import alive_bar
-from myLicense import printLongLicense, printShortLicense, logTextLine
 
+import src.args as args
+import src.Timer as Timer
+import src.Config as Config
+import src.Logger as Logger
+import src.License as License
+import src.Library as Library
+import src.Exceptions as Exceptions
+import src.utils.zapUtils as zapUtils
+import src.utils.tagUtils as tagUtils
+import src.utils.duplicateUtils as duplicateUtils
 
-####################################################################################### checktags #############
-def checktags(musicFile, songFile):
-    """  Used to check if the Soundex algorithm has returned a false positive.
-         Returns True if the artist and title of the two songs are the same.
-         Returns False if there is an error.
-    """
-    try:  # Tries to read tags from the music file.
-        tags = TinyTag.get(musicFile)
-    except Exception as e:  # Can't read tags - log as error.
-        logger.error(f"ERROR : Can't read tags : {musicFile}")
-        return False
-    artist1 = removeThe(tags.artist)
-    title1 = removeThe(tags.title)
+#try:
+    #import pyjion       #  Apparently tries to improve speed.
+    #pyjion.enable()
+#except:
+    #pass
 
-    try:  # Tries to read tags from the music file.
-        tags = TinyTag.get(songFile)
-    except Exception as e:  # Can't read tags - log as error.
-        logger.error(f"ERROR : Can't read tags : {songFile}")
-        return False
-    artist2 = removeThe(tags.artist)
-    title2 = removeThe(tags.title)
-
-    return True if (artist1 == artist2) and (title1 == title2) else False
-
-
-####################################################################################### checkToIgnore #########
-def checkToIgnore(musicDuplicate, songDuplicate):
-    """  Each song may carry a ignore flag, return True if these are the same.
-         Only checked if the tags are read using mutagen.
-    """
-    if (musicDuplicate == myConfig.IGNORE) and (songDuplicate == myConfig.IGNORE):
-        return True
-    else:
-        return False
-
-
-####################################################################################### createKey #############
-def createKey(artist, title):
-    """ Creates the key from the artist and title.
-        key is either formed from string substitution or created from the soundex of the string.
-    """
-    return phonetic.soundex(f"{artist}:{title}") if myConfig.SOUNDEX else f"{artist}:{title}"
-
-
-####################################################################################### removeThe #############
-# @lru_cache()
-def removeThe(name):
-    """  Removes 'the' from the from the beginning of artist and title if present.
-         Mainly a problem with artist, to be honest.
-         Name is returned lower case.
-    """
-    if name:
-        n = name.lower()
-        return name[4:] if n.startswith("the") else name
-    else:
-        return ""
-
-
-####################################################################################### scanTags ##############
-def scanTags(musicFile):
-    """  Scans the musicfile for the required tags.
-         Will use the method indicated in the user configure.
-
-         If there is a problem reading the tags, raise an exception.
-    """
-    if myConfig.TAGS == "tinytag":
-        try:  # Tries to read tags from the music file.
-            tags = TinyTag.get(musicFile)
-        except Exception as e:  # Can't read tags - flag as error.
-            logger.error(f"Tinytag error reading tags :: {e} ")
-            raise TagReadError(f"Tinytag error reading tags {musicFile}")
-        artist = removeThe(tags.artist)
-        title = removeThe(tags.title)
-        duration = tags.duration
-        duplicate = ""
-
-    elif myConfig.TAGS == "eyed3":
-        try:
-            tags = eyed3.load(musicFile)
-        except Exception as e:
-            logger.error(f"Eyed3 error reading tags  :: {musicFile}")
-            raise TagReadError(f"Eyed3 error reading tags {musicFile}")
-        artist = removeThe(tags.tag.artist)
-        title = removeThe(tags.tag.title)
-        duration = tags.info.time_secs
-        duplicate = ""
-
-    elif myConfig.TAGS == "mutagen":
-        try:
-            tags = ID3(musicFile)
-            audio = MP3(musicFile)
-        except Exception as e:
-            logger.error(f"Nutagen error reading tags :: {e} ")
-            raise TagReadError(f"Mutagen error reading tags {musicFile}")
-        artist = removeThe(tags["TPE1"][0])
-        title = removeThe(tags["TIT2"][0])
-        duration = audio.info.length
-        try:  # Try to read duplicate tag.
-            duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
-        except Exception as e:
-            duplicate = ""
-    else:
-        # Should not happen, tinytag should be returned by default.
-        logger.error("Unknown use option for Tags Module.")
-        print(f"{colorama.Fore.RED}Unknown use option for Tags Module.{colorama.Fore.RESET}")
-        exit(4)
-
-    if not duration:  # In case there is no valid duration time on the mp3 file.
-        musicDuration = 0
-    else:
-        musicDuration = round(duration, 2)
-
-    key = createKey(artist, title)
-    return key, musicDuration, duplicate, artist, title
-
-
-####################################################################################### countSongs ############
-def countSongs(sourceDir):
-    """  Count the number of songs [.mp3 files] in the sourceDir.
-         This count is used in the progress bar in scanMusic()
-         Takes just over a second at 130000 files approx.
-    """
-    print("Counting Songs")
-    count = 0
-    for musicFile in tqdm(sourceDir.glob("**/*.mp3"), unit="songs", ncols=myConfig.NCOLS, position=1):
-        count += 1
-
-    print(f"... with a song count of {count}")
-    return count
 
 ####################################################################################### scanMusic #############
-def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, zap):
-    """  Scan the sourceDir, which should contain mp3 files.
+def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe, soundex, tagType):
+    """  Scan the list fileList, which should contain mp3 files only.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then the two are checked.
 
-         mode = "scan"  -- the sourceDir is scanned and duplicates are reported.
-         mode = "build" -- the sourceDir is scanned and the database is built only, duplicates are not checked.
+         mode = "scan"  -- the fileList is scanned and duplicates are reported.
+         mode = "build" -- the fileList is scanned and the database is built only, duplicates are not checked.
 
          Uses tqdm - a very cool progress bar for console windows.
          Now uses alive_bar a even more cool progress bar for console windows.
@@ -194,308 +65,120 @@ def scanMusic(mode, sourceDir, duplicateFile, difference, songsCount, noPrint, z
     count      = 0  # Number of song files to check.
     duplicates = 0  # Number of duplicate songs.
     noDups     = 0  # Number of duplicate songs that fall outside of the time difference.
-    nonMusic   = 0  # Number of non music files.
     ignored    = 0  # Number of duplicate songs that have been marked to ignore.
     falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
-
-    #for musicFile in tqdm(sourceDir.glob("**/*.*"), total=songsCount, unit="songs", ncols=myConfig.NCOLS, position=2):
+    noTrailing = 0  # Number of songs that have a trailing the  i.e.  Shadows, the instead of The Shadows.
 
     with alive_bar(songsCount, bar="circles", spinner="notes") as bar:
-        for musicFile in sourceDir.glob("**/*.*"):
-
-            if musicFile.suffix != ".mp3":                  # A non music file found.
-                if musicFile.is_dir(): continue             # Ignore directories - for loop picks up dirs like Dr. John.
-                if mode == "build": continue                # Ignore non .mp3 files if in build mode.
-                if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
-                if musicFile.suffix == ".json": continue    # Ignore database if stored in target directory.
-                zapNoneMusicFile(musicFile, zap)
-                nonMusic += 1
-                continue
+        for musicFile in fileList:
 
             try:
-                key, musicDuration, musicDuplicate, artist, title = scanTags(musicFile)
+                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(Config.TAGS, musicFile, soundex)
             except Exception as e:  # Can't read tags - flag as error.
-                logger.debug(f"Raised exception at calling scanTags :: {e} ")
+                logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
 
             if songLibrary.hasKey(key):
                 if mode == "build": continue  # Only analyse songs if in scan mode.
-                # If build mode, skip.
 
                 songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
                 if abs(musicDuration - songDuration) < difference:
-                    if myConfig.TAGS == "mutagen":  # Using mutagen, we should check for ignore flag
-                        if checkToIgnore(musicDuplicate, songDuplicate):
+                    if tagType == "mutagen":  # Using mutagen, we should check for ignore flag
+                        if duplicateUtils.checkToIgnore(musicDuplicate, songDuplicate, Config.IGNORE):
                             ignored += 1
                             continue  # Do not print ignore duplicate
                     message = " Duplicate Found "
-                    if myConfig.SOUNDEX and not checktags(musicFile, songFile):
+                    if soundex and not tagUtils.checkTags(musicFile, songFile, logger):
                         falsePos += 1
                         if not noPrint:
                             message = " Possible False Positive "
                         else:
                             continue  # Do not print Possible False Positives
-                    logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                    logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                    logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                    duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
+                    duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                    duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
                     duplicates += 1
                 else:  # if abs(musicDuration - songDuration) < difference:
                     noDups += 1
 
             else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
+
+                if checkThe and duplicateUtils.trailingThe(artist):         #  A new artist, check for trailing the.
+                    duplicateUtils.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
+                    duplicateUtils.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
+                    noTrailing +=1
+
                 songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
-                count += 1
 
             bar()   #  Update alive_bar.
 
-    count = count + noDups + duplicates  # Adjust for duplicates found.
+    count = songLibrary.noOfItems + noDups + duplicates  # Adjust for duplicates found.
 
-    if zap and myConfig.EMPTY_DIR and mode == "scan": removeEmptyDir(sourceDir, duplicateFile)
+    zapUtils.removeUnwanted(sourceDir, duplicateFile, Config.EMPTY_DIR, zap, Config.ZAP_RECYCLE, logger)
 
-    logTextLine("", duplicateFile)
+    duplicateUtils.logTextLine("", duplicateFile)
     if mode == "build":
-        logTextLine(f"{count} music files found.", duplicateFile)
-    elif nonMusic and ignored:
-        logTextLine(f"{count} music files found with {duplicates} duplicates, \
-                    with {nonMusic} non music files and {ignored} songs.", duplicateFile)
-    elif nonMusic:
-        logTextLine(f"{count} music files found with {duplicates} duplicates, \
-                    with {nonMusic} non music files.", duplicateFile)
+        duplicateUtils.logTextLine(f"{count} music files found.", duplicateFile)
+    elif ignored:
+        duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates, with {ignored} songs.", duplicateFile)
     else:
-        logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
+        duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
 
     if noDups:
-        logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.",
-                    duplicateFile)
+        duplicateUtils.logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
+
+    if noTrailing:
+        duplicateUtils.logTextLine(f" Found possible {noTrailing} artists with a trailing 'the' in their name.", duplicateFile)
 
     if falsePos:
         if noPrint:
-            logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
+            duplicateUtils.logTextLine(f" Found possible {falsePos} false positives [not displayed].", duplicateFile)
         else:
-            logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
-
-############################################################################################## removeEmptyDir( #######
-def removeEmptyDir(sourceDir, duplicateFile):
-    """ Scan and delete empty directories.
-        Called if myConfig.EMPTY_DIR is true.
-    """
-    timeDir = myTimer.Timer()
-    timeDir.Start
-    noOfDirs = 0
-    print("\nRunning Empty Directory Check\n")
-    logger.info("Running Empty Directory Check")
-    for musicDir in sourceDir.glob("**/*"):
-        if musicDir.is_dir():
-            if len(os.listdir(musicDir)) == 0:
-                noOfDirs += 1
-                logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
-                logTextLine(f"{musicDir}", duplicateFile)
-
-                try:
-                    if myConfig.ZAP_RECYCLE:
-                        send2trash(str(musicDir))  # Move to recycle bin.
-                    else:
-                        shutil.rmtree(musicDir, ignore_errors=True, onerror=None)  # Permanently remove directory
-                except OSError:
-                    logger.error(f"ERROR : Can't delete Directory : {musicDir}")
-
-    if noOfDirs != 0:
-        message = f"Removed {noOfDirs} empty directories in  :: {timeDir.Stop}"
-        logTextLine("", duplicateFile)
-        logTextLine(message, duplicateFile)
-        logger.info(message)
-############################################################################################## zapNoneMusicFile ######
-def zapNoneMusicFile(musicFile, zap):
-    """ Zap [delete] any none music file."""
-    logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
-    if zap:
-        try:
-            logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
-            if myConfig.ZAP_RECYCLE:
-                send2trash(str(musicFile))
-            else:
-                os.remove(musicFile)
-        except OSError:
-            logger.error(f"ERROR : Can't delete file : {musicFile}")
-    else:   # if zap:
-        logTextLine(f"{musicFile} is not a music file.", duplicateFile)
-
-############################################################################################## parseArgs ######
-def parseArgs():
-    """  Process the command line arguments.
-
-         Checks the arguments and will exit if not valid.
-
-         Exit code 0 - program has exited normally, after print version, licence or help.
-         Exit code 0 - Program has exited normally, after Loading program working directory into file explorer.
-         Exit Code 1 - No source directory supplied.
-         Exit code 2 - Source directory does not exist.
-         Exit code 3 - Duplicate File Directory Does Not Exist.
-    """
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description=textwrap.dedent("""\
-        A Python MP3 Duplicate finder.
-        -----------------------
-        The program will scan a given directory and report duplicate MP3 files."""),
-        epilog=f" Kevin Scott (C) 2020-2021 :: {myConfig.NAME} {myConfig.VERSION}")
-
-    parser.add_argument("-s", "--sourceDir", type=Path, action="store", help="directory of the music files [mp3].")
-    parser.add_argument("-f", "--dupFile", type=Path, action="store", default=False,
-                        help="[Optional] list duplicates to file, start afresh.")
-    parser.add_argument("-fA", "--dupFileAmend", type=Path, action="store", default=False,
-                        help="[Optional] list duplicates to file, Amend to previous.")
-    parser.add_argument("-d", "--difference",
-                        type=float, action="store", default=0.5, help="Time difference between songs, default = 0.5s.")
-    parser.add_argument("-b", "--build", action="store_true", help="Build the database only.")
-    parser.add_argument("-n", "--number", action="store_true", help="Print the Number of Songs in the database.")
-    parser.add_argument("-l", "--license", action="store_true", help="Print the Software License.")
-    parser.add_argument("-v", "--version", action="store_true", help="Print the version of the application.")
-    parser.add_argument("-e", "--explorer", action="store_true", help="Load program working directory into file explorer.")
-    parser.add_argument("-c", "--check", action="store_true", help="Check database integrity.")
-    parser.add_argument("-cD", "--checkDelete", action="store_true",
-                        help="Check database integrity and delete unwanted.")
-    parser.add_argument("-xL", "--noLoad", action="store_true", help="Do not load database.")
-    parser.add_argument("-xS", "--noSave", action="store_true", help="Do not save database.")
-    parser.add_argument("-np", "--noPrint", action="store_true", help="Do Not Print Possible False Positives.")
-    parser.add_argument("-zD", "--zapNoneMusic", action="store_true", help="Zap [DELETE] none music files.")
-
-    args = parser.parse_args()
-
-    if args.version:
-        printShortLicense(myConfig.NAME, myConfig.VERSION, "", False)
-        print(f"Running on {sys.version} Python")
-        logger.info(f"Running on {sys.version} Python")
-        logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION}: version")
-        print("Goodbye.")
-        exit(0)
-
-    if args.license:
-        printLongLicense(myConfig.NAME, myConfig.VERSION)
-        logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Printed Licence")
-        print("Goodbye.")
-        exit(0)
-
-    if not args.sourceDir and not (args.check or args.checkDelete or args.number or args.explorer):
-        logger.error("No Source Directory Supplied.")
-        print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
-        parser.print_help()
-        print("Goodbye.")
-        exit(1)
-
-    if args.sourceDir and not args.sourceDir.exists():  # Only check source dir exits if one was entered.
-        logger.error("Source Directory Does Not Exist.")
-        print(f"{colorama.Fore.RED}Source Directory Does Not Exist. {colorama.Fore.RESET}")
-        parser.print_help()
-        print("Goodbye.")
-        exit(2)
-
-    if args.dupFile and not args.dupFile.parent.exists():  # Only check Duplicate File Directory exits if one was entered.
-        logger.error("Duplicate File Directory Does Not Exist.")
-        print(f"{colorama.Fore.RED}Duplicate File Directory Does Not Exist. {colorama.Fore.RESET}")
-        parser.print_help()
-        print("Goodbye.")
-        exit(3)
-
-    if args.check:
-        check = "test"
-    elif args.checkDelete:
-        check = "delete"
-    else:
-        check = ""
-
-    if args.dupFile:  # Delete duplicate file if it exists.
-        try:
-            dfile = args.dupFile
-            os.remove(args.dupFile)
-        except (IOError, os.error):
-            logger.error("Duplication File Does Not Exist.")  # Log error, but don't really care.
-    else:  # Amend to previous duplicate file, if it exists.
-        dfile = args.dupFileAmend
-
-    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.number,
-            check, args.noPrint, args.zapNoneMusic, args.explorer)
+            duplicateUtils.logTextLine(f" Found possible {falsePos} false positives.", duplicateFile)
 
 
-################################################################################### printNumberOfSongs() ######
-def printNumberOfSongs():
-    """  Print the number of songs in the library.
-    """
-    printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
-    l = songLibrary.noOfItems
-    print(f"Song Library has {l} songs")
-    logger.info(f"End of {myConfig.NAME} V{myConfig.VERSION} : Song Library has {l} songs")
-    print("Goodbye.")
-    exit(0)
-
-
-######################################################################################## checkDatabase() ######
-def checkDatabase(check):
-    """  Perform a data integrity check on the library.
-
-          if check == test then just report errors.
-          if check == delete then report errors and delete entries.
-    """
-    message = "Running Database Integrity Check"
-    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
-    printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, False)
-    logger.info(message)
-    songLibrary.check(check)
-    print("Goodbye.")
-    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, "Database Check Ended", myConfig.NAME, icon, timeout)
-    exit(3)
-
-
-######################################################################################## loadExplorer() ######
-def loadExplorer():
-    """  Load program working directory into file explorer.
-    """
-    try:
-        os.startfile(os.getcwd(), "explore")
-    except NotImplementedError as error:
-        logger.error(error)
-    exit(0)
 ############################################################################################### __main__ ######
 
 if __name__ == "__main__":
 
     startTime = time.time()
 
-    icon    = "tea.ico"  # icon used by notifications
+    icon    = "resources\\tea.ico"  # icon used by notifications
     timeout = 5  # timeout used by notifications in seconds
 
-    myConfig = myConfig.Config()  # Need to do this first.
+    Config = Config.Config()  # Need to do this first.
 
-    DBpath = Path(myConfig.DB_LOCATION + myConfig.DB_NAME)
+    DBpath = Path("data", Config.DB_LOCATION + Config.DB_NAME)
+    LGpath = "data\\" +Config.NAME +".log"                     #  Must be a string for a logger path.
 
-    songLibrary = myLibrary.Library(DBpath, myConfig.DB_FORMAT)  # Create the song library.
-    logger      = myLogger.get_logger(myConfig.NAME + ".log")  # Create the logger.
-    timer       = myTimer.Timer()
-    phonetic    = Soundex()
+    songLibrary = Library.Library(DBpath, Config.DB_FORMAT)  # Create the song library.
+    logger      = Logger.get_logger(LGpath)                    # Create the logger.
+    timer       = Timer.Timer()
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, number, check, noPrint, zap, explorer = parseArgs()
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, noPrint, zap, checkThe, checkDB = args.parseArgs(Config.NAME, Config.VERSION, logger)
+
+    if checkDB == 1:
+        duplicateUtils.checkDatabase(songLibrary, "test", DBpath, logger, Config.NAME, Config.VERSION, icon, timeout, Config.NOTIFICATION)          # Run data integrity check in test mode on library.
+    elif checkDB == 2:
+        duplicateUtils.checkDatabase(songLibrary, "delete", DBpath, logger, Config.NAME, Config.VERSION, icon, timeout, Config.NOTIFICATION)        # Run data integrity check in delete mode on library.
 
     timer.Start
 
-    if myConfig.SOUNDEX:
-        mode = f"Using Soundex for {myConfig.TAGS} matching"
+    if Config.SOUNDEX:
+        mode = f"Using Soundex for {Config.TAGS} matching"
     else:
-        mode = f"Using Strings for {myConfig.TAGS} matching"
+        mode = f"Using Strings for {Config.TAGS} matching"
 
-    message = f"Start of {myConfig.NAME} {myConfig.VERSION}"
-    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
+    message = f"Start of {Config.NAME} {Config.VERSION}"
+    if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
     logger.info("-" * 100)
     logger.info(message)
-    logger.debug(f"Using database at {myConfig.DB_NAME} in {myConfig.DB_FORMAT} format")
+    logger.debug(f"Using database at {Config.DB_NAME} in {Config.DB_FORMAT} format")
     logger.debug(f"{mode}")
 
-    if number:   printNumberOfSongs()  # Print on number of songs in library.
-    if check:    checkDatabase(check)  # Run data integrity check on library.
-    if explorer: loadExplorer()        # Load program working directory n file explorer.
-
     flag = (True if duplicateFile else False)  # If no duplicateFile then print to screen.
-    printShortLicense(myConfig.NAME, myConfig.VERSION, duplicateFile, flag)
+    License.printShortLicense(Config.NAME, Config.VERSION, duplicateFile, flag)
 
     if noLoad or build:
         logger.debug("Not Loading database")
@@ -503,47 +186,45 @@ if __name__ == "__main__":
         songLibrary.load()
 
     if zap:
-        if myConfig.ZAP_RECYCLE:
+        if Config.ZAP_RECYCLE:
             logger.debug("Will zap [Recycle mode] none music files.")
         else:
             logger.debug("Will zap [Delete mode] none music files.")
 
-    songsCount = countSongs(sourceDir)
+    fileList = []
+    songsCount = duplicateUtils.countSongs(sourceDir, fileList, Config.NCOLS)
 
     if build:
-        logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
-                    duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
-        logger.debug(f"Building Database from {sourceDir} with a time difference of {difference} seconds")
-        logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("build", sourceDir, duplicateFile, difference, songsCount, noPrint, zap)
+        duplicateUtils.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
+                    duplicateFile, logger)
+        duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
+        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
     else:
-        logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile)
-        logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile)
-        logger.debug(f"Scanning {sourceDir} with a time difference of {difference} seconds")
-        logger.debug(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds")
-        scanMusic("scan", sourceDir, duplicateFile, difference, songsCount, noPrint, zap)
+        duplicateUtils.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile, logger)
+        duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
+        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
 
     if noSave:
         logger.debug("Not Saving database")
     else:
-        if not myConfig.DB_OVERWRITE:
+        if not Config.DB_OVERWRITE:
             logger.debug(f"Not over writing database {DBpath}")
-        songLibrary.DBOverWrite(myConfig.DB_OVERWRITE)
+        songLibrary.DBOverWrite(Config.DB_OVERWRITE)
         songLibrary.save()
 
     timeStop = timer.Stop
 
-    message = f"{myConfig.NAME} Completed :: {timeStop}"
+    message = f"{Config.NAME} Completed :: {timeStop}"
 
-    logTextLine("", duplicateFile)
-    logTextLine(message, duplicateFile)
-    logTextLine("", duplicateFile)
+    duplicateUtils.logTextLine("", duplicateFile)
+    duplicateUtils.logTextLine(message, duplicateFile)
+    duplicateUtils.logTextLine("", duplicateFile)
     print(message)
 
-    # logger.info(f"{removeThe.cache_info()}")
+    #logger.info(f"{removeThe.cache_info()}")
     logger.info(message)
-    logger.info(f"End of {myConfig.NAME} {myConfig.VERSION}")
+    logger.info(f"End of {Config.NAME} {Config.VERSION}")
 
-    if myConfig.NOTIFICATION: notification.notify(myConfig.NAME, message, myConfig.NAME, icon, timeout)
+    if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
+
     exit(0)

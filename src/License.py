@@ -20,27 +20,15 @@
 #                                                                                                             #
 ###############################################################################################################
 
-
-
-####################################################################################### printDuplicate ########
-def logTextLine(textLine, textFile):
-    """  if the textFile is set, then write the line of text to that file, else print to screen.
-
-         textLine needs to be a string, for f.write - NOT a path.
-    """
-    if textFile:
-        with open(textFile, encoding='utf-8', mode="a") as f:     # Open in amend mode, important.
-            f.write(textLine + "\n")
-    else:
-        print(textLine)
+import src.utils.duplicateUtils as duplicateUtils
 
 ########################################################################################### printSortLicense ######
 def printShortLicense(Name, Version, textFile, screen=False):
-    logTextLine("", textFile)
-    logTextLine(f"{Name} {Version}   Copyright (C) 2020-2021  Kevin Scott", textFile)
-    logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{Name} -l'.", textFile)
-    logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.", textFile)
-    logTextLine("", textFile)
+    duplicateUtils.logTextLine("", textFile)
+    duplicateUtils.logTextLine(f"{Name} {Version}   Copyright (C) 2020-2021  Kevin Scott", textFile)
+    duplicateUtils.logTextLine(f"This program comes with ABSOLUTELY NO WARRANTY; for details type `{Name} -l'.", textFile)
+    duplicateUtils.logTextLine("This is free software, and you are welcome to redistribute it under certain conditions.", textFile)
+    duplicateUtils.logTextLine("", textFile)
     if screen:
         print("")
         print(f"{Name} {Version}   Copyright (C) 2020-2021  Kevin Scott")

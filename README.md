@@ -28,7 +28,7 @@
     The -zD flag if specified zap [delete] none music files.
         Delete to recycle bin or plainf delete is set via a user option.
         Will find and delete empty directories, selectable by user option.
-         
+
     Added tqdm - a very cool progress bar for console windows.
 
     Added the ability to use different modules to read the mp3 tags.
@@ -48,34 +48,54 @@
 
 To install dependencies pip -r requirements.txt
 
-usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] 
-                                                            [-b] [-n] [-l] [-v] [-e] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
+usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d DIFFERENCE] [-b] [-n] [-l] [-v] [-e] [-t] [-c] [-cD] [-xL] [-xS] [-np] [-zD]
+::
+    A Python MP3 Duplicate finder.
+    -----------------------
+    The program will scan a given directory and report duplicate MP3 files.
 
-A Python MP3 Duplicate finder.
------------------------
-  -h, --help            show this help message and exit
-  -s SOURCEDIR, --sourceDir SOURCEDIR
-                        directory of the music files [mp3].
-  -f DUPFILE, --dupFile DUPFILE
-                        [Optional] list duplicates to file, start afresh.
-  -fA DUPFILEAMEND, --dupFileAmend DUPFILEAMEND
-                        [Optional] list duplicates to file, Amend to previous.
-  -d DIFFERENCE, --difference DIFFERENCE
-                        Time difference between songs, default = 0.5s.
-  -b, --build           Build the database only.
-  -n, --number          Print the Number of Songs in the database.
-  -l, --license         Print the Software License.
-  -v, --version         Print the version of the application.
-  -e, --explorer        Load program working directory into file explorer.
-  -c, --check           Check database integrity.
-  -cD, --checkDelete    Check database integrity and delete unwanted.
-  -xL, --noLoad         Do not load database.
-  -xS, --noSave         Do not save database.
-  -np, --noPrint        Do Not Print Possible False Positives.
-  -zD, --zapNoneMusic   Zap [DELETE] none music files.
+    options:
 
- Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.29
+    -h, --help            show this help message and exit.
 
+    -s SOURCEDIR, --sourceDir SOURCEDIR
+                            directory of the music files [mp3].
+
+    -f DUPFILE, --dupFile DUPFILE
+                            [Optional] list duplicates to file, start afresh.
+
+    -fA DUPFILEAMEND, --dupFileAmend DUPFILEAMEND
+                            [Optional] list duplicates to file, Amend to previous.
+
+    -d DIFFERENCE, --difference DIFFERENCE
+
+                            Time difference between songs, default = 0.5s.
+    -b, --build           Build the database only.
+
+    -n, --number          Print the Number of Songs in the database.
+
+    -l, --license         Print the Software License and exit.
+
+    -v, --version         Print the version of the application and exit.
+
+    -e, --explorer        Load program working directory into file explorer.
+
+    -t, --checkThe        Check for a artist for trailing ',the'.
+
+    -c, --check           Check database integrity.
+
+    -cD, --checkDelete    Check database integrity and delete unwanted.
+
+    -xL, --noLoad         Do not load database.
+
+    -xS, --noSave         Do not save database.
+
+    -np, --noPrint        Do Not Print Possible False Positives.
+
+    -zD, --zapNoneMusic   Zap [DELETE] none music files.
+
+
+    Kevin Scott (C) 2020-2021 :: pyMP3duplicate 2021.38
 
 
 
