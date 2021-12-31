@@ -1,13 +1,17 @@
-** all builds are to the master branch, unless stated.
+** all builds are to the master branch, unless stated. **
+
+V2021.41.7fa8043
+
+    Merged branch python_3.10 back into master
 
 
-V2021.39    [branch python_3.10]
+V2021.40.7fa8043    [branch python_3.10]
 
     Test against Python 3.10.1
     More attempts at formatting README.md
 
 
-V2021.39    [branch python_3.10]
+V2021.39.cba8694    [branch python_3.10]
 
     Refactoring continues.
     Removed my from all src\my*.py.
@@ -19,10 +23,10 @@ V2021.39    [branch python_3.10]
         If a logger is supplied, log test as well as print to screen.
     Added the argument logger=None to src\utils\tagUtils\checktags.
     Removed stuff from main program which now resides in src\ modules.
-    Added commands.text - examplke usage.
+    Added commands.text - example usage.
 
 
-V2021.38    [branch python_3.10]
+V2021.38.4af1c6e    [branch python_3.10]
 
     Added a test directory.
     Added two test files test_duplicateUtils.py & test_myLibrary.py.
@@ -57,7 +61,7 @@ V2021.38    [branch python_3.10]
     ---------------------------------------------------------------------------------------------
 
 
-V2021.37    [branch python_3.10]
+V2021.37.03fe489    [branch python_3.10]
 
     Renamed Lib directory to src.
     Created a new directory utils under src.
@@ -75,7 +79,7 @@ V2021.36    [branch python_3.10]
     If one is found an entry is either printed to screen or added to duplicate file.
 
 
-V2021.35    [branch python_3.10]
+V2021.35.480171f.abc9f84    [branch python_3.10]
 
 	Tried to make the directory structure less cluttered.
 	It now look like this
@@ -102,7 +106,7 @@ V2021.35    [branch python_3.10]
 	  |  tea.icon
 
 
-V2021.34    [branch python_3.10]
+V2021.34.432ca60    [branch python_3.10]
 
     Made changes from build 33 below to the python_3.10 branch.
     Tried pyjion to test for increase in speed - seems to be very small.
@@ -114,8 +118,7 @@ V2021.34    [branch python_3.10]
     Updated README.md
 
 
-V2021.33.2140d3f
->>>>>>> python_3.10:docs/history.txt
+V2021.33.2140d3f.1e93bb
 
     When upgraded Tinytag to V1.6, it started throwing errors that it can't read some ID3 tags.
     This crashed the program.  Added try except clauses to the scanTags function to catch these.
@@ -125,9 +128,7 @@ V2021.33.2140d3f
     Also added a try except clause to the removeEmptryDir function.
 
 
-<<<<<<< HEAD:history.txt
-=======
-V2021.32    [branch python_3.10]
+V2021.32.2140d3f    [branch python_3.10]
 
     Created branch python_3.10, to test Python V3.10
     Amended pyMP3Duplicate.py to use the new match [case] statement instead of
@@ -135,7 +136,6 @@ V2021.32    [branch python_3.10]
     Upgraded all packages to test on V3.10 - all seem to work.
 
 
->>>>>>> python_3.10:docs/history.txt
 V2021.31.f554fea
 
     Amended the -v version to also show Python version.
@@ -249,16 +249,16 @@ V2020.23.d06085a
         -----------------------------------------------------------------------------------
         File                                            blank        comment           code
         -----------------------------------------------------------------------------------
-        pyMP3duplicate\pyMP3duplicate.py		 64             84            279
+        pyMP3duplicate\pyMP3duplicate.py		64             84            279
         pyMP3duplicate\myLibrary.py			    35             72            100
         pyMP3duplicate\myConfig.py			    39             60             87
         pyMP3duplicate\myTimer.py			    16             40             32
-        pyMP3duplicate\myLicense.py			  8             39             20
+        pyMP3duplicate\myLicense.py			     8             39             20
         pyMP3duplicate\myLogger.py			     8             29             18
         pyMP3duplicate\config.toml			     4              7             14
-        pyMP3duplicate\myExceptions.py	     3             20             11
+        pyMP3duplicate\myExceptions.py	         3             20             11
         -----------------------------------------------------------------------------------
-        SUM:						                      177            351            561
+        SUM:						           177            351            561
         -----------------------------------------------------------------------------------
 
 V2020.22.30f9a16

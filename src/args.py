@@ -54,6 +54,7 @@ import colorama
 from pathlib import Path
 
 import src.License as License
+import src.utils.duplicateUtils as duplicateUtils
 
 ############################################################################################## parseArgs ######
 def parseArgs(appName, appVersion, logger):
