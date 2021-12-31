@@ -43,12 +43,11 @@ import src.utils.zapUtils as zapUtils
 import src.utils.tagUtils as tagUtils
 import src.utils.duplicateUtils as duplicateUtils
 
-
-try:
-    import pyjion       #  Apparently tries to improve speed.
-    pyjion.enable()
-except:
-    pass
+#try:
+    #import pyjion       #  Apparently tries to improve speed.
+    #pyjion.enable()
+#except:
+    #pass
 
 
 ####################################################################################### scanMusic #############
@@ -227,4 +226,5 @@ if __name__ == "__main__":
     logger.info(f"End of {Config.NAME} {Config.VERSION}")
 
     if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
+
     exit(0)

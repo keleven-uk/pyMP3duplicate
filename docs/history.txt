@@ -3,6 +3,12 @@
 
 V2021.39    [branch python_3.10]
 
+    Test against Python 3.10.1
+    More attempts at formatting README.md
+
+
+V2021.39    [branch python_3.10]
+
     Refactoring continues.
     Removed my from all src\my*.py.
         Amended all files to reflect this.
