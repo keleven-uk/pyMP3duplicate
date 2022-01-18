@@ -25,8 +25,8 @@
 ###############################################################################################################
 
 import os
+import sys
 import time
-import eyed3
 
 from pathlib import Path
 from plyer import notification
@@ -149,8 +149,18 @@ if __name__ == "__main__":
 
     Config = Config.Config()  # Need to do this first.
 
-    DBpath = Path("data", Config.DB_LOCATION + Config.DB_NAME)
-    LGpath = "data\\" +Config.NAME +".log"                     #  Must be a string for a logger path.
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        print('running in a PyInstaller bundle')
+        DBpath = Path(Config.DB_LOCATION + Config.DB_NAME)
+        LGpath = Config.NAME +".log"                     #  Must be a string for a logger path.
+        icon   = ""                                      # icon used by notifications
+    else:
+        print('running in a normal Python process')
+        DBpath = Path("data", Config.DB_LOCATION + Config.DB_NAME)
+        LGpath = "data\\" +Config.NAME +".log"                     #  Must be a string for a logger path.
+        icon   = "resources\\tea.ico"                              # icon used by notifications
+
+
 
     songLibrary = Library.Library(DBpath, Config.DB_FORMAT)  # Create the song library.
     logger      = Logger.get_logger(LGpath)                    # Create the logger.
@@ -227,4 +237,4 @@ if __name__ == "__main__":
 
     if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
 
-    exit(0)
+    sys.exit(0)

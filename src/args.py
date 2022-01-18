@@ -104,34 +104,34 @@ def parseArgs(appName, appVersion, logger):
         logger.info(f"Running on {sys.version} Python")
         logger.info(f"End of {appName} V{appVersion}: version")
         print("Goodbye.")
-        exit(0)
+        sys.exit(0)
 
     if args.license:
         License.printLongLicense(appName, appVersion)
         logger.info(f"End of {appName} V{appVersion} : Printed Licence")
         print("Goodbye.")
-        exit(0)
+        sys.exit(0)
 
     if not args.sourceDir and not (args.check or args.checkDelete or args.number or args.explorer):
         logger.error("No Source Directory Supplied.")
         print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
         parser.print_help()
         print("Goodbye.")
-        exit(1)
+        sys.exit(1)
 
     if args.sourceDir and not args.sourceDir.exists():  # Only check source dir exits if one was entered.
         logger.error("Source Directory Does Not Exist.")
         print(f"{colorama.Fore.RED}Source Directory Does Not Exist. {colorama.Fore.RESET}")
         parser.print_help()
         print("Goodbye.")
-        exit(2)
+        sys.exit(2)
 
     if args.dupFile and not args.dupFile.parent.exists():  # Only check Duplicate File Directory exits if one was entered.
         logger.error("Duplicate File Directory Does Not Exist.")
         print(f"{colorama.Fore.RED}Duplicate File Directory Does Not Exist. {colorama.Fore.RESET}")
         parser.print_help()
         print("Goodbye.")
-        exit(3)
+        sys.exit(3)
 
     if args.dupFile:  # Delete duplicate file if it exists.
         try:
@@ -147,12 +147,12 @@ def parseArgs(appName, appVersion, logger):
         l = songLibrary.noOfItems
         print(f"Song Library has {l} songs")                 # Print on number of songs in library.
         print("Goodbye.")
-        exit(0)
+        sys.exit(0)
 
     if args.explorer:
         duplicateUtils.loadExplorer(logger)             # Load program working directory n file explorer.
         print("Goodbye.")
-        exit(0)
+        sys.exit(0)
 
     checkDB = 0
     if args.check:

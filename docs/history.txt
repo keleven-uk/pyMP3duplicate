@@ -1,6 +1,25 @@
 ** all builds are to the master branch, unless stated. **
 
-V2021.41.7fa8043
+
+V2022.42
+
+    Main changes due to testing the use of auto-py-to-exe [pip install auto-py-to-exe]
+        Added file pyMP3duplicateInstall.json, saved setting for the app.
+        The app creates a standalone on file executable of pyMP3duplicate.
+    Changes to pyMP3duplicate.py, so if run as a frozen executable
+        then all data files etc are in the same directory.
+    Changes to src\Library.py to raise an exception if the date file does not exist.
+    Changes to src\utils\duplicateUtils.py to catch above exceptions and report error.
+    Changed exit(0) to sys.exit(0) in src\args.py
+
+
+V2021.41.ccf1166
+
+	Commit after merge.
+	Corrected a bug on calling file explorer as a argument.
+
+
+V2021.41.262a31c
 
     Merged branch python_3.10 back into master
 

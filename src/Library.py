@@ -125,10 +125,13 @@ class Library():
     def load(self):
         """  Loads the library from disc.
         """
-        if self.__format == "pickle":
-            self.pickleLoad()
-        else:
-            self.jsonLoad()
+        try:
+            if self.__format == "pickle":
+                self.pickleLoad()
+            else:
+                self.jsonLoad()
+        except:
+            raise myExceptions.LibraryError
 
 
     def clear(self):
@@ -151,7 +154,10 @@ class Library():
         self.displayMessage(f"Loading {self.__filename}", logger)
 
         if not self.library:
-            self.load()
+            try:
+                self.load()
+            except:
+                raise myExceptions.LibraryError
 
         l = self.noOfItems
         self.displayMessage(f"Song Library has {l} songs", logger)

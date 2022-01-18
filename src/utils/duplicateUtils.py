@@ -19,6 +19,9 @@
 ###############################################################################################################
 
 import os
+import sys
+import colorama
+
 from tqdm import tqdm
 from plyer import notification
 
@@ -57,7 +60,7 @@ def loadExplorer(logger):
         os.startfile(os.getcwd(), "explore")
     except NotImplementedError as error:
         logger.error(error)
-    exit(0)
+    sys.exit(0)
 
 
 ####################################################################################### checkToIgnore #########
@@ -109,9 +112,17 @@ def checkDatabase(songLibrary, check, dfile, logger, appName, appVersion, icon, 
     """
     if NOTIFICATION: notification.notify(appName, "Database Check Started", appName, icon, timeout)
     License.printShortLicense(appName, appName, dfile, False)
-    songLibrary.check(check, logger)
+
+    try:
+        songLibrary.check(check, logger)
+    except:
+        message = f"{colorama.Fore.RED}ERROR : No Database file found. {colorama.Fore.RESET}"
+        print(message)
+        if logger: logger.info(message)
+        sys.exit(1)
+
     print("Goodbye.")
     if NOTIFICATION: notification.notify(appName, "Database Check Ended", appName, icon, timeout)
-    exit(3)
+    sys.exit(0)
 
 #(Config.NAME, message, Config.NAME, icon, timeout)
