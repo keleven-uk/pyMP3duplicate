@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLibrary.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                  #
+#    myLibrary.py   Copyright (C) <2020-2022>  <Kevin Scott>                                                  #
 #                                                                                                             #
 #    A class that acts has a wrapper around a dictionary access.                                              #
 #    The items to store are song files,                                                                       #
@@ -12,7 +12,7 @@
 #    The format is specified when the library is created.                                                     #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
+#    Copyright (C) <2020-2022>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -28,12 +28,12 @@
 ###############################################################################################################
 
 import os
-import time
 import json
 import pickle
 import datetime
 import pathlib
 
+import src.Timer as Timer
 import src.Exceptions as myExceptions
 
 
@@ -59,16 +59,15 @@ class Library():
 
     def __init__(self, DBfilename, DBformat):
         self.library     = {}
+        self.timer       = Timer.Timer()                #  A timer class.
         self.__filename  = pathlib.Path(DBfilename)
         self.__format    = DBformat
-        self.__overWrite = True     #  Originally set to overwrite DB file.
-
+        self.__overWrite = True  # Originally set to overwrite DB file.
 
     def hasKey(self, key):
         """  Returns true if the key exist in the library.
         """
         return key in self.library
-
 
     def addItem(self, key, item1, item2, item3):
         """  Adds to the library at point key, added is a list of items.
@@ -78,7 +77,6 @@ class Library():
         """
         self.library[key] = [item1, item2, item3]
 
-
     def getItem(self, key):
         """  Returns items at position key from the library.
         """
@@ -86,7 +84,6 @@ class Library():
             return self.library[key]
         else:
             raise myExceptions.LibraryError
-
 
     def delItem(self, key):
         """  Deletes item at position key from the library.
@@ -96,7 +93,6 @@ class Library():
         except (KeyError):
             raise myExceptions.LibraryError
 
-
     @property
     def noOfItems(self):
         """  Return the number of entries in the library
@@ -105,13 +101,11 @@ class Library():
             self.load()
         return len(self.library)
 
-
     def DBOverWrite(self, mode):
         """  If set to True the old database file, if exists, will be overwritten.
              If set to False the old database file will be backed up before new one is written.
         """
         self.__overWrite = mode
-
 
     def save(self):
         """  Save the library to disc.
@@ -120,7 +114,6 @@ class Library():
             self.pickleSave()
         else:
             self.jsonSave()
-
 
     def load(self):
         """  Loads the library from disc.
@@ -133,19 +126,17 @@ class Library():
         except:
             raise myExceptions.LibraryError
 
-
     def clear(self):
         """  Clears the library.
         """
         self.library.clear()
-
 
     def check(self, mode, logger=None):
         """  Runs a database data integrity check.
 
              If a logger is passed in, then use it - else ignore.
         """
-        startTime = time.time()
+        self.timer.Start        #  Start timer.
         missing   = 0
         removed   = 0
 
@@ -162,7 +153,7 @@ class Library():
         l = self.noOfItems
         self.displayMessage(f"Song Library has {l} songs", logger)
 
-        for song in self.library.copy():                 #  iterate over a copy, gets around the error dictionary changed size during iteration
+        for song in self.library.copy():  # iterate over a copy, gets around the error dictionary changed size during iteration
             path, duration, ignore = self.getItem(song)
             if not os.path.isfile(path):
                 if mode == "delete":
@@ -173,23 +164,22 @@ class Library():
                     missing += 1
                     print(f"Song does not exist {path}")
 
-        elapsedTimeSecs = time.time() - startTime
+        timeStop = self.timer.Stop      #  Stop timer.
 
         if removed:
             self.displayMessage(f"Saving {self.__filename}", logger)
             self.save()
-            self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and removed {removed} entries from database.", logger)
+            self.displayMessage(f"Completed  :: {timeStop} and removed {removed} entries from database.", logger)
             l = self.noOfItems
             self.displayMessage(f"Song Library has now {l} songs", logger)
         else:
             if missing:
                 l = self.noOfItems
-                self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and found {missing} missing songs.", logger)
+                self.displayMessage(f"Completed  :: {timeStop} and found {missing} missing songs.", logger)
             else:
-               self.displayMessage(f"Completed  :: {datetime.timedelta(seconds = elapsedTimeSecs)} and database looks good.", logger)
+                self.displayMessage(f"Completed  :: {timeStop} and database looks good.", logger)
 
-
-#-------------
+    # -------------
     def displayMessage(self, message, logger=None):
         """   Display the message to screen and pass to logger if required.
               If a logger is passed in, then use it - else ignore.
@@ -197,8 +187,7 @@ class Library():
         print(message)
         if logger: logger.info(message)
 
-
-#------------- pickle load and save. ------------------
+    # ------------- pickle load and save. ------------------
     def pickleLoad(self):
         """  Load the song library in pickle format.
         """
@@ -208,7 +197,6 @@ class Library():
         except FileNotFoundError:
             print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
             self.library = {}
-
 
     def pickleSave(self):
         """  Save the song library in pickle format.
@@ -220,7 +208,7 @@ class Library():
         with open(self.__filename, "wb") as pickle_file:
             pickle.dump(self.library, pickle_file)
 
-#------------- json load and save. ------------------
+    # ------------- json load and save. ------------------
     def jsonLoad(self):
         """  Load the song library in json format.
         """

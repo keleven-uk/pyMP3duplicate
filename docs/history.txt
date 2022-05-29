@@ -1,6 +1,13 @@
 ** all builds are to the master branch, unless stated. **
 
 
+V2022.43
+
+    The library self check now uses the time class form src/Timer.
+    Python version is nor saves to logger file.
+    Copyright years updated on source files.
+
+
 V2022.42
 
     Main changes due to testing the use of auto-py-to-exe [pip install auto-py-to-exe]

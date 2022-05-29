@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLogger.py   Copyright (C) <2020-2021>  <Kevin Scott>                                                        #
+#    myLogger.py   Copyright (C) <2020-2022>  <Kevin Scott>                                                        #
 #                                                                                                             #
 #    A Wrapper for logging - based on https://www.toptal.com/python/in-depth-python-logging                   #
 #                                                                                                             #
@@ -32,23 +32,25 @@ import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
+FORMATTER = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s")  # Could add if needed - %(funcName)s:%(lineno)d
 
-FORMATTER = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s")
-                                                                 # Could add if needed - %(funcName)s:%(lineno)d
+
 def get_console_handler():
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(FORMATTER)
     return console_handler
+
 
 def get_file_handler(logger_name):
     file_handler = TimedRotatingFileHandler(logger_name, when="midnight", backupCount=7)  # Only keep 7 previous logs.
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
+
 def get_logger(logger_name):
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)              # better to have too much log than not enough
-    #logger.addHandler(get_console_handler())   # add to log to console
+    logger.setLevel(logging.DEBUG)               # better to have too much log than not enough
+    # logger.addHandler(get_console_handler())   # add to log to console
     logger.addHandler(get_file_handler(logger_name))
     # with this pattern, it's rarely necessary to propagate the error up to parent
     logger.propagate = False

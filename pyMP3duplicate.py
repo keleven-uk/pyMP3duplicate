@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020-2021>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020-2022>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 #  Usage:                                                                                                     #
@@ -9,7 +9,7 @@
 #     For changes see history.txt                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
+#    Copyright (C) <2020-2022>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -26,7 +26,6 @@
 
 import os
 import sys
-import time
 
 from pathlib import Path
 from plyer import notification
@@ -142,25 +141,21 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
 
 if __name__ == "__main__":
 
-    startTime = time.time()
-
     icon    = "resources\\tea.ico"  # icon used by notifications
     timeout = 5  # timeout used by notifications in seconds
 
     Config = Config.Config()  # Need to do this first.
 
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        print('running in a PyInstaller bundle')
+        runningInfo = ('running in a PyInstaller bundle')
         DBpath = Path(Config.DB_LOCATION + Config.DB_NAME)
         LGpath = Config.NAME +".log"                     #  Must be a string for a logger path.
         icon   = ""                                      # icon used by notifications
     else:
-        print('running in a normal Python process')
+        runningInfo = ('running in a normal Python process')
         DBpath = Path("data", Config.DB_LOCATION + Config.DB_NAME)
         LGpath = "data\\" +Config.NAME +".log"                     #  Must be a string for a logger path.
         icon   = "resources\\tea.ico"                              # icon used by notifications
-
-
 
     songLibrary = Library.Library(DBpath, Config.DB_FORMAT)  # Create the song library.
     logger      = Logger.get_logger(LGpath)                    # Create the logger.
@@ -181,9 +176,12 @@ if __name__ == "__main__":
         mode = f"Using Strings for {Config.TAGS} matching"
 
     message = f"Start of {Config.NAME} {Config.VERSION}"
+
     if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
     logger.info("-" * 100)
     logger.info(message)
+    logger.info(f"Running on {sys.version} Python")
+    logger.info(runningInfo)
     logger.debug(f"Using database at {Config.DB_NAME} in {Config.DB_FORMAT} format")
     logger.debug(f"{mode}")
 
@@ -205,8 +203,7 @@ if __name__ == "__main__":
     songsCount = duplicateUtils.countSongs(sourceDir, fileList, Config.NCOLS)
 
     if build:
-        duplicateUtils.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}",
-                    duplicateFile, logger)
+        duplicateUtils.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile, logger)
         duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
         scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
     else:

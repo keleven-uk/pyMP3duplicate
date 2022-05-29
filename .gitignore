@@ -90,7 +90,8 @@ celerybeat-schedule
 .venv
 venv/
 ENV/
-env_3.10.1/
+env_3.10/
+env_3.11.0/
 
 # Spyder project settings
 .spyderproject
@@ -134,5 +135,10 @@ $RECYCLE.BIN/
 *.pickle
 *.pickle.*
 dup.txt
+
+# PyCharm config
+.idea/
+
+
 
 # End of https://www.gitignore.io/api/python,windows

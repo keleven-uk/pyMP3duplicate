@@ -1,12 +1,12 @@
 ###############################################################################################################
-#    myConfig.py    Copyright (C) <2020-2021>  <Kevin Scott>                                                       #
+#    myConfig.py    Copyright (C) <2020-2022>  <Kevin Scott>                                                       #
 #                                                                                                             #
 #    A class that acts has a wrapper around the configure file - config.toml.                                 #
 #    The configure file is first read, then the properties are made available.                                #
 #    The configure file is currently in toml format.                                                          #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2022>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -165,7 +165,7 @@ class Config():
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '2020.27',
+        config['INFO'] = {'myVERSION': '2022.43',
                           'myNAME'   : 'pyMP3duplicate'}
 
         config['APPLICATION'] = {'notification': True}

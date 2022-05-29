@@ -1,9 +1,9 @@
 ###############################################################################################################
-#    duplicateUtils.py   Copyright (C) <2020-2021>  <Kevin Scott>                                             #                                                                                                             #                                                                                                             #
+#    duplicateUtils.py   Copyright (C) <2020-2022>  <Kevin Scott>                                             #                                                                                                             #                                                                                                             #
 #    A number of helper and utility functions                                                                 #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
+#    Copyright (C) <2020-2022>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
