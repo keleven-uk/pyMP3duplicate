@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myConfig.py    Copyright (C) <2020-2022>  <Kevin Scott>                                                       #
+#    myConfig.py    Copyright (C) <2020-2023>  <Kevin Scott>                                                       #
 #                                                                                                             #
 #    A class that acts has a wrapper around the configure file - config.toml.                                 #
 #    The configure file is first read, then the properties are made available.                                #
@@ -127,7 +127,7 @@ class Config():
         extension = self.config['DATABASE']['format']
 
         if location:
-            return f"{location}\{filename}.{extension}"
+            return f"{location}\\{filename}.{extension}"
         else:
             return f"{filename}.{extension}"
 

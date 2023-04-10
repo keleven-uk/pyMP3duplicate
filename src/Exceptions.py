@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myExceptions.py    Copyright (C) <2020-2022>  <Kevin Scott>                                              #
+#    myExceptions.py    Copyright (C) <2020-2023>  <Kevin Scott>                                              #
 #                                                                                                             #
 #    A class that raises a custom exceptions.                                                                 #
 #                                                                                                             #

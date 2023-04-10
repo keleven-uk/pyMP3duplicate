@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLibrary.py   Copyright (C) <2020-2022>  <Kevin Scott>                                                  #
+#    myLibrary.py   Copyright (C) <2020-2023>  <Kevin Scott>                                                  #
 #                                                                                                             #
 #    A class that acts has a wrapper around a dictionary access.                                              #
 #    The items to store are song files,                                                                       #

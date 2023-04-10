@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    duplicateUtils.py   Copyright (C) <2020-2022>  <Kevin Scott>                                             #                                                                                                             #                                                                                                             #
+#    duplicateUtils.py   Copyright (C) <2020-2023>  <Kevin Scott>                                             #                                                                                                             #                                                                                                             #
 #    A number of helper and utility functions                                                                 #
 #                                                                                                             #
 ###############################################################################################################
@@ -74,13 +74,13 @@ def checkToIgnore(musicDuplicate, songDuplicate, ignore):
 ####################################################################################### countSongs ############
 def countSongs(sourceDir, fileList, NCOLS):
     """  Count the number of songs [.mp3 files] in the sourceDir.
-         The filename are save in a list fileList, this is then passed to scanMusic.
+         The filenames are saved in a list fileList, this is then passed to scanMusic.
          Takes just over a second at 160000 files approx.
     """
     count = 0
 
     print("Counting Songs")
-    for musicFile in tqdm(sourceDir.glob("**/*.mp3"), unit="songs", ncols=NCOLS, position=1):
+    for musicFile in tqdm(sourceDir.rglob("*.mp3"), unit="songs", ncols=NCOLS, position=1):
         fileList.append(musicFile)
 
     print(f"... with a song count of {len(fileList)}")

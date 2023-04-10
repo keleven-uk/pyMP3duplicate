@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020-2022>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020-2023>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 #  Usage:                                                                                                     #
@@ -25,6 +25,7 @@
 ###############################################################################################################
 
 import os
+import gc
 import sys
 
 from pathlib import Path
@@ -78,32 +79,34 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
                 continue
 
             if songLibrary.hasKey(key):
-                if mode == "build": continue  # Only analyse songs if in scan mode.
 
-                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+                if mode == "scan":                #  Only log result in scan mode, if build - just build the database.
 
-                if abs(musicDuration - songDuration) < difference:
-                    if tagType == "mutagen":  # Using mutagen, we should check for ignore flag
-                        if duplicateUtils.checkToIgnore(musicDuplicate, songDuplicate, Config.IGNORE):
-                            ignored += 1
-                            continue  # Do not print ignore duplicate
-                    message = " Duplicate Found "
-                    if soundex and not tagUtils.checkTags(musicFile, songFile, logger):
-                        falsePos += 1
-                        if not noPrint:
-                            message = " Possible False Positive "
-                        else:
-                            continue  # Do not print Possible False Positives
-                    duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                    duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                    duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
-                    duplicates += 1
-                else:  # if abs(musicDuration - songDuration) < difference:
-                    noDups += 1
+                    songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+
+                    if abs(musicDuration - songDuration) <= difference:
+
+                        if tagType == "mutagen":  #  Using mutagen, we should check for ignore flag
+                            if duplicateUtils.checkToIgnore(musicDuplicate, songDuplicate, Config.IGNORE):
+                                ignored += 1
+                                continue  # Do not print ignore duplicate
+                        message = " Duplicate Found "
+                        if soundex and not tagUtils.checkTags(musicFile, songFile, logger):
+                            falsePos += 1
+                            if not noPrint:
+                                message = " Possible False Positive "
+                            else:
+                                continue  # Do not print Possible False Positives
+                        duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
+                        duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                        duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                        duplicates += 1
+                    else:  # if abs(musicDuration - songDuration) < difference:
+                        noDups += 1
 
             else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
 
-                if checkThe and duplicateUtils.trailingThe(artist):         #  A new artist, check for trailing the.
+                if checkThe and duplicateUtils.trailingThe(artist) and mode == "scan":         #  A new artist, check for trailing the.
                     duplicateUtils.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
                     duplicateUtils.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
                     noTrailing +=1
@@ -141,7 +144,18 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
 
 if __name__ == "__main__":
 
-    icon    = "resources\\tea.ico"  # icon used by notifications
+    # Clean up what might be garbage so far.
+    gc.collect(2)
+    # Exclude current items from future GC.
+    gc.freeze()
+
+    allocs, gen1, gen2 = gc.get_threshold()
+    allocs = 50_000  # Start the GC sequence every 50K not 700 allocations.
+    gen1 = gen1 * 2
+    gen2 = gen2 * 2
+    gc.set_threshold(allocs, gen1, gen2)
+
+
     timeout = 5  # timeout used by notifications in seconds
 
     Config = Config.Config()  # Need to do this first.
@@ -233,5 +247,8 @@ if __name__ == "__main__":
     logger.info(f"End of {Config.NAME} {Config.VERSION}")
 
     if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
+
+
+    #gc.set_debug(gc.DEBUG_STATS)
 
     sys.exit(0)

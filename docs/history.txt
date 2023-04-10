@@ -1,10 +1,18 @@
 ** all builds are to the master branch, unless stated. **
 
+V2023.44
+
+    Tested against Python 3.11.3.
+    Upgraded all dependences and requirements.txt.
+    Amened logic in main loop - not building correctly.
+    Amended for loop in duplicateUtils.py to use rglob instead of glob.
+    Amended year in all copyright notices to be 2023.
+
 
 V2022.43
 
     The library self check now uses the time class form src/Timer.
-    Python version is nor saves to logger file.
+    Python version is noy saved to logger file.
     Copyright years updated on source files.
 
 

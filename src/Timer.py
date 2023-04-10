@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myTimer.py   Copyright (C) <2020-2022>  <Kevin Scott>                                                    #
+#    myTimer.py   Copyright (C) <2020-2023>  <Kevin Scott>                                                    #
 #                                                                                                             #
 #    Inspired by https://realpython.com/python-timer/                                                         #
 #                                                                                                             #

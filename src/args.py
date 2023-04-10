@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    args   Copyright (C) <2022>  <Kevin Scott>                                                               #
+#    args   Copyright (C) <2023>  <Kevin Scott>                                                               #
 #                                                                                                             #
 #    Parse the command line arguments.                                     .                                  #
 #                                                                                                             #
@@ -74,7 +74,7 @@ def parseArgs(appName, appVersion, logger):
         A Python MP3 Duplicate finder.
         -----------------------
         The program will scan a given directory and report duplicate MP3 files."""),
-        epilog=f" Kevin Scott (C) 2020-2021 :: {appName} {appVersion}")
+        epilog=f" Kevin Scott (C) 2020-2023 :: {appName} {appVersion}")
 
     parser.add_argument("-s", "--sourceDir", type=Path, action="store", help="directory of the music files [mp3].")
     parser.add_argument("-f", "--dupFile", type=Path, action="store", default=False,

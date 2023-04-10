@@ -7,7 +7,7 @@
 #   Copyright (C) <2020-2021>  <Kevin Scott>
 
 [INFO]
-myVERSION = "2022.43"
+myVERSION = "2022.44"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]

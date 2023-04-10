@@ -1,3 +1,5 @@
 pyMP3duplicate.py -s e:\music -f c:\tmp\dup_big.txt -xL -zD -np -t -d1
 
 pyMP3duplicate.py -s c:\usr\music\check -f c:\tmp\dup.txt -xS -zD -np -t -d1
+
+pyMP3duplicate.py -cD
