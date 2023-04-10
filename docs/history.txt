@@ -1,5 +1,12 @@
 ** all builds are to the master branch, unless stated. **
 
+v2023.45
+
+    Created a new branch - Light.
+    This is an attempt to simplify the logic to improve speed.
+        i.e. removed some of the options, like multiple libraries to scan the ID3 tags.
+
+
 V2023.44
 
     Tested against Python 3.11.3.
