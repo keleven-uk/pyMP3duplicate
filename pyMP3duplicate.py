@@ -51,7 +51,7 @@ import src.utils.duplicateUtils as duplicateUtils
 
 
 ####################################################################################### scanMusic #############
-def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe, soundex, tagType):
+def scanMusic(fileList, duplicateFile, difference, songsCount, noPrint, checkThe, soundex, tagType):
     """  Scan the list fileList, which should contain mp3 files only.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then the two are checked.
@@ -65,7 +65,6 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
     count      = 0  # Number of song files to check.
     duplicates = 0  # Number of duplicate songs.
     noDups     = 0  # Number of duplicate songs that fall outside of the time difference.
-    ignored    = 0  # Number of duplicate songs that have been marked to ignore.
     falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
     noTrailing = 0  # Number of songs that have a trailing the  i.e.  Shadows, the instead of The Shadows.
 
@@ -73,40 +72,34 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
         for musicFile in fileList:
 
             try:
-                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(Config.TAGS, musicFile, soundex)
+                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(musicFile)
             except Exception as e:  # Can't read tags - flag as error.
                 logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
 
             if songLibrary.hasKey(key):
 
-                if mode == "scan":                #  Only log result in scan mode, if build - just build the database.
+                songFile, songDuration, songDuplicate = songLibrary.getItem(key)
 
-                    songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+                if abs(musicDuration - songDuration) <= difference:
 
-                    if abs(musicDuration - songDuration) <= difference:
-
-                        if tagType == "mutagen":  #  Using mutagen, we should check for ignore flag
-                            if duplicateUtils.checkToIgnore(musicDuplicate, songDuplicate, Config.IGNORE):
-                                ignored += 1
-                                continue  # Do not print ignore duplicate
-                        message = " Duplicate Found "
-                        if soundex and not tagUtils.checkTags(musicFile, songFile, logger):
-                            falsePos += 1
-                            if not noPrint:
-                                message = " Possible False Positive "
-                            else:
-                                continue  # Do not print Possible False Positives
-                        duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                        duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                        duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
-                        duplicates += 1
-                    else:  # if abs(musicDuration - songDuration) < difference:
-                        noDups += 1
+                    message = " Duplicate Found "
+                    if soundex and not tagUtils.checkTags(musicFile, songFile, logger):
+                        falsePos += 1
+                        if not noPrint:
+                            message = " Possible False Positive "
+                        else:
+                            continue  # Do not print Possible False Positives
+                    duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
+                    duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
+                    duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+                    duplicates += 1
+                else:  # if abs(musicDuration - songDuration) < difference:
+                    noDups += 1
 
             else:  # if songLibrary.hasKey(key):  Song is a new find, add to database.
 
-                if checkThe and duplicateUtils.trailingThe(artist) and mode == "scan":         #  A new artist, check for trailing the.
+                if checkThe and duplicateUtils.trailingThe(artist):         #  A new artist, check for trailing the.
                     duplicateUtils.logTextLine("-" * 70 + " Trailing the found " + "-" * 40, duplicateFile)
                     duplicateUtils.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
                     noTrailing +=1
@@ -120,12 +113,8 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
     zapUtils.removeUnwanted(sourceDir, duplicateFile, Config.EMPTY_DIR, zap, Config.ZAP_RECYCLE, logger)
 
     duplicateUtils.logTextLine("", duplicateFile)
-    if mode == "build":
-        duplicateUtils.logTextLine(f"{count} music files found.", duplicateFile)
-    elif ignored:
-        duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates, with {ignored} songs.", duplicateFile)
-    else:
-        duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
+    duplicateUtils.logTextLine(f"{count} music files found.", duplicateFile)
+    duplicateUtils.logTextLine(f"{count} music files found with {duplicates} duplicates.", duplicateFile)
 
     if noDups:
         duplicateUtils.logTextLine(f" Found possible {noDups} duplicates, but with a time difference greater then {difference}.", duplicateFile)
@@ -216,14 +205,9 @@ if __name__ == "__main__":
     fileList = []
     songsCount = duplicateUtils.countSongs(sourceDir, fileList, Config.NCOLS)
 
-    if build:
-        duplicateUtils.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile, logger)
-        duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
-        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
-    else:
-        duplicateUtils.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile, logger)
-        duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
-        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
+    duplicateUtils.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile, logger)
+    duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
+    scanMusic(fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
 
     if noSave:
         logger.debug("Not Saving database")

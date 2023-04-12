@@ -48,7 +48,7 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap, recycle, logger):
     print("\nRunning Empty Directory Check and zap Non Music files.\n")
     logger.info("Running Empty Directory Check and zap Non Music files.")
 
-    for musicFile in sourceDir.glob("**/*"):
+    for musicFile in sourceDir.rglob("**/*"):
         if emptyDir and musicFile.is_dir():
             if not len(os.listdir(musicFile)):
                 noOfDirs += 1

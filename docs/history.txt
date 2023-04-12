@@ -1,5 +1,13 @@
 ** all builds are to the master branch, unless stated. **
 
+V2023.46
+
+    Removed the checking for multiple tagging - always use tinytag.
+    Removed some other checking - like ignore flags.
+    No real increase in speed, but still slows down as the file count increases.
+    Looks like the very large directory is the problem.
+
+
 v2023.45
 
     Created a new branch - Light.
