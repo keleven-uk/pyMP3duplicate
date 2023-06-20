@@ -143,7 +143,7 @@ def parseArgs(appName, appVersion, logger):
         dfile = args.dupFileAmend
 
     if args.number :
-        myLicense.printShortLicense(appName, appVersion, dfile, False)
+        License.printShortLicense(appName, appVersion, dfile, False)
         l = songLibrary.noOfItems
         print(f"Song Library has {l} songs")                 # Print on number of songs in library.
         print("Goodbye.")

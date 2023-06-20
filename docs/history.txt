@@ -1,22 +1,31 @@
 ** all builds are to the master branch, unless stated. **
 
-V2023.44
+
+v2023.45
+
+    Tested against Python 3.11.4.
+    Bumped up version to V2023.45 in files.
+    Corrected call for license print in args.py
+    Added env_3.12 and removed env_3.100 from .gitignore.
+
+
+V2023.44.3c100ed
 
     Tested against Python 3.11.3.
     Upgraded all dependences and requirements.txt.
-    Amened logic in main loop - not building correctly.
+    Amended logic in main loop - not building correctly.
     Amended for loop in duplicateUtils.py to use rglob instead of glob.
     Amended year in all copyright notices to be 2023.
 
 
-V2022.43
+V2022.43.9a441b1
 
     The library self check now uses the time class form src/Timer.
-    Python version is noy saved to logger file.
+    Python version is not saved to logger file.
     Copyright years updated on source files.
 
 
-V2022.42
+V2022.42.2472bef
 
     Main changes due to testing the use of auto-py-to-exe [pip install auto-py-to-exe]
         Added file pyMP3duplicateInstall.json, saved setting for the app.
@@ -30,8 +39,8 @@ V2022.42
 
 V2021.41.ccf1166
 
-	Commit after merge.
-	Corrected a bug on calling file explorer as a argument.
+    Commit after merge.
+    Corrected a bug on calling file explorer as a argument.
 
 
 V2021.41.262a31c

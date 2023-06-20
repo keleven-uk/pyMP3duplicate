@@ -94,6 +94,6 @@ usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d
     -zD, --zapNoneMusic   Zap [DELETE] none music files.
     
     
-    Kevin Scott (C) 2020-2023 :: pyMP3duplicate 2023.44
+    Kevin Scott (C) 2020-2023 :: pyMP3duplicate 2023.45
 
 For changes see history.txt

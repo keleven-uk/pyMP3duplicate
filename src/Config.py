@@ -6,7 +6,7 @@
 #    The configure file is currently in toml format.                                                          #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2022>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2020-2023>  <Kevin Scott>                                                                      #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -165,7 +165,7 @@ class Config():
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '2022.43',
+        config['INFO'] = {'myVERSION': '2022.45',
                           'myNAME'   : 'pyMP3duplicate'}
 
         config['APPLICATION'] = {'notification': True}
@@ -193,7 +193,7 @@ class Config():
             configFile.write("#   Configure files for pyMP3duplicates.py \n")
             configFile.write("#   location needs double \ i.e. c:\\tmp\\music - well, on windows any way. \n")
             configFile.write("#\n")
-            configFile.write("#   March 2020    (c) Kevin Scott \n")
+            configFile.write("#   <2020-2023> (c) Kevin Scott \n")
             configFile.write("\n")
             configFile.writelines(st_toml)                  # Write configure file.
 
