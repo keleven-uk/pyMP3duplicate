@@ -1,15 +1,26 @@
 ** all builds are to the master branch, unless stated. **
 
 
-v2023.45
+V2.23.47
+
+    Upgraded decencies - tinytag, Send2Trash, pyparsing, packaging, alive-progress.
+    Ran the source through the Python linter Ruff.
+        Added the ruff.toml, the configuration file.
+    Corrected all of the style suggestions - mostly single quotes to double quotes and bare exceptions.
+        Ignored the 80 column line length - I like long lines, I have a landscape monitor ;-)
+    Corrected the found bug in pyMP3duplicate.py.
+        The command line argument --number would't work.
+
+
+v2023.46
 
     Tested against Python 3.11.4.
-    Bumped up version to V2023.45 in files.
+    Bumped up version to V2023.46 in files.
     Corrected call for license print in args.py
     Added env_3.12 and removed env_3.100 from .gitignore.
 
 
-V2023.44.3c100ed
+V2023.45.3c100ed
 
     Tested against Python 3.11.3.
     Upgraded all dependences and requirements.txt.
@@ -18,14 +29,14 @@ V2023.44.3c100ed
     Amended year in all copyright notices to be 2023.
 
 
-V2022.43.9a441b1
+V2022.44.9a441b1
 
     The library self check now uses the time class form src/Timer.
     Python version is not saved to logger file.
     Copyright years updated on source files.
 
 
-V2022.42.2472bef
+V2022.43.2472bef
 
     Main changes due to testing the use of auto-py-to-exe [pip install auto-py-to-exe]
         Added file pyMP3duplicateInstall.json, saved setting for the app.
@@ -37,7 +48,7 @@ V2022.42.2472bef
     Changed exit(0) to sys.exit(0) in src\args.py
 
 
-V2021.41.ccf1166
+V2021.42.ccf1166
 
     Commit after merge.
     Corrected a bug on calling file explorer as a argument.
@@ -59,7 +70,7 @@ V2021.39.cba8694    [branch python_3.10]
     Refactoring continues.
     Removed my from all src\my*.py.
         Amended all files to reflect this.
-    Moved the parseArgs function to it's own file src\arg.py
+    Moved the parseArgs function to it"s own file src\arg.py
     Added the argument logger=None to src\Library.py\check/
         If a logger is supplied, log progress of database check.
     Added the argument logger=None to src\utils\duplicateUtils\logTextLine.
@@ -117,7 +128,7 @@ V2021.37.03fe489    [branch python_3.10]
 
 V2021.36    [branch python_3.10]
 
-    Added an option to check the artist field for trailing 'the'
+    Added an option to check the artist field for trailing "the"
         i.e.  "Shadows, The" instead of "The Shadows".
     If one is found an entry is either printed to screen or added to duplicate file.
 
@@ -163,7 +174,7 @@ V2021.34.432ca60    [branch python_3.10]
 
 V2021.33.2140d3f.1e93bb
 
-    When upgraded Tinytag to V1.6, it started throwing errors that it can't read some ID3 tags.
+    When upgraded Tinytag to V1.6, it started throwing errors that it can"t read some ID3 tags.
     This crashed the program.  Added try except clauses to the scanTags function to catch these.
     The error look like internal to Tinytag, I was just not catching them.
     Added a try except to the calling of scantags, to I can pass to next next music
@@ -175,7 +186,7 @@ V2021.32.2140d3f    [branch python_3.10]
 
     Created branch python_3.10, to test Python V3.10
     Amended pyMP3Duplicate.py to use the new match [case] statement instead of
-    multiple if's in the scanTags function.
+    multiple if"s in the scanTags function.
     Upgraded all packages to test on V3.10 - all seem to work.
 
 
@@ -243,7 +254,7 @@ V2020.27.2029586
 
 V2020.26.8d33ed9
 
-    Some of the imports haven't made V3.9 yet, so still using V3.8 - oh hum.
+    Some of the imports haven"t made V3.9 yet, so still using V3.8 - oh hum.
     Renamed requirments.txt to requirements.txt, I had spelt it wrong.
     Added pyCharm project files.
     Added the option to delete non music files [-zD].
@@ -331,7 +342,7 @@ V2020.19.a2c0ef7
 
     In myconfig.py -
         Added exception toml.TomlDecodeErrror or load routine.
-        Made all methods read only property's.
+        Made all methods read only property"s.
         Added a header to the writeDefaultConfig method.
     In myLibrary.py -
         The library filename and format is now passed to class on initialisation.
@@ -339,7 +350,7 @@ V2020.19.a2c0ef7
         noOfItems method is now a property.
         Bugs fixed in check, load & save methods.
     In pyMP3duplicates.py -
-        Changes to call class methods as property's.
+        Changes to call class methods as property"s.
         Build mode should now work [I Think].
 
 
@@ -399,8 +410,8 @@ V2020.14.4c4fd39
 V2020.13.e2d3a0f
 
     Added two new config options name and locations of the database, used in loading and saving.
-    If the config file is absent, or can't be read, a default one is created and used.
-    When checking the artist and song title, if they start with 'the' this is ignored.
+    If the config file is absent, or can"t be read, a default one is created and used.
+    When checking the artist and song title, if they start with "the" this is ignored.
       i.e.Sweet will match with both Sweet and The Sweet.
     Added the ability to amend to previous duplicate text file or create a new one.
 
@@ -476,9 +487,9 @@ V2020.5.4e0b3d8
 
     Added an argument to get the time difference, defaults to 0.5s.
     Getting error when writing some paths to the duplicate file,
-      'charmap' codec can't encode character '\u03b8'.
+      "charmap" codec can"t encode character "\u03b8".
       Adding the encoding flag cured this,
-    Open(duplicateFile, encoding='utf-8', mode="a")
+    Open(duplicateFile, encoding="utf-8", mode="a")
       Changed the name of the method addKey to addItem.
 
 

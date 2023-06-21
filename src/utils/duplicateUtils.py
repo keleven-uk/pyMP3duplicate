@@ -26,6 +26,7 @@ from tqdm import tqdm
 from plyer import notification
 
 import src.License as License
+import src.Exceptions as myExceptions
 
 ####################################################################################### removeThe #############
 def removeThe(name):
@@ -77,8 +78,6 @@ def countSongs(sourceDir, fileList, NCOLS):
          The filenames are saved in a list fileList, this is then passed to scanMusic.
          Takes just over a second at 160000 files approx.
     """
-    count = 0
-
     print("Counting Songs")
     for musicFile in tqdm(sourceDir.rglob("*.mp3"), unit="songs", ncols=NCOLS, position=1):
         fileList.append(musicFile)
@@ -96,12 +95,13 @@ def logTextLine(textLine, textFile, logger=None):
          If a logger is passed in, then use it - else ignore.
     """
     if textFile:
-        with open(textFile, encoding='utf-8', mode="a") as f:     # Open in amend mode, important.
+        with open(textFile, encoding="utf-8", mode="a") as f:     # Open in amend mode, important.
             f.write(textLine + "\n")
     else:
         print(textLine)
 
-    if logger: logger.info(textLine)
+    if logger:
+        logger.info(textLine)
 
 ######################################################################################## checkDatabase() ######
 def checkDatabase(songLibrary, check, dfile, logger, appName, appVersion, icon, timeout, NOTIFICATION):
@@ -110,19 +110,24 @@ def checkDatabase(songLibrary, check, dfile, logger, appName, appVersion, icon, 
           if check == test then just report errors.
           if check == delete then report errors and delete entries.
     """
-    if NOTIFICATION: notification.notify(appName, "Database Check Started", appName, icon, timeout)
+    if NOTIFICATION:
+        notification.notify(appName, "Database Check Started", appName, icon, timeout)
+
     License.printShortLicense(appName, appName, dfile, False)
 
     try:
         songLibrary.check(check, logger)
-    except:
+    except myExceptions.LibraryError:
         message = f"{colorama.Fore.RED}ERROR : No Database file found. {colorama.Fore.RESET}"
         print(message)
-        if logger: logger.info(message)
+        if logger:
+            logger.info(message)
         sys.exit(1)
 
     print("Goodbye.")
-    if NOTIFICATION: notification.notify(appName, "Database Check Ended", appName, icon, timeout)
+    if NOTIFICATION:
+        notification.notify(appName, "Database Check Ended", appName, icon, timeout)
+
     sys.exit(0)
 
 #(Config.NAME, message, Config.NAME, icon, timeout)

@@ -91,7 +91,7 @@ class Library():
         try:
             del self.library[key]
         except (KeyError):
-            raise myExceptions.LibraryError
+            raise myExceptions.LibraryError from None
 
     @property
     def noOfItems(self):
@@ -123,8 +123,8 @@ class Library():
                 self.pickleLoad()
             else:
                 self.jsonLoad()
-        except:
-            raise myExceptions.LibraryError
+        except FileNotFoundError:
+            raise myExceptions.LibraryError from None
 
     def clear(self):
         """  Clears the library.
@@ -136,22 +136,24 @@ class Library():
 
              If a logger is passed in, then use it - else ignore.
         """
-        self.timer.Start        #  Start timer.
+        self.timer.Start()        #  Start timer.
         missing   = 0
         removed   = 0
 
-        if logger: logger.info("-" * 100)
+        if logger:
+            logger.info("-" * 100)
+
         self.displayMessage(f"Running database integrity check on {self.__filename} in {mode} mode", logger)
         self.displayMessage(f"Loading {self.__filename}", logger)
 
         if not self.library:
             try:
                 self.load()
-            except:
-                raise myExceptions.LibraryError
+            except FileNotFoundError:
+                raise myExceptions.LibraryError from None
 
-        l = self.noOfItems
-        self.displayMessage(f"Song Library has {l} songs", logger)
+        no_songs = self.noOfItems
+        self.displayMessage(f"Song Library has {no_songs} songs", logger)
 
         for song in self.library.copy():  # iterate over a copy, gets around the error dictionary changed size during iteration
             path, duration, ignore = self.getItem(song)
@@ -170,11 +172,10 @@ class Library():
             self.displayMessage(f"Saving {self.__filename}", logger)
             self.save()
             self.displayMessage(f"Completed  :: {timeStop} and removed {removed} entries from database.", logger)
-            l = self.noOfItems
-            self.displayMessage(f"Song Library has now {l} songs", logger)
+            no_songs = self.noOfItems
+            self.displayMessage(f"Song Library has now {no_songs} songs", logger)
         else:
             if missing:
-                l = self.noOfItems
                 self.displayMessage(f"Completed  :: {timeStop} and found {missing} missing songs.", logger)
             else:
                 self.displayMessage(f"Completed  :: {timeStop} and database looks good.", logger)
@@ -185,7 +186,8 @@ class Library():
               If a logger is passed in, then use it - else ignore.
         """
         print(message)
-        if logger: logger.info(message)
+        if logger:
+            logger.info(message)
 
     # ------------- pickle load and save. ------------------
     def pickleLoad(self):

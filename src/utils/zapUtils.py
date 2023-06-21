@@ -19,10 +19,11 @@
 ###############################################################################################################
 
 import os
+import shutil
+
 from send2trash import send2trash
 
 import src.Timer as myTimer
-import src.License as myLicense
 import src.utils.duplicateUtils as duplicateUtils
 
 timer = myTimer.Timer()
@@ -39,7 +40,7 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap, recycle, logger):
     """
 
     timeDir = myTimer.Timer()
-    timeDir.Start
+    timeDir.Start()
 
     noOfDirs = 0
     nonMusic = 0
@@ -54,15 +55,17 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap, recycle, logger):
                 noOfDirs += 1
                 duplicateUtils.logTextLine("-" * 70 + "Empty Directory Deleted" + "-" * 40, duplicateFile)
                 duplicateUtils.logTextLine(f"{musicFile}", duplicateFile)
-                zapEmptyDir(musicFile, recycle)
+                zapEmptyDir(musicFile, recycle, logger)
 
         if zap and musicFile.is_file():
             if musicFile.suffix != ".mp3":                  # A non music file found.
-                if musicFile.suffix == ".pickle": continue  # Ignore database if stored in target directory.
-                if musicFile.suffix == ".json"  : continue  # Ignore database if stored in target directory.
+                if musicFile.suffix == ".pickle":
+                    continue  # Ignore database if stored in target directory.
+                if musicFile.suffix == ".json"  :
+                    continue  # Ignore database if stored in target directory.
                 duplicateUtils.logTextLine("-" * 80 + "Non Music File Found" + "-" * 40, duplicateFile)
                 duplicateUtils.logTextLine(f"{musicFile} is not a music file and has been deleted.", duplicateFile)
-                zapFile(musicFile, recycle)
+                zapFile(musicFile, recycle, logger)
                 nonMusic += 1
 
     if nonMusic != 0:
@@ -78,7 +81,7 @@ def removeUnwanted(sourceDir, duplicateFile, emptyDir, zap, recycle, logger):
         logger.info(message)
 
 ################################################################################################## zapEmptyDir ######
-def zapEmptyDir(musicFile, recycle):
+def zapEmptyDir(musicFile, recycle, logger):
     """ Zap [delete] any empty dir."""
 
     try:
@@ -90,7 +93,7 @@ def zapEmptyDir(musicFile, recycle):
         logger.error(f"ERROR : Can't delete Directory : {musicFile}")
 
 ############################################################################################## zapNoneMusicFile ######
-def zapFile(musicFile, recycle):
+def zapFile(musicFile, recycle, logger):
     """ Zap [delete] any none music file."""
 
     try:

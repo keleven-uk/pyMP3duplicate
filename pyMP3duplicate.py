@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020-2023>  <Kevin Scott>                                                #                                                                                                             #                                                                                                             #
+#    pyMP3duplicate   Copyright (C) <2020-2023>  <Kevin Scott>                                                #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 #  Usage:                                                                                                     #
@@ -38,7 +38,6 @@ import src.Config as Config
 import src.Logger as Logger
 import src.License as License
 import src.Library as Library
-import src.Exceptions as Exceptions
 import src.utils.zapUtils as zapUtils
 import src.utils.tagUtils as tagUtils
 import src.utils.duplicateUtils as duplicateUtils
@@ -66,15 +65,15 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
     duplicates = 0  # Number of duplicate songs.
     noDups     = 0  # Number of duplicate songs that fall outside of the time difference.
     ignored    = 0  # Number of duplicate songs that have been marked to ignore.
-    falsePos   = 0  # Number of songs that seem to be duplicate, but ain't.
+    falsePos   = 0  # Number of songs that seem to be duplicate, but ain"t.
     noTrailing = 0  # Number of songs that have a trailing the  i.e.  Shadows, the instead of The Shadows.
 
     with alive_bar(songsCount, bar="circles", spinner="notes") as bar:
         for musicFile in fileList:
 
             try:
-                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(Config.TAGS, musicFile, soundex)
-            except Exception as e:  # Can't read tags - flag as error.
+                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(Config.TAGS, musicFile, soundex, logger)
+            except Exception as e:  # Can"t read tags - flag as error.
                 logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
 
@@ -160,29 +159,29 @@ if __name__ == "__main__":
 
     Config = Config.Config()  # Need to do this first.
 
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        runningInfo = ('running in a PyInstaller bundle')
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        runningInfo = ("running in a PyInstaller bundle")
         DBpath = Path(Config.DB_LOCATION + Config.DB_NAME)
-        LGpath = Config.NAME +".log"                     #  Must be a string for a logger path.
-        icon   = ""                                      # icon used by notifications
+        LGpath = Config.NAME +".log"                               #  Must be a string for a logger path.
+        icon   = ""                                                # icon used by notifications
     else:
-        runningInfo = ('running in a normal Python process')
+        runningInfo = ("running in a normal Python process")
         DBpath = Path("data", Config.DB_LOCATION + Config.DB_NAME)
         LGpath = "data\\" +Config.NAME +".log"                     #  Must be a string for a logger path.
         icon   = "resources\\tea.ico"                              # icon used by notifications
 
-    songLibrary = Library.Library(DBpath, Config.DB_FORMAT)  # Create the song library.
-    logger      = Logger.get_logger(LGpath)                    # Create the logger.
+    songLibrary = Library.Library(DBpath, Config.DB_FORMAT)        # Create the song library.
+    logger      = Logger.get_logger(LGpath)                        # Create the logger.
     timer       = Timer.Timer()
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, noPrint, zap, checkThe, checkDB = args.parseArgs(Config.NAME, Config.VERSION, logger)
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, noPrint, zap, checkThe, checkDB = args.parseArgs(Config.NAME, Config.VERSION, logger, songLibrary)
 
     if checkDB == 1:
         duplicateUtils.checkDatabase(songLibrary, "test", DBpath, logger, Config.NAME, Config.VERSION, icon, timeout, Config.NOTIFICATION)          # Run data integrity check in test mode on library.
     elif checkDB == 2:
         duplicateUtils.checkDatabase(songLibrary, "delete", DBpath, logger, Config.NAME, Config.VERSION, icon, timeout, Config.NOTIFICATION)        # Run data integrity check in delete mode on library.
 
-    timer.Start
+    timer.Start()
 
     if Config.SOUNDEX:
         mode = f"Using Soundex for {Config.TAGS} matching"
@@ -191,7 +190,9 @@ if __name__ == "__main__":
 
     message = f"Start of {Config.NAME} {Config.VERSION}"
 
-    if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
+    if Config.NOTIFICATION:
+        notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
+
     logger.info("-" * 100)
     logger.info(message)
     logger.info(f"Running on {sys.version} Python")
@@ -246,7 +247,8 @@ if __name__ == "__main__":
     logger.info(message)
     logger.info(f"End of {Config.NAME} {Config.VERSION}")
 
-    if Config.NOTIFICATION: notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
+    if Config.NOTIFICATION:
+        notification.notify(Config.NAME, message, Config.NAME, icon, timeout)
 
 
     #gc.set_debug(gc.DEBUG_STATS)

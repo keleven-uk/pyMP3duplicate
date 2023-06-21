@@ -42,7 +42,6 @@ class Timer():
     def __init__(self):
         self._start_time = None
 
-    @property
     def Start(self):
         """  Start a new timer.
         """

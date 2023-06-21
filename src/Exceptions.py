@@ -29,9 +29,9 @@ class TagReadError(Exception):
 
     def __str__(self):
         if self.message:
-            return 'TagReadError, {0} '.format(self.message)
+            return "TagReadError, {0} ".format(self.message)
         else:
-            return 'TagReadError has been raised'
+            return "TagReadError has been raised"
 
 
 class LibraryError(Exception):
@@ -43,6 +43,6 @@ class LibraryError(Exception):
 
     def __str__(self):
         if self.message:
-            return 'LibraryError, {0} '.format(self.message)
+            return "LibraryError, {0} ".format(self.message)
         else:
-            return 'LibraryError has been raised'
+            return "LibraryError has been raised"

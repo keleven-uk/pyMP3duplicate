@@ -57,7 +57,7 @@ import src.License as License
 import src.utils.duplicateUtils as duplicateUtils
 
 ############################################################################################## parseArgs ######
-def parseArgs(appName, appVersion, logger):
+def parseArgs(appName, appVersion, logger, songLibrary):
     """  Process the command line arguments.
 
          Checks the arguments and will exit if not valid.
@@ -144,8 +144,8 @@ def parseArgs(appName, appVersion, logger):
 
     if args.number :
         License.printShortLicense(appName, appVersion, dfile, False)
-        l = songLibrary.noOfItems
-        print(f"Song Library has {l} songs")                 # Print on number of songs in library.
+        no_songs = songLibrary.noOfItems
+        print(f"Song Library has {no_songs} songs")                 # Print on number of songs in library.
         print("Goodbye.")
         sys.exit(0)
 

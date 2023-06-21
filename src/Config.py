@@ -27,7 +27,7 @@ import colorama
 
 class Config():
     """  A class that acts has a wrapper around the configure file - config.toml.
-         The configure file is hard coded and lives in the save directory has the main script.
+         The configure file is hard coded and lives in the same directory has the main script.
          The configure file is first read, then the properties are made available.
 
          If config.toml is not found, a default configure file is generated.
@@ -59,25 +59,25 @@ class Config():
     def NAME(self):
         """  Returns application name.
         """
-        return self.config['INFO']['myNAME']
+        return self.config["INFO"]["myNAME"]
 
     @property
     def VERSION(self):
         """  Returns application Version.
         """
-        return self.config['INFO']['myVERSION']
+        return self.config["INFO"]["myVERSION"]
 
     @property
     def NOTIFICATION(self):
         """  Returns the [system tray] Notification marker.
         """
-        return self.config['APPLICATION']['notification']
+        return self.config["APPLICATION"]["notification"]
 
     @property
     def NCOLS(self):
         """  Returns Max number of columns for tqdm [width of progress bar].
         """
-        return self.config['TQDM']['ncols']
+        return self.config["TQDM"]["ncols"]
 
     @property
     def TAGS(self):
@@ -85,7 +85,7 @@ class Config():
              Currently supports three modules tinytag, mutagen or eyed3.
              Will default to tinytag, if module returns other.
         """
-        module = self.config['TAGS']['module']
+        module = self.config["TAGS"]["module"]
 
         if module == "mutagen" or module == "eyed3":
             return module
@@ -97,20 +97,20 @@ class Config():
         """  Returns the ignore marker.
              if both duplicate have this in comment, then ignore
         """
-        return self.config['TAGS']['ignore']
+        return self.config["TAGS"]["ignore"]
 
     @property
     def SOUNDEX(self):
         """  Returns the Soundex marker.
              if true, uses Soundex for tags matching else use normal strings.
         """
-        return self.config['TAGS']['soundex']
+        return self.config["TAGS"]["soundex"]
 
     @property
     def DB_FORMAT(self):
         """  Returns the format of the song library - either pickle or json.
         """
-        format = self.config['DATABASE']['format']
+        format = self.config["DATABASE"]["format"]
 
         if format == "json":
             return "json"
@@ -122,9 +122,9 @@ class Config():
         """  Returns the location and filename of the database.
              if location is empty will use just filename, so save next to main script.
         """
-        location  = self.config['DATABASE']['location']
-        filename  = self.config['DATABASE']['filename']
-        extension = self.config['DATABASE']['format']
+        location  = self.config["DATABASE"]["location"]
+        filename  = self.config["DATABASE"]["filename"]
+        extension = self.config["DATABASE"]["format"]
 
         if location:
             return f"{location}\\{filename}.{extension}"
@@ -136,28 +136,28 @@ class Config():
         """  Returns the location [path] of the database.
              If empty, then save in the same directory has the script.
         """
-        return self.config['DATABASE']['location']
+        return self.config["DATABASE"]["location"]
 
     @property
     def DB_OVERWRITE(self):
         """  If set to True the old database file, if exists, will be overwritten.
              If set to False the old database file will be backed up before new one is written.
         """
-        return self.config['DATABASE']['overwrite']
+        return self.config["DATABASE"]["overwrite"]
 
     @property
     def ZAP_RECYCLE(self):
         """  If set to True the recycle bin will be used for deletes.
              If set to False all deletes are final :-(.
         """
-        return self.config['ZAP']['recycle']
+        return self.config["ZAP"]["recycle"]
 
     @property
     def EMPTY_DIR(self):
         """  If set to True then delete empty directories.
              If set to False ignore empty directories
         """
-        return self.config['ZAP']['emptyDir']
+        return self.config["ZAP"]["emptyDir"]
 
     def _writeDefaultConfig(self):
         """ Write a default configure file.
@@ -165,24 +165,24 @@ class Config():
         """
         config = dict()
 
-        config['INFO'] = {'myVERSION': '2022.45',
-                          'myNAME'   : 'pyMP3duplicate'}
+        config["INFO"] = {"myVERSION": "2022.47",
+                          "myNAME"   : "pyMP3duplicate"}
 
-        config['APPLICATION'] = {'notification': True}
+        config["APPLICATION"] = {"notification": True}
 
-        config['TQDM'] = {'ncols': 160}
+        config["TQDM"] = {"ncols": 160}
 
-        config['TAGS'] = {'module' : 'tinytag',
-                          'ignore' : '**IGNORE**',
-                          'soundex': True}
+        config["TAGS"] = {"module" : "tinytag",
+                          "ignore" : "**IGNORE**",
+                          "soundex": True}
 
-        config['DATABASE'] = {'format'   : 'pickle',
-                              'filename' : 'dup',
-                              'location' : '',
-                              'overwrite': False}
+        config["DATABASE"] = {"format"   : "pickle",
+                              "filename" : "dup",
+                              "location" : "",
+                              "overwrite": False}
 
-        config['ZAP'] = {'recycle' : True,
-                         'emptyDir': True}
+        config["ZAP"] = {"recycle" : True,
+                         "emptyDir": True}
 
         st_toml = toml.dumps(config)
 

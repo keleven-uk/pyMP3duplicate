@@ -18,12 +18,16 @@
 #                                                                                                             #
 ###############################################################################################################
 
+import colorama
+import eyed3
+
 from mutagen.id3 import ID3
 from mutagen.mp3 import MP3
 from tinytag import TinyTag
 from libindic.soundex import Soundex
 
 import src.utils.duplicateUtils as duplicateUtils
+import src.Exceptions as myExceptions
 
 phonetic = Soundex()
 
@@ -36,7 +40,7 @@ def checkTags(musicFile, songFile, logger):
     try:  # Tries to read tags from the music file.
         tags = TinyTag.get(musicFile)
     except Exception as e:  # Can't read tags - log as error.
-        logger.error(f"ERROR : Can't read tags : {musicFile}")
+        logger.error(f"ERROR : Can't read tags : {musicFile} : {e.message}")
         return False
     artist1 = duplicateUtils.removeThe(tags.artist)
     title1 = duplicateUtils.removeThe(tags.title)
@@ -44,7 +48,7 @@ def checkTags(musicFile, songFile, logger):
     try:  # Tries to read tags from the music file.
         tags = TinyTag.get(songFile)
     except Exception as e:  # Can't read tags - log as error.
-        logger.error(f"ERROR : Can't read tags : {songFile}")
+        logger.error(f"ERROR : Can't read tags : {songFile} : {e.message}")
         return False
     artist2 = duplicateUtils.removeThe(tags.artist)
     title2  = duplicateUtils.removeThe(tags.title)
@@ -52,7 +56,7 @@ def checkTags(musicFile, songFile, logger):
     return True if (artist1 == artist2) and (title1 == title2) else False
 
 ####################################################################################### scanTags ##############
-def scanTags(tag, musicFile, soundex):
+def scanTags(tag, musicFile, soundex, logger):
     """  Scans the musicfile for the required tags.
          Will use the method indicated in the user configure.
 
@@ -62,9 +66,9 @@ def scanTags(tag, musicFile, soundex):
         case "tinytag":
             try:  # Tries to read tags from the music file.
                 tags = TinyTag.get(musicFile)
-            except Exception as e:  # Can't read tags - flag as error.
-                logger.error(f"Tinytag error reading tags :: {e} ")
-                raise myExceptions.TagReadError(f"Tinytag error reading tags {musicFile}")
+            except Exception as error:  # Can't read tags - flag as error.
+                logger.error(f"Tinytag error reading tags :: {musicFile}  : {error.message} ")
+                raise myExceptions.TagReadError(f"Tinytag error reading tags {musicFile}  : {error.message}") from error
             artist    = duplicateUtils.removeThe(tags.artist)
             title     = duplicateUtils.removeThe(tags.title)
             duration  = tags.duration
@@ -73,9 +77,9 @@ def scanTags(tag, musicFile, soundex):
         case "eyed3":
             try:
                 tags = eyed3.load(musicFile)
-            except Exception as e:
-                logger.error(f"Eyed3 error reading tags :: {musicFile}")
-                raise myExceptions.TagReadError(f"Eyed3 error reading tags {musicFile}")
+            except Exception as error:
+                logger.error(f"Eyed3 error reading tags :: {musicFile}  : {error.message}")
+                raise myExceptions.TagReadError(f"Eyed3 error reading tags {musicFile}  : {error.message}") from error
             artist    = duplicateUtils.removeThe(tags.tag.artist)
             title     = duplicateUtils.removeThe(tags.tag.title)
             duration  = tags.info.time_secs
@@ -85,15 +89,15 @@ def scanTags(tag, musicFile, soundex):
             try:
                 tags  = ID3(musicFile)
                 audio = MP3(musicFile)
-            except Exception as e:
-                logger.error(f"Nutagen error reading tags :: {e} ")
-                raise myExceptions.TagReadError(f"Mutagen error reading tags {musicFile}")
+            except Exception as error:
+                logger.error(f"Nutagen error reading tags :: {musicFile}  : {error.message} ")
+                raise myExceptions.TagReadError(f"Mutagen error reading tags {musicFile} : {error.message}") from error
             artist   = duplicateUtils.removeThe(tags["TPE1"][0])
             title    = duplicateUtils.emoveThe(tags["TIT2"][0])
             duration = audio.info.length
             try:  # Try to read duplicate tag.
                 duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
-            except Exception as e:
+            except:
                 duplicate = ""
         case _:
             # Should not happen, tinytag should be returned by default.

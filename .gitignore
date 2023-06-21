@@ -135,6 +135,7 @@ $RECYCLE.BIN/
 *.pickle
 *.pickle.*
 dup.txt
+test.bat
 
 # PyCharm config
 .idea/

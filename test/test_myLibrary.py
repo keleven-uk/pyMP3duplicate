@@ -1,9 +1,9 @@
 ###############################################################################################################
-#    test_myLibrary.py.py   Copyright (C) <2020-2021>  <Kevin Scott>                                          #                                                                                                             #                                                                                                             #
+#    test_myLibrary.py.py   Copyright (C) <2020-2023>  <Kevin Scott>                                          #                                                                                                             #                                                                                                             #
 #    test for functions in myLibrary.pys.py                                                                   #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2021>  <Kevin Scott>                                                                 #
+#    Copyright (C) <2020-2023>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -74,19 +74,19 @@ def test_library_jason_get_fail(ja_library):
 #-----------------------------------------------------------------  test library has --------------------------
 def test_library_pickle_has(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    assert db_library.hasKey("one") == True
+    assert db_library.hasKey("one") is True
 
 def test_library_pickle_has_fail(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    assert db_library.hasKey("two") == False
+    assert db_library.hasKey("two") is False
 
 def test_library_jason_has(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    assert db_library.hasKey("one") == True
+    assert db_library.hasKey("one") is True
 
 def test_library_jason_has_fail(db_library):
     db_library.addItem("one", "data1", "data2", "data3")
-    assert db_library.hasKey("two") == False
+    assert db_library.hasKey("two") is False
 
 #-----------------------------------------------------------------  test delete from library -------------------
 

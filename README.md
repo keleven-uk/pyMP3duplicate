@@ -4,13 +4,13 @@
     
     The main mp3 directory should be scanned first, this will give a list of duplicates in that directory.
     A database is then created of these files keyed on artist, title and duration.
-    If any new mp3's need to be added to the main directory, they should be scanned first, this will then
+    If any new mp3"s need to be added to the main directory, they should be scanned first, this will then
     be compared to the database and any duplicates will be flagged and can be deleted [maybe with the -xS flag].
     The remaining mp3 files can be safely added to the main directory, the database will need to be rebuilt.
     
-    NB : The tags in the new MP3's should be in the same format has the tags in the main directory.
+    NB : The tags in the new MP3"s should be in the same format has the tags in the main directory.
          i.e spaces trimmed and in title case - my preference. [See note about Soundex later on.]
-         Also, both mp3's should have valid time or lengths.  Correct with mp3val.
+         Also, both mp3"s should have valid time or lengths.  Correct with mp3val.
     
     The database is stored in a simple directory and stored via pickling.  The pickled database is
     stored in the same directory as the main script, if location not set in config file..
@@ -42,7 +42,7 @@
       artist, title and duration [or close] but are in fact not the same track.
     
     Added the ability to match the song artist / title using the Soundex algorithm, to add a sort of
-    fuzzy matching.  Also will ignore any leading 'the'.  Also, the matching is done with lower case strings.
+    fuzzy matching.  Also will ignore any leading "the".  Also, the matching is done with lower case strings.
       i.e The Sweet will match Sweet and Led Zeppelin should match Led Zepelin.
 
 To install dependencies pip -r requirements.txt
@@ -79,7 +79,7 @@ usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d
     
     -e, --explorer        Load program working directory into file explorer.
     
-    -t, --checkThe        Check for a artist for trailing ',the'.
+    -t, --checkThe        Check for a artist for trailing ",the".
     
     -c, --check           Check database integrity.
     
@@ -94,6 +94,6 @@ usage: pyMP3duplicate.py [-h] [-s SOURCEDIR] [-f DUPFILE] [-fA DUPFILEAMEND] [-d
     -zD, --zapNoneMusic   Zap [DELETE] none music files.
     
     
-    Kevin Scott (C) 2020-2023 :: pyMP3duplicate 2023.45
+    Kevin Scott (C) 2020-2023 :: pyMP3duplicate 2023.47
 
 For changes see history.txt
