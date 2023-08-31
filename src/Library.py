@@ -43,7 +43,7 @@ class Library():
          usage:
          songLibrary = myLibrary.Library(name, format)
             name = name of datebase
-            format = format used to save database = either pickle or jason.
+            format = format used to save database = either pickle or json.
 
          to add an item              - songLibrary.addItem(key, musicFile, musicDuration) - Data specific.
          to retrieve an item         - songFile, songDuration, songDuplicate = songLibrary.getItem(key) - Data specific.
