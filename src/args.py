@@ -74,7 +74,7 @@ def parseArgs(appName, appVersion, logger, songLibrary):
         A Python MP3 Duplicate finder.
         -----------------------
         The program will scan a given directory and report duplicate MP3 files."""),
-        epilog=f" Kevin Scott (C) 2020-2023 :: {appName} {appVersion}")
+        epilog=f" Kevin Scott (C) 2020-2024 :: {appName} {appVersion}")
 
     parser.add_argument("-s", "--sourceDir", type=Path, action="store", help="directory of the music files [mp3].")
     parser.add_argument("-f", "--dupFile", type=Path, action="store", default=False,
@@ -95,6 +95,7 @@ def parseArgs(appName, appVersion, logger, songLibrary):
     parser.add_argument("-xS", "--noSave", action="store_true", help="Do not save database.")
     parser.add_argument("-np", "--noPrint", action="store_true", help="Do Not Print Possible False Positives.")
     parser.add_argument("-zD", "--zapNoneMusic", action="store_true", help="Zap [DELETE] none music files.")
+    parser.add_argument("-ZZ", "--zapMusic",     action="store_true", help="Zap [DELETE] music files from source to recycle bin")
 
     args = parser.parse_args()
 
@@ -112,7 +113,7 @@ def parseArgs(appName, appVersion, logger, songLibrary):
         print("Goodbye.")
         sys.exit(0)
 
-    if not args.sourceDir and not (args.check or args.checkDelete or args.number or args.explorer):
+    if not args.sourceDir and not (args.check or args.checkDelete or args.number or args.explorer or args.zapMusic):
         logger.error("No Source Directory Supplied.")
         print(f"{colorama.Fore.RED}No Source Directory Supplied. {colorama.Fore.RESET}")
         parser.print_help()
@@ -160,5 +161,5 @@ def parseArgs(appName, appVersion, logger, songLibrary):
     elif args.checkDelete:
         checkDB = 2                    # Run data integrity check in delete mode on library.
 
-    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.noPrint, args.zapNoneMusic, args.checkThe, checkDB)
+    return (args.sourceDir, dfile, args.noLoad, args.noSave, args.build, args.difference, args.noPrint, args.zapNoneMusic, args.checkThe, checkDB, args.zapMusic)
 

@@ -21,7 +21,15 @@
 ###############################################################################################################
 
 
-V2.23.48
+V2024.49
+
+    Added the ability to delete music files from the given source directory.
+        This is activated using the command line argument -ZZ.
+        The music files are deleted to the recycle bin - for safety.
+        This option should be safe if using an exact match - care should be taken in using fuzzy matching.
+
+
+V2023.48
 
     Corrected spelling mistake in library.py.
     Correct try exceptions errors in tagUtils.py
@@ -43,7 +51,7 @@ v2023.46
     Tested against Python 3.11.4.
     Bumped up version to V2023.46 in files.
     Corrected call for license print in args.py
-    Added env_3.12 and removed env_3.100 from .gitignore.
+    Added env_3.12 and removed env_3.10 from .gitignore.
 
 
 V2023.45.3c100ed

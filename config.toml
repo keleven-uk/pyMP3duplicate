@@ -7,11 +7,11 @@
 #   Copyright (C) <2020-2021>  <Kevin Scott>
 
 [INFO]
-myVERSION = "2022.48"
+myVERSION = "2024.49"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]
-notification = true
+notification = false
 
 [TQDM]
 ncols = 160

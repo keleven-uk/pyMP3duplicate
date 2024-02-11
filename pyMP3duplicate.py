@@ -50,7 +50,7 @@ import src.utils.duplicateUtils as duplicateUtils
 
 
 ####################################################################################### scanMusic #############
-def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe, soundex, tagType):
+def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, checkThe, soundex, tagType, zapMusic):
     """  Scan the list fileList, which should contain mp3 files only.
          The songs are added to the library using the song artist and title as key.
          If the song already exists in the library, then the two are checked.
@@ -97,8 +97,15 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
                             else:
                                 continue  # Do not print Possible False Positives
                         duplicateUtils.logTextLine("-" * 70 + message + "-" * 40, duplicateFile)
-                        duplicateUtils.logTextLine(f"{musicFile} {timer.formatSeconds(musicDuration)}", duplicateFile)
-                        duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}", duplicateFile)
+
+                        if zapMusic:
+                            duplicateUtils.logTextLine(f"{musicFile}  {timer.formatSeconds(songDuration)} ** DELETED **" , duplicateFile)
+                            zapUtils.zapFile(musicFile, True, logger)
+                        else:
+                            duplicateUtils.logTextLine(f"{musicFile}  {timer.formatSeconds(songDuration)}" , duplicateFile)
+
+                        duplicateUtils.logTextLine(f"{songFile}  {timer.formatSeconds(songDuration)}" , duplicateFile)
+
                         duplicates += 1
                     else:  # if abs(musicDuration - songDuration) < difference:
                         noDups += 1
@@ -174,7 +181,11 @@ if __name__ == "__main__":
     logger      = Logger.get_logger(LGpath)                        # Create the logger.
     timer       = Timer.Timer()
 
-    sourceDir, duplicateFile, noLoad, noSave, build, difference, noPrint, zap, checkThe, checkDB = args.parseArgs(Config.NAME, Config.VERSION, logger, songLibrary)
+    sourceDir, duplicateFile, noLoad, noSave, build, difference, noPrint, zap, checkThe, checkDB, zapMusic = args.parseArgs(Config.NAME, Config.VERSION, logger, songLibrary)
+
+    if zapMusic:
+        print("** WARNING **")
+        print("** Music files will be deleted **")
 
     if checkDB == 1:
         duplicateUtils.checkDatabase(songLibrary, "test", DBpath, logger, Config.NAME, Config.VERSION, icon, timeout, Config.NOTIFICATION)          # Run data integrity check in test mode on library.
@@ -220,11 +231,11 @@ if __name__ == "__main__":
     if build:
         duplicateUtils.logTextLine(f"Building Database from {sourceDir} with a time difference of {difference} seconds.  {mode}", duplicateFile, logger)
         duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
-        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
+        scanMusic("build", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS, zapMusic)
     else:
         duplicateUtils.logTextLine(f"Scanning {sourceDir} with a time difference of {difference} seconds  {mode}", duplicateFile, logger)
         duplicateUtils.logTextLine(f"... with a song count of {songsCount} in {timer.Elapsed} Seconds", duplicateFile, logger)
-        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS)
+        scanMusic("scan", fileList, duplicateFile, difference, songsCount, noPrint, checkThe, Config.SOUNDEX, Config.TAGS, zapMusic)
 
     if noSave:
         logger.debug("Not Saving database")
