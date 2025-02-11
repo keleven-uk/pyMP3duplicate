@@ -1,11 +1,11 @@
 ###############################################################################################################
-#    history.txt   Copyright (C) <2023>  <Kevin Scott>                                                        #
+#    history.txt   Copyright (C) <2024-25>  <Kevin Scott>                                                     #
 #                                                                                                             #
 #    History file for pyMP3duplicate                                                                          #
 #                                                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2023>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2024-25>  <Kevin Scott>                                                                   #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -21,7 +21,17 @@
 ###############################################################################################################
 
 
-V2024.49
+V2025.50    [11 February 2025]
+
+    Added library path and format setters.
+    Need to upgrade Tinytag to V2.0.0 from 1.8.1 - Chunk had been deprecated.
+    Tested on Python V13.2 [also the free threading version] & V3.12.9 - seemed to have slowed down.
+        Although Mutagen seems to be the quickest - need to test.
+        Eyed3, is showing up some errors, again need to test.
+    Updated to all latest modules - requirements.txt also upgraded.
+
+
+V2024.49    [11 February 2024]
 
     Added the ability to delete music files from the given source directory.
         This is activated using the command line argument -ZZ.
@@ -29,13 +39,13 @@ V2024.49
         This option should be safe if using an exact match - care should be taken in using fuzzy matching.
 
 
-V2023.48
+V2023.48    [31 August 2023]
 
     Corrected spelling mistake in library.py.
     Correct try exceptions errors in tagUtils.py
 
 
-V2023.47
+V2023.47    21 June 2023
 
     Upgraded decencies - tinytag, Send2Trash, pyparsing, packaging, alive-progress.
     Ran the source through the Python linter Ruff.
@@ -46,7 +56,7 @@ V2023.47
         The command line argument --number would't work.
 
 
-v2023.46
+v2023.46    [20 June 2023]
 
     Tested against Python 3.11.4.
     Bumped up version to V2023.46 in files.
@@ -54,7 +64,7 @@ v2023.46
     Added env_3.12 and removed env_3.10 from .gitignore.
 
 
-V2023.45.3c100ed
+V2023.45    [10 April 2023]
 
     Tested against Python 3.11.3.
     Upgraded all dependences and requirements.txt.
@@ -63,14 +73,14 @@ V2023.45.3c100ed
     Amended year in all copyright notices to be 2023.
 
 
-V2022.44.9a441b1
+V2022.44    [29 May 2022]
 
     The library self check now uses the time class form src/Timer.
     Python version is not saved to logger file.
     Copyright years updated on source files.
 
 
-V2022.43.2472bef
+V2022.43    [18 january 2022]
 
     Main changes due to testing the use of auto-py-to-exe [pip install auto-py-to-exe]
         Added file pyMP3duplicateInstall.json, saved setting for the app.
@@ -82,24 +92,24 @@ V2022.43.2472bef
     Changed exit(0) to sys.exit(0) in src\args.py
 
 
-V2021.42.ccf1166
+V2021.42    [31 December 2021]
 
     Commit after merge.
     Corrected a bug on calling file explorer as a argument.
 
 
-V2021.41.262a31c
+V2021   [31 December 2021]
 
     Merged branch python_3.10 back into master
 
 
-V2021.40.7fa8043    [branch python_3.10]
+V2021.40    [31 December 2021]    [branch python_3.10]
 
     Test against Python 3.10.1
     More attempts at formatting README.md
 
 
-V2021.39.cba8694    [branch python_3.10]
+V2021.39    [20 December 2021] [branch python_3.10]
 
     Refactoring continues.
     Removed my from all src\my*.py.
@@ -114,7 +124,7 @@ V2021.39.cba8694    [branch python_3.10]
     Added commands.text - example usage.
 
 
-V2021.38.4af1c6e    [branch python_3.10]
+V2021.38    [30 November 2021]    [branch python_3.10]
 
     Added a test directory.
     Added two test files test_duplicateUtils.py & test_myLibrary.py.
@@ -149,7 +159,7 @@ V2021.38.4af1c6e    [branch python_3.10]
     ---------------------------------------------------------------------------------------------
 
 
-V2021.37.03fe489    [branch python_3.10]
+V2021.37    [28 November 2021]    [branch python_3.10]
 
     Renamed Lib directory to src.
     Created a new directory utils under src.
@@ -160,14 +170,14 @@ V2021.37.03fe489    [branch python_3.10]
     Amended the main scripts to import and call the new utils functions.
 
 
-V2021.36    [branch python_3.10]
+V2021.36    [25 November 2021]  [branch python_3.10]
 
     Added an option to check the artist field for trailing "the"
         i.e.  "Shadows, The" instead of "The Shadows".
     If one is found an entry is either printed to screen or added to duplicate file.
 
 
-V2021.35.480171f.abc9f84    [branch python_3.10]
+V2021.35    [14 November 2021]    [branch python_3.10]
 
 	Tried to make the directory structure less cluttered.
 	It now look like this
@@ -194,7 +204,7 @@ V2021.35.480171f.abc9f84    [branch python_3.10]
 	  |  tea.icon
 
 
-V2021.34.432ca60    [branch python_3.10]
+V2021.34    13 November 2021    [branch python_3.10]
 
     Made changes from build 33 below to the python_3.10 branch.
     Tried pyjion to test for increase in speed - seems to be very small.
@@ -206,7 +216,7 @@ V2021.34.432ca60    [branch python_3.10]
     Updated README.md
 
 
-V2021.33.2140d3f.1e93bb
+V2021.33    [31 October 2021]
 
     When upgraded Tinytag to V1.6, it started throwing errors that it can"t read some ID3 tags.
     This crashed the program.  Added try except clauses to the scanTags function to catch these.
@@ -216,7 +226,7 @@ V2021.33.2140d3f.1e93bb
     Also added a try except clause to the removeEmptryDir function.
 
 
-V2021.32.2140d3f    [branch python_3.10]
+V2021.32    [30 October 2021]    [branch python_3.10]
 
     Created branch python_3.10, to test Python V3.10
     Amended pyMP3Duplicate.py to use the new match [case] statement instead of
@@ -224,7 +234,7 @@ V2021.32.2140d3f    [branch python_3.10]
     Upgraded all packages to test on V3.10 - all seem to work.
 
 
-V2021.31.f554fea
+V2021.31    [25 October 2021]
 
     Amended the -v version to also show Python version.
         Need to import sys.
@@ -247,15 +257,15 @@ V2021.31.f554fea
     -----------------------------------------------------------------------------------
     stats by cloc
 
-V2021.30.0723d68
+V2021.30    [14 October 2021]
 
     Switched to alive_bar instead of tqdm for progress bar.
-        Added to requirements.txt.git add .
+        Added to requirements.txt.
     Some more code formatting improvements, similar to below.
     Amended the -v version to also show Python version.
 
 
-V2021.29.4ff0f2d
+V2021.29    10 January 2021
 
     In pyMP3duplicate.py
         RemoveEmptyDir is now only performed in scan mode.
@@ -265,14 +275,14 @@ V2021.29.4ff0f2d
     Amended all copyright to be 2020-2021.
 
 
-V2020.28.568b231
+V2020.28    [24 November 2020]
 
     Corrected bug, if the music file was a non music file and delete is chosen.
     Certain directories that contain a period could also be deleted.  [i.e. Dr.John].
     Added a check so that directories are ignored.
 
 
-V2020.27.2029586
+V2020.27    [15 November 2020]
 
     Added user option emptyDir, which will find and delete empty directories.
     This is only active is -zD option is used.
@@ -286,7 +296,7 @@ V2020.27.2029586
             [But I like my equal symbols, comments and imports to line up.]
 
 
-V2020.26.8d33ed9
+V2020.26    [8 November 2020]
 
     Some of the imports haven"t made V3.9 yet, so still using V3.8 - oh hum.
     Renamed requirments.txt to requirements.txt, I had spelt it wrong.
@@ -301,13 +311,13 @@ V2020.26.8d33ed9
         This either to the recycle bin or not, depending upon above option.
         Started to format code using pyCharm.
 
-v2020.25.931da7a
+v2020.25    [18 October 2020]
 
     Renamed LICENSE to LICENSE.txt
     To make sure all code has been committed, upgrade to python V3.9
 
 
-V2020.24.ee3b4db
+V2020.24    [4 October 2020]
 
     In myConfig.py
         Added the property, NOTIFICATION, if set then system tray notification will be displayed
@@ -320,7 +330,7 @@ V2020.24.ee3b4db
     Added plyer to requirements.txt [for Notifications.]
 
 
-V2020.23.d06085a
+V2020.23    [10 August 2020]
 
     In myConfig.py
         Added the property, DB_OVERWRITE, if set to False a backup of the database file is made.
@@ -349,7 +359,7 @@ V2020.23.d06085a
         SUM:						           177            351            561
         -----------------------------------------------------------------------------------
 
-V2020.22.30f9a16
+V2020.22    [17 June 2020]
 
     In pyMP3duplicates.py -
         Added option to not print "Possible False Positive" items.
@@ -357,7 +367,7 @@ V2020.22.30f9a16
     Cleaned up code and licence text.
 
 
-V2020.21.5e81399
+V2020.21    [13 May 2020]
 
     In myTimer.py -
         Added public method the format seconds into hh:mm:ss format.
@@ -365,14 +375,14 @@ V2020.21.5e81399
     Added .gitattributes, so github would correctly identify project as python.
 
 
-V2020.20.4cf55b6
+V2020.20    [13 May 2020]
 
     Added myTimer.py - A timer class that tidies up the timing of the program.
     Changes in pyMP3duplicates.py to accommodate the new timer.
     First attempts at a help manual.
 
 
-V2020.19.a2c0ef7
+V2020.19    [2 may 2020]
 
     In myconfig.py -
         Added exception toml.TomlDecodeErrror or load routine.
@@ -388,7 +398,7 @@ V2020.19.a2c0ef7
         Build mode should now work [I Think].
 
 
-V2020.18.86f6d02
+V2020.18    [29 April 2020]
 
     Added confiG option to either save song library in pickle or JSON format.
     In myConfig.py -
@@ -403,7 +413,7 @@ V2020.18.86f6d02
         Amended several method call to include library format.
 
 
-V2020.l7.f9f7e74
+V2020.l7    [16 April 2020]
 
     In myConfig.py -
       Wrapped the loading and saving of the config file in a context manager.
@@ -416,7 +426,7 @@ V2020.l7.f9f7e74
       Corrected bug in calling of printNumberOfSongs()
 
 
-V2020.16.b874ea8
+V2020.16    [19 April 2020]
 
     Changed format of version number - now is year.build number. [first] 7 digit git commit ID
     Added a data integrity check for the database[Song Library].
@@ -425,7 +435,7 @@ V2020.16.b874ea8
     Added an command line option to call the data integrity check.
 
 
-V2020.15.b7a2f28
+V2020.15    [18 April 2020]
 
     Added custom exception, held in myException.py, which is raised when the tag read has failed.
     Added a check for false positives when matching the tags using Soundex.
@@ -434,14 +444,14 @@ V2020.15.b7a2f28
       i.e. the artist or title tag is blank or failed to read.
 
 
-V2020.14.4c4fd39
+V2020.14    [11 April 2020]
 
     Added the ability to match the song artist / title using the Soundex algorithm, to add a sort of
     fuzzy matching.  Also, the matching is done with lower case strings.
       i.e Led Zeppelin should match Led Zeplin.
 
 
-V2020.13.e2d3a0f
+V2020.13    11 April 2020
 
     Added two new config options name and locations of the database, used in loading and saving.
     If the config file is absent, or can"t be read, a default one is created and used.
@@ -450,13 +460,13 @@ V2020.13.e2d3a0f
     Added the ability to amend to previous duplicate text file or create a new one.
 
 
-V2020.12.8f4d74e
+V2020.12    [26 March 2020]
 
     Added requirments.txt - to install dependences pip -r requirments.txt.
     Added ignore song count, if not using mutagen.
 
 
-V2020.11.b4ee2ae
+V2020.11    [24 March 2020]
 
     Added the ability to read the mp3 tags using mutagen.
     Added the ability to ignore certain duplicates files, these may be files with the same
@@ -471,7 +481,7 @@ V2020.11.b4ee2ae
       Mutagen is the slowest, needs to read the song twice - about five time slower then Tinytag.
 
 
-V2020.10.43df053
+V2020.10    [21 March 2020]
 
     Added the ability to use different modules to read the mp3 tags.
       Currently tinytag & eyed3 are supported.  [eyed3 could be used to write tags]
@@ -479,7 +489,7 @@ V2020.10.43df053
       Alterations to pyMP3Duplicate.py by above [added method scanTags].
 
 
-V2020.9.b6dee92
+V2020.9     [14 March 2020]
 
     Added tqdm - a very cool progress bar for console windows.
       Both countSongs and scannMusic loop now display a progress bar.
@@ -489,7 +499,7 @@ V2020.9.b6dee92
       not now needed with progress bar.
 
 
-V2020.8.91ee2f4
+V2020.8     [10 March 2020]
 
     Added two new files.
       myLibrary - a wrapper around dictionary access, used to store song stuff.
@@ -497,7 +507,7 @@ V2020.8.91ee2f4
     Alterations to pyMP3Duplicate.py by above.
 
 
-V2020.7.a971b19
+V2020.7     [10 March 2020]
 
     Added a toml config file and a wrapper class in myConfig.py.
       The config only holds contents of _version.py i.e.
@@ -509,7 +519,7 @@ V2020.7.a971b19
       Almost identical except for the test for duplicates.
 
 
-V2020.6.68a5941
+V2020.6     [8 March 2020]
 
     Changed main loop in scanMusic to os.walk from glob.
       Using os.walk seems faster but only just slightly.
@@ -517,7 +527,7 @@ V2020.6.68a5941
     Some code clean up.
 
 
-V2020.5.4e0b3d8
+V2020.5     [29 February 2020]
 
     Added an argument to get the time difference, defaults to 0.5s.
     Getting error when writing some paths to the duplicate file,
@@ -527,7 +537,7 @@ V2020.5.4e0b3d8
       Changed the name of the method addKey to addItem.
 
 
-V2020.4.7215ad0
+V2020.4     [28 February 2020]
 
     Getting strange errors when trying to print song paths, they where of
       type pathlib.path, now they are all cast to str.
@@ -535,14 +545,14 @@ V2020.4.7215ad0
       before doing comparisons.
 
 
-V2020.3.66f1e24
+V2020.3     [28 February 2020]
 
     Added an argument to not load the database.
     Added an argument to not save the database.
     Added an argument to build the database only.
 
 
-V2020.2.29b90d8
+V2020.2     [27 February 2020]
 
     Added methods to save and load the songLibrary - pickles a directory.
     Added an argument to print the number of songs.
@@ -550,7 +560,7 @@ V2020.2.29b90d8
     Added an argument to not load database on start. i.e. create new one.
 
 
-V2020.1.299bd44
+V2020.1     [26 February 2020]
 
     basic program completed.
     The program will scan a given directory and report duplicate MP3 files.

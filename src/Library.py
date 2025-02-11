@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    myLibrary.py   Copyright (C) <2020-2023>  <Kevin Scott>                                                  #
+#    myLibrary.py   Copyright (C) <2020-2025>  <Kevin Scott>                                                  #
 #                                                                                                             #
 #    A class that acts has a wrapper around a dictionary access.                                              #
 #    The items to store are song files,                                                                       #
@@ -57,12 +57,18 @@ class Library():
          TODO - possibly needs error checking [some done, some to go].
     """
 
-    def __init__(self, DBfilename, DBformat):
+    __slots__ = ["library", "timer", "filename", "format", "__overWrite"]
+
+    def __init__(self):
         self.library     = {}
         self.timer       = Timer.Timer()                #  A timer class.
-        self.__filename  = pathlib.Path(DBfilename)
-        self.__format    = DBformat
-        self.__overWrite = True  # Originally set to overwrite DB file.
+        self.__overWrite = True
+
+    def set_DBpath(self, value):
+        self.filename = pathlib.Path(value)
+
+    def set_DBformat(self, value):
+        self.format = value
 
     def hasKey(self, key):
         """  Returns true if the key exist in the library.
@@ -110,7 +116,7 @@ class Library():
     def save(self):
         """  Save the library to disc.
         """
-        if self.__format == "pickle":
+        if self.format == "pickle":
             self.pickleSave()
         else:
             self.jsonSave()
@@ -119,7 +125,7 @@ class Library():
         """  Loads the library from disc.
         """
         try:
-            if self.__format == "pickle":
+            if self.format == "pickle":
                 self.pickleLoad()
             else:
                 self.jsonLoad()
@@ -143,8 +149,8 @@ class Library():
         if logger:
             logger.info("-" * 100)
 
-        self.displayMessage(f"Running database integrity check on {self.__filename} in {mode} mode", logger)
-        self.displayMessage(f"Loading {self.__filename}", logger)
+        self.displayMessage(f"Running database integrity check on {self.filename} in {mode} mode", logger)
+        self.displayMessage(f"Loading {self.filename}", logger)
 
         if not self.library:
             try:
@@ -169,7 +175,7 @@ class Library():
         timeStop = self.timer.Stop      #  Stop timer.
 
         if removed:
-            self.displayMessage(f"Saving {self.__filename}", logger)
+            self.displayMessage(f"Saving {self.filename}", logger)
             self.save()
             self.displayMessage(f"Completed  :: {timeStop} and removed {removed} entries from database.", logger)
             no_songs = self.noOfItems
@@ -194,20 +200,20 @@ class Library():
         """  Load the song library in pickle format.
         """
         try:
-            with open(self.__filename, "rb") as pickle_file:
+            with open(self.filename, "rb") as pickle_file:
                 self.library = pickle.load(pickle_file)
         except FileNotFoundError:
-            print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
+            print(f"ERROR :: Cannot find library file. {self.filename}.  Will use an empty library")
             self.library = {}
 
     def pickleSave(self):
         """  Save the song library in pickle format.
         """
         if not self.__overWrite:
-            if self.__filename.exists():
+            if self.filename.exists():
                 now = datetime.datetime.now()
-                self.__filename.rename(str(self.__filename) + "." + now.strftime("%Y%m%d%H%M%S"))
-        with open(self.__filename, "wb") as pickle_file:
+                self.filename.rename(str(self.filename) + "." + now.strftime("%Y%m%d%H%M%S"))
+        with open(self.filename, "wb") as pickle_file:
             pickle.dump(self.library, pickle_file)
 
     # ------------- json load and save. ------------------
@@ -215,18 +221,18 @@ class Library():
         """  Load the song library in json format.
         """
         try:
-            with open(self.__filename, "r") as json_file:
+            with open(self.filename, "r") as json_file:
                 self.library = json.load(json_file)
         except FileNotFoundError:
-            print(f"ERROR :: Cannot find library file. {self.__filename}.  Will use an empty library")
+            print(f"ERROR :: Cannot find library file. {self.filename}.  Will use an empty library")
             self.library = {}
 
     def jsonSave(self):
         """  Save the song library in json format.
         """
         if not self.__overWrite:
-            if self.__filename.exists():
+            if self.filename.exists():
                 now = datetime.datetime.now()
-                self.__filename.rename(str(self.__filename) + "." + now.strftime("%Y%m%d%H%M%S"))
-        with open(self.__filename, "w") as json_file:
+                self.filename.rename(str(self.filename) + "." + now.strftime("%Y%m%d%H%M%S"))
+        with open(self.filename, "w") as json_file:
             json.dump(self.library, json_file, indent=4)

@@ -1,5 +1,5 @@
 ###############################################################################################################
-#    pyMP3duplicate   Copyright (C) <2020-2023>  <Kevin Scott>                                                #
+#    pyMP3duplicate   Copyright (C) <2020-2025>  <Kevin Scott>                                                #
 #    The program will scan a given directory and report duplicate MP3 files.                                  #
 #                                                                                                             #
 #  Usage:                                                                                                     #
@@ -9,7 +9,7 @@
 #     For changes see history.txt                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2020-2022>  <Kevin Scott>                                                                 #
+#    Copyright (C) <2020-2025>  <Kevin Scott>                                                                 #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either Version 3 of the         #
@@ -59,7 +59,7 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
          mode = "build" -- the fileList is scanned and the database is built only, duplicates are not checked.
 
          Uses tqdm - a very cool progress bar for console windows.
-         Now uses alive_bar a even more cool progress bar for console windows.
+         Now uses alive_bar an even more cool progress bar for console windows.
     """
     count      = 0  # Number of song files to check.
     duplicates = 0  # Number of duplicate songs.
@@ -177,7 +177,10 @@ if __name__ == "__main__":
         LGpath = "data\\" +Config.NAME +".log"                     #  Must be a string for a logger path.
         icon   = "resources\\tea.ico"                              # icon used by notifications
 
-    songLibrary = Library.Library(DBpath, Config.DB_FORMAT)        # Create the song library.
+    songLibrary = Library.Library()                                # Create the song library.
+    songLibrary.set_DBpath(DBpath)
+    songLibrary.set_DBformat(Config.DB_FORMAT)
+
     logger      = Logger.get_logger(LGpath)                        # Create the logger.
     timer       = Timer.Timer()
 

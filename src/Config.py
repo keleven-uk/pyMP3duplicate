@@ -165,7 +165,7 @@ class Config():
         """
         config = dict()
 
-        config["INFO"] = {"myVERSION": "2024.49",
+        config["INFO"] = {"myVERSION": "V2025.50",
                           "myNAME"   : "pyMP3duplicate"}
 
         config["APPLICATION"] = {"notification": True}
@@ -191,7 +191,7 @@ class Config():
             configFile.write("#\n")
             configFile.write("#   true and false are lower case \n")
             configFile.write("#   Configure files for pyMP3duplicates.py \n")
-            configFile.write("#   location needs double \ i.e. c:\\tmp\\music - well, on windows any way. \n")
+            configFile.write("#   location needs double \\ i.e. c:\\tmp\\music - well, on windows any way. \n")
             configFile.write("#\n")
             configFile.write("#   <2020-2023> (c) Kevin Scott \n")
             configFile.write("\n")

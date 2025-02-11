@@ -72,7 +72,6 @@ def scanTags(tag, musicFile, soundex, logger):
             artist    = duplicateUtils.removeThe(tags.artist)
             title     = duplicateUtils.removeThe(tags.title)
             duration  = tags.duration
-            duplicate = ""
 
         case "eyed3":
             try:
@@ -83,7 +82,6 @@ def scanTags(tag, musicFile, soundex, logger):
             artist    = duplicateUtils.removeThe(tags.tag.artist)
             title     = duplicateUtils.removeThe(tags.tag.title)
             duration  = tags.info.time_secs
-            duplicate = ""
 
         case "mutagen":
             try:
@@ -93,12 +91,9 @@ def scanTags(tag, musicFile, soundex, logger):
                 logger.error(f"Nutagen error reading tags :: {musicFile}")
                 raise myExceptions.TagReadError(f"Mutagen error reading tags {musicFile} : File Not Found") from error
             artist   = duplicateUtils.removeThe(tags["TPE1"][0])
-            title    = duplicateUtils.emoveThe(tags["TIT2"][0])
+            title    = duplicateUtils.removeThe(tags["TIT2"][0])
             duration = audio.info.length
-            try:  # Try to read duplicate tag.
-                duplicate = tags["TXXX:DUPLICATE"][0]  # Ignore if not there.
-            except MP3.TagReadError:
-                duplicate = ""
+
         case _:
             # Should not happen, tinytag should be returned by default.
             logger.error("Unknown user option for Tags Module.")
@@ -111,4 +106,4 @@ def scanTags(tag, musicFile, soundex, logger):
         musicDuration = round(duration, 2)
 
     key = phonetic.soundex(f"{artist}:{title}") if soundex else f"{artist}:{title}"
-    return key, musicDuration, duplicate, artist, title
+    return key, musicDuration, artist, title

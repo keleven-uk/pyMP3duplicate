@@ -7,7 +7,7 @@
 #   Copyright (C) <2020-2021>  <Kevin Scott>
 
 [INFO]
-myVERSION = "2024.49"
+myVERSION = "V2025.50"
 myNAME = "pyMP3duplicate"
 
 [APPLICATION]
@@ -17,7 +17,7 @@ notification = false
 ncols = 160
 
 [TAGS]
-module = "tinytag"
+module = "mutagen"
 ignore = "**IGNORE**"
 soundex = true
 
