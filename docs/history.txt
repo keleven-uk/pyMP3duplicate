@@ -21,6 +21,11 @@
 ###############################################################################################################
 
 
+V2025.51    [9 March 2025]
+
+    Removed the ignore option - never used and not sure it ever worked.
+
+
 V2025.50    [11 February 2025]
 
     Added library path and format setters.

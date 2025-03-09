@@ -6,7 +6,7 @@
 #      The key is either made up of {song.artist}:{tag.title}                                                 #
 #        or soundex({song.artist}:{tag.title})                                                                #
 #        or any unique token generated from the song.                                                         #
-#      The data is a list [songFile, songDuration, ignore flag]                                               #
+#      The data is a list [songFile, songDuration                                            #
 #                                                                                                             #
 #    Uses pickle or json to load and save the library.                                                        #
 #    The format is specified when the library is created.                                                     #
@@ -75,19 +75,18 @@ class Library():
         """
         return key in self.library
 
-    def addItem(self, key, item1, item2, item3):
+    def addItem(self, key, item1, item2):
         """  Adds to the library at point key, added is a list of items.
              item1 is song path.
              item2 is song duration.
-             item3 is song ignore flag.
         """
-        self.library[key] = [item1, item2, item3]
+        self.library[key] = [item1, item2]
 
     def getItem(self, key):
         """  Returns items at position key from the library.
         """
         if self.hasKey(key):
-            return self.library[key]
+            return self.library[key][0:2]
         else:
             raise myExceptions.LibraryError
 
@@ -162,7 +161,7 @@ class Library():
         self.displayMessage(f"Song Library has {no_songs} songs", logger)
 
         for song in self.library.copy():  # iterate over a copy, gets around the error dictionary changed size during iteration
-            path, duration, ignore = self.getItem(song)
+            path, duration = self.getItem(song)
             if not os.path.isfile(path):
                 if mode == "delete":
                     self.delItem(song)

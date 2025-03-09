@@ -165,7 +165,7 @@ class Config():
         """
         config = dict()
 
-        config["INFO"] = {"myVERSION": "V2025.50",
+        config["INFO"] = {"myVERSION": "V2025.51",
                           "myNAME"   : "pyMP3duplicate"}
 
         config["APPLICATION"] = {"notification": True}

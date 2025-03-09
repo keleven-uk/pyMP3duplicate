@@ -72,7 +72,7 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
         for musicFile in fileList:
 
             try:
-                key, musicDuration, musicDuplicate, artist, title = tagUtils.scanTags(Config.TAGS, musicFile, soundex, logger)
+                key, musicDuration, artist, title = tagUtils.scanTags(Config.TAGS, musicFile, soundex, logger)
             except Exception as e:  # Can"t read tags - flag as error.
                 logger.error(f"Raised exception at calling scanTags :: {e} ")
                 continue
@@ -81,14 +81,10 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
 
                 if mode == "scan":                #  Only log result in scan mode, if build - just build the database.
 
-                    songFile, songDuration, songDuplicate = songLibrary.getItem(key)
+                    songFile, songDuration = songLibrary.getItem(key)
 
                     if abs(musicDuration - songDuration) <= difference:
 
-                        if tagType == "mutagen":  #  Using mutagen, we should check for ignore flag
-                            if duplicateUtils.checkToIgnore(musicDuplicate, songDuplicate, Config.IGNORE):
-                                ignored += 1
-                                continue  # Do not print ignore duplicate
                         message = " Duplicate Found "
                         if soundex and not tagUtils.checkTags(musicFile, songFile, logger):
                             falsePos += 1
@@ -117,7 +113,7 @@ def scanMusic(mode, fileList, duplicateFile, difference, songsCount, noPrint, ch
                     duplicateUtils.logTextLine(f"{artist} is wrong in {musicFile}.", duplicateFile)
                     noTrailing +=1
 
-                songLibrary.addItem(key, os.fspath(musicFile), musicDuration, musicDuplicate)
+                songLibrary.addItem(key, os.fspath(musicFile), musicDuration)
 
             bar()   #  Update alive_bar.
 
